@@ -1,5 +1,14 @@
 #!/bin/zsh
 
+# Author: Aaron Toponce
+# License: Public Domain
+# Date: Mar 6, 2013
+#
+# Script to backup the snapshots of a ZFS filesystem to an offsite ZFS
+# storage server using "zfs send" and "zfs receive". If put in crontab(5),
+# it can execute after your "time sliding" snapshots, to make sure the
+# latest snapshot is always offsite.
+
 # Edit as necessary
 BACKUP="offsite"    # pool name of offsite ZFS pool
 ZFS="/sbin/zfs"     # full path to zfs(8) binary
@@ -24,5 +33,6 @@ for D in $DSETS; do
     WEEK_SNAP=(${(M)SNAPS:#*weekly*})
     MNTH_SNAP=(${(M)SNAPS:#*monthly*})
 
+    # FIXME: change "ssh -c arcfour server.example.com" as necessary
     "$ZFS" send -RI "$FREQ_SNAP[2]" "$FREQ_SNAP[1]" | ssh -c arcfour server.example.com "$ZFS recv -Fduv $BACKUP/$SERVER"
 done
