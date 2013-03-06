@@ -1,13 +1,39 @@
 #!/bin/zsh
 
+# Author: Aaron Toponce
+# License: Public Domain
+# Date: Mar 06, 2013
+#
+# Script for generating a challenge/response token for keysigning parties.
+#
+# After attending the party, download the public keyring from the party, or
+# create one from the fingerprints on your handout. Then run this script
+# against that keyring. It will generate a "tokens.txt" file. The syntax of
+# that file will be as follows:
+#
+#       "KEYID","UID","TOKEN","SHA1 HASH"
+#
+# Verify that the KeyID matches what is on your printout (should be
+# sufficient). Email the user with the minted Hashcash token (not the SHA1
+# hash). When the user replies, with the token in the body of the mail,
+# take the SHA1 of that token. If it matches what is in "tokens.txt", sign
+# the UID on that key.
+# 
+# It complicates things, I understand, but has the benefit that those who
+# are serious about getting their key(s) signed will reply, and you won't
+# needlessly sign keys that won't sign yours back.
+#
+# TODO:
+#   * Add automation with mutt(1) to send an encrypted message with
+#     everything in place automatically.
+#
 # Some ZSH foo in this script:
 #   - FOO=("${(@f)$(command)}") uses the 'f' expansion flag to split on
 #     newlines; useful for arrays where a string could contain spaces
 #   - FOO="${BAR[(ws,:,)10]}" returns only the 10th colon-delimited field from
 #     every element in the $BAR array
 
-# Only user-editable variables
-# Provide only absolute paths
+# Only user-editable variables. Provide only absolute paths
 GPG="/usr/bin/gpg"
 HASHCASH="/usr/bin/hashcash"
 KEYRING="/home/aaron/.gnupg/dev/scale11x-keyring.gpg"
