@@ -3,6 +3,11 @@
 # swap.sh: Shows the swap usage of each process
 # Author: Robert Love
 # Improved: Aaron Toponce <atoponce@xmission.com>
+# License: Public Domain
+# Date: Mar 6, 2013
+#
+# Shows you the swap usage by PID and process name. Can be sorted in
+# ascending and descending numerical order.
 
 NAME=$(basename $0 2> /dev/null)
 FILE=/tmp/swap-usage.txt
