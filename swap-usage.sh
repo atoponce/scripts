@@ -2,7 +2,7 @@
 #
 # swap.sh: Shows the swap usage of each process
 # Author: Robert Love
-# URL: # http://www.quora.com/How-can-I-determine-which-process-is-contributing-to-paging-on-Linux
+# URL: http://www.quora.com/How-can-I-determine-which-process-is-contributing-to-paging-on-Linux
 # Improved: Aaron Toponce
 # License: Public Domain
 # Date: Mar 6, 2013
