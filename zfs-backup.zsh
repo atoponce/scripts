@@ -8,6 +8,11 @@
 # storage server using "zfs send" and "zfs receive". If put in crontab(5),
 # it can execute after your "time sliding" snapshots, to make sure the
 # latest snapshot is always offsite.
+#
+# This does require that your offsite ZFS pool is fully caught up with the
+# exact snapshots as is on the source before this can be automated. After
+# the offsite ZFS pool is a mirror of the src pool, then you can proceed
+# with automating the script.
 
 # Edit as necessary
 BACKUP="offsite"    # pool name of offsite ZFS pool
