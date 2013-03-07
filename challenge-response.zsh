@@ -43,25 +43,10 @@ BASEDIR="$(dirname $KEYRING)"
 touch "$BASEDIR/tokens.txt"
 : > "$BASEDIR/tokens.txt"
 
-if [ ! -x "$GPG" ]; then
-    echo "GnuPG is not installed. Please install it before continuing."
-    exit 1
-fi
-
-if [ ! -x "$HASHCASH" ]; then
-    echo "Hashcash is not installed. Please install it before continuing."
-    exit 2
-fi
-
-if [ ! -w "$BASEDIR" ]; then
-    echo "Permission denied: $BASEDIR is not writable by the current process."
-    exit 3
-fi
-
-if [ ! -f "$KEYRING" ]; then
-    echo "$KEYRING does not exist."
-    exit 4
-fi
+if [ ! -x "$GPG" ]; then echo "GnuPG is not installed. Please install it before continuing."; exit 1; fi
+if [ ! -x "$HASHCASH" ]; then echo "Hashcash is not installed. Please install it before continuing."; exit 2; fi
+if [ ! -w "$BASEDIR" ]; then echo "Permission denied: $BASEDIR is not writable by the current process."; exit 3; fi
+if [ ! -f "$KEYRING" ]; then echo "$KEYRING does not exist."; exit 4; fi
 
 KEYS=("${(@f)$("$GPG" --fixed-list-mode --with-colons --list-keys --no-default-keyring --keyring="$KEYRING" | awk -F ':' '$1 == "pub" {print $5}')}")
 
