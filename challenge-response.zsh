@@ -36,7 +36,7 @@
 # Only user-editable variables. Provide only absolute paths
 GPG="/usr/bin/gpg"
 HASHCASH="/usr/bin/hashcash"
-KEYRING="/home/aaron/.gnupg/dev/scale11x-keyring.gpg"
+KEYRING="${HOME}/.gnupg/dev/scale11x-keyring.gpg"
 
 # DO NOT EDIT BELOW HERE
 BASEDIR="$(dirname $KEYRING)"
@@ -51,7 +51,7 @@ if [ ! -f "$KEYRING" ]; then echo "$KEYRING does not exist."; exit 4; fi
 KEYS=("${(@f)$("$GPG" --fixed-list-mode --with-colons --list-keys --no-default-keyring --keyring="$KEYRING" | awk -F ':' '$1 == "pub" {print $5}')}")
 
 for KEY in $KEYS; do 
-    "$GPG" --recv-keys $KEY &> "$BASEDIR/challenge-response.out"
+    "$GPG" --import $KEYRING &> "$BASEDIR/challenge-response.out"
     UIDS=("${(@f)$("$GPG" --fixed-list-mode --with-colons --list-keys "$KEY" | awk -F ':' '$1 == "uid" && $2 ~ /(-|f|m|o|q|u)/')}")
     for U in $UIDS; do
         RESOURCE="${U[(ws,:,)10]}"
