@@ -5,8 +5,8 @@
 # License: Public Domain
 
 ### Edit only these variables as needed ###
-URL="http://paste.example.com/api" # $URL should point to the external API
-AUTHOR="Anonymous"  # Your name as you want it to appear on the paste
+URL="http://ae7.st/p/api" # $URL should point to the external API
+AUTHOR="eightyeight"  # Your name as you want it to appear on the paste
 
 ### DO NOT EDIT BELOW HERE ###
 function usage {
@@ -41,22 +41,23 @@ function usage {
     echo "--verilog, --vhdl, --vim, --visualfoxpro, --visualprolog, --whitespace,"
     echo "--whois, --winbatch, --xbasic, --xml, --xorg_conf, --xpp, --yaml, --z80"
     echo # blank line
-    echo "--public          Create a public paste."
-    echo "--private         Create a private paste."
+    echo "Set lifetime. Default is no expiration."
+    echo "-m, --minutes         Expire the post in 10 minutes."
+    echo "-H, --hour            Expire the post in 1 hour."
+    echo "-d, --day             Expire the post in 1 day."
+    echo "-w, --week            Expire the post in 1 week."
+    echo "-M, --month           Expire the post in 1 month (4 weeks)."
+    echo "-y, --year            Expire the post in 1 year."
     echo # blank line
-    echo "--minutes         Expire the post in 10 minutes."
-    echo "--hour            Expire the post in 1 hour."
-    echo "--day             Expire the post in 1 day."
-    echo "--week            Expire the post in 1 week."
-    echo "--month           Expire the post in 1 month (4 weeks)."
-    echo "--year            Expire the post in 1 year."
+    echo "Toggle privacy. Default is public."
+    echo "-p, --private         Create a private paste."
     echo # blank line
-    echo "-h, --help        Print this usage summary and exit."
+    echo "-h, --help            Print this usage summary and exit."
     echo # blank line
     echo "Examples:"
     echo # blank line
     echo "  pastebin /tmp/file.txt"
-    echo "    Create a public paste that with no highlighting or expiration."
+    echo "    Create a public paste with no highlighting or expiration."
     echo # blank line
     echo "  pastebin --c --private --day /tmp/file.txt"
     echo "    Create a private paste with C syntax highlighting that expires"
@@ -69,27 +70,6 @@ function usage {
 
 autoload -U colors && colors
 
-TEMP=$(getopt -o h -l 4cs,abap,actionscript,actionscript3,ada,apache,\
-applescript,apt_sources,asm,asp,autoconf,autohotkey,autoit,avisynth,awk,bash,\
-basic4gl,bf,bibtex,blitzbasic,bnf,boo,c,caddcl,cadlisp,cfdg,cfm,chaiscript,\
-cil,clojure,c_mac,cmake,cobol,cpp,cpp-qt,csharp,css,cuesheet,d,dcs,delphi,\
-diff,div,dos,dot,ecmascript,eiffel,email,erlang,fo,fortran,freebasic,fsharp,\
-gambas,gdb,genero,genie,gettext,glsl,gml,gnuplot,groovy,gwbasic,haskell,\
-hicest,hq9plus,html4strict,icon,idl,ini,inno,intercal,io,j,java,java5,\
-javascript,jquery,kixtart,klonec,klonecpp,latex,lisp,locobasic,logtalk,\
-lolcode,lotusformulas,lotusscript,lscript,lsl2,lua,m68k,magiksf,make,\
-mapbasic,matlab,mirc,mmix,modula2,modula3mpasm,mxml,mysql,newlisp,nsis,\
-oberon2objc,ocaml,ocaml-brief,oobas,oracle11oracle8,oxygene,oz,pascal,pcre,\
-per,perl,perl6,pf,php,php-brief,pic16pike,pixelbender,plaintext,plsql,\
-postgresql,povray,powerbuilder,powershell,progress,prolog,properties,\
-providex,purebasic,python,q,qbasic,rails,rebol,reg,robots,rpmspec,rsplus,ruby,\
-sas,scala,scheme,scilab,sdlbasic,smalltalk,smarty,sql,systemverilog,tcl,\
-teraterm,text,thinbasic,tsql,typoscript,unicon,vala,vb,vbnet,verilog,vhdl,vim,\
-visualfoxpro,visualprolog,whitespace,whois,winbatch,xbasic,xml,xorg_conf,xpp,\
-yaml,z80,public,private,minutes,hour,day,week,month,year,help -n $0 -- "$@")
-if [ $? != 0 ]; then echo "Internal error..." >&2; exit 1; fi
-
-eval set -- "$TEMP"
 while true; do
     case "$1" in
         --4cs) H="4cs"; shift;;
@@ -191,16 +171,19 @@ while true; do
         --mirc) H="mirc"; shift;;
         --mmix) H="mmix"; shift;;
         --modula2) H="modula2"; shift;;
-        --modula3mpasm) H="modula3mpasm"; shift;;
+        --modula3) H="modula3"; shift;;
+        --mpasm) H="mpasm"; shift;;
         --mxml) H="mxml"; shift;;
         --mysql) H="mysql"; shift;;
         --newlisp) H="newlisp"; shift;;
         --nsis) H="nsis"; shift;;
-        --oberon2objc) H="oberon2objc"; shift;;
+        --oberon2) H="oberon2"; shift;;
+        --objc) H="objc"; shift;;
         --ocaml) H="ocaml"; shift;;
         --ocaml-brief) H="ocaml-brief"; shift;;
         --oobas) H="oobas"; shift;;
-        --oracle11oracle8) H="oracle11oracle8"; shift;;
+        --oracle11) H="oracle11"; shift;;
+        --oracle8) H="oracle8"; shift;;
         --oxygene) H="oxygene"; shift;;
         --oz) H="oz"; shift;;
         --pascal) H="pascal"; shift;;
@@ -211,7 +194,8 @@ while true; do
         --pf) H="pf"; shift;;
         --php) H="php"; shift;;
         --php-brief) H="php-brief"; shift;;
-        --pic16pike) H="pic16pike"; shift;;
+        --pic16) H="pic16"; shift;;
+        --pike) H="pike"; shift;;
         --pixelbender) H="pixelbender"; shift;;
         --plaintext) H="plaintext"; shift;;
         --plsql) H="plsql"; shift;;
@@ -267,19 +251,34 @@ while true; do
         --xpp) H="xpp"; shift;;
         --yaml) H="yaml"; shift;;
         --z80) H="z80"; shift;;
-        --public) P="public"; shift;;
-        --private) P="private"; shift;;
-        --minutes) L="1"; shift;;
-        --hour) L="2"; shift;;
-        --day) L="3"; shift;;
-        --week) L="4"; shift;;
-        --month) L="5"; shift;;
-        --year) L="6"; shift;;
+        -p|--private) P="private"; shift;;
+        -m|--minutes) L="1"; shift;;
+        -H|--hour) L="2"; shift;;
+        -d|--day) L="3"; shift;;
+        -w|--week) L="4"; shift;;
+        -M|--month) L="5"; shift;;
+        -y|--year) L="6"; shift;;
         -h|--help) usage; exit 0;;
         *)
+            # if $1 is a file on the filesystem
             if [ -e $1 ]; then
-                TEXT="$(cat $1)"
-                echo $TEXT
+                # curl(1) interprets special characters in the source file
+                # conert those to unicode equivalents
+                cat $1 > /tmp/pastebin.tmp
+                sed -ir 's# #%20#g' /tmp/pastebin.tmp           # space
+                sed -ir 's#"#%22#g' /tmp/pastebin.tmp           # "
+                sed -ir "s#'#%27#g" /tmp/pastebin.tmp           # '
+                sed -ir 's#`#%60#g' /tmp/pastebin.tmp           # `
+                sed -ir 's#\\#%5c#g' /tmp/pastebin.tmp          # \
+                sed -ir 's#&%20#26%20#g' /tmp/pastebin.tmp      # &space;
+                sed -ir 's#%20&#%2026#g' /tmp/pastebin.tmp      # space&
+                sed -ir 's#@#%40#g' /tmp/pastebin.tmp           # @
+                sed -ir 's#-#%2d#g' /tmp/pastebin.tmp           # -
+                sed -ir 's#=%20#%3d%20#g' /tmp/pastebin.tmp     # =space
+                sed -ir 's#%20=#%20%3d#g' /tmp/pastebin.tmp     # space=
+                TEXT=$(cat /tmp/pastebin.tmp)
+                rm /tmp/pastebin.tmp
+                break
             else
                 printf "$fg[red]invalid option:$reset_color $1\n\n"
                 usage
@@ -293,5 +292,8 @@ if [ -z $H ]; then H="plaintext"; fi    # <select name=highlighter>
 if [ -z $P ]; then P="public"; fi       # <select name=privacy>
 if [ -z $L ]; then L="0"; fi            # <select name=lifespan>
 
-#curl -d author=eightyeight -d pasteEnter="$TEXT" $URL |\
-#awk -F '"' '/url/ {print $4}'
+curl -d author="$AUTHOR" -d pasteEnter="$TEXT" -d highlighter="$H"\
+    -d privacy="$P" -d lifespan="$L" $URL 2> /dev/null |\
+    awk -F '"' '/url/ {print $4}'
+
+exit 0
