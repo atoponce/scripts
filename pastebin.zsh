@@ -50,7 +50,7 @@ function usage {
     echo "-y, --year            Expire the post in 1 year."
     echo # blank line
     echo "-p, --private         Create a private paste."
-    echo "-r, --raw             Return the raw data without the HTML."
+    echo "-r, --raw             Return the raw link without the HTML."
     echo "-h, --help            Print this usage summary and exit."
     echo # blank line
     echo "Examples:"
