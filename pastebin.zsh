@@ -49,9 +49,8 @@ function usage {
     echo "-M, --month           Expire the post in 1 month (4 weeks)."
     echo "-y, --year            Expire the post in 1 year."
     echo # blank line
-    echo "Toggle privacy. Default is public."
     echo "-p, --private         Create a private paste."
-    echo # blank line
+    echo "-r, --raw             Return the raw data without the HTML."
     echo "-h, --help            Print this usage summary and exit."
     echo # blank line
     echo "Examples:"
@@ -258,6 +257,7 @@ while true; do
         -w|--week) L="4"; shift;;
         -M|--month) L="5"; shift;;
         -y|--year) L="6"; shift;;
+        -r|--raw) R="raw"; shift;;
         -h|--help) usage; exit 0;;
         *)
             # if $1 is a file on the filesystem
@@ -292,8 +292,14 @@ if [ -z $H ]; then H="plaintext"; fi    # <select name=highlighter>
 if [ -z $P ]; then P="public"; fi       # <select name=privacy>
 if [ -z $L ]; then L="0"; fi            # <select name=lifespan>
 
-curl -d author="$AUTHOR" -d pasteEnter="$TEXT" -d highlighter="$H"\
+LINK=$(curl -d author="$AUTHOR" -d pasteEnter="$TEXT" -d highlighter="$H"\
     -d privacy="$P" -d lifespan="$L" $URL 2> /dev/null |\
-    awk -F '"' '/url/ {print $4}'
+    awk -F '"' '/url/ {print $4}')
+
+if [ ! -z "$R" ]; then
+    LINK="${LINK}@raw"
+fi
+
+echo $LINK
 
 exit 0
