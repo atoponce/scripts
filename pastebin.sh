@@ -3,9 +3,6 @@
 # Author: Aaron Toponce
 # Date: Mar 28, 2013
 # License: Public Domain
-#
-# Source this file in your shell's config:
-#   $ source /path/to/this/pastebin.sh
 
 ### Edit only these variables as needed ###
 URL="http://ae7.st/p/api" # $URL should point to the external API
@@ -52,9 +49,8 @@ function usage {
     echo "-M, --month           Expire the post in 1 month (4 weeks)."
     echo "-y, --year            Expire the post in 1 year."
     echo # blank line
-    echo "Toggle privacy. Default is public."
     echo "-p, --private         Create a private paste."
-    echo # blank line
+    echo "-r, --raw             Return the raw link without the HTML."
     echo "-h, --help            Print this usage summary and exit."
     echo # blank line
     echo "Examples:"
@@ -260,6 +256,7 @@ function pastebin {
             -w|--week) L="4"; shift;;
             -M|--month) L="5"; shift;;
             -y|--year) L="6"; shift;;
+            -r|--raw) R="raw"; shift;;
             -h|--help) usage; exit 0;;
             *)
                 # if $1 is a file on the filesystem
@@ -282,7 +279,7 @@ function pastebin {
                     rm /tmp/pastebin.tmp
                     break
                 else
-                    printf "invalid option: $1\n\n"
+                    printf "Invalid option: $1\n\n"
                     usage
                     exit 1
                 fi
@@ -294,7 +291,13 @@ function pastebin {
     if [ -z $P ]; then P="public"; fi       # <select name=privacy>
     if [ -z $L ]; then L="0"; fi            # <select name=lifespan>
 
-    curl -d author="$AUTHOR" -d pasteEnter="$TEXT" -d highlighter="$H"\
+    LINK=$(curl -d author="$AUTHOR" -d pasteEnter="$TEXT" -d highlighter="$H"\
         -d privacy="$P" -d lifespan="$L" $URL 2> /dev/null |\
-        awk -F '"' '/url/ {print $4}'
+        awk -F '"' '/url/ {print $4}')
+
+    if [ ! -z "$R" ]; then
+        LINK="${LINK}@raw"
+    fi
+
+    echo $LINK
 }
