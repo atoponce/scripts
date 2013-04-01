@@ -1,4 +1,4 @@
-#!/bin/sh
+#!/bin/sh -X
 
 # Author: Aaron Toponce
 # Date: Mar 28, 2013
@@ -257,7 +257,7 @@ function pastebin {
             -M|--month) L="5"; shift;;
             -y|--year) L="6"; shift;;
             -r|--raw) R="raw"; shift;;
-            -h|--help) usage; exit 0;;
+            -h|--help) usage; return 0; ;;
             *)
                 # if $1 is a file on the filesystem
                 if [ -e $1 ]; then
@@ -281,23 +281,21 @@ function pastebin {
                 else
                     printf "Invalid option: $1\n\n"
                     usage
-                    exit 1
+                    return 1
                 fi
                 ;;
         esac
     done
 
-    if [ -z $H ]; then H="plaintext"; fi    # <select name=highlighter>
-    if [ -z $P ]; then P="public"; fi       # <select name=privacy>
-    if [ -z $L ]; then L="0"; fi            # <select name=lifespan>
+    [ -z $H ] && H="plaintext"  # <select name=highlighter>
+    [ -z $P ] && P="public"     # <select name=privacy>
+    [ -z $L ] && L="0"          # <select name=lifespan>
 
     LINK=$(curl -d author="$AUTHOR" -d pasteEnter="$TEXT" -d highlighter="$H"\
         -d privacy="$P" -d lifespan="$L" $URL 2> /dev/null |\
         awk -F '"' '/url/ {print $4}')
 
-    if [ ! -z "$R" ]; then
-        LINK="${LINK}@raw"
-    fi
+    [ "$R" ] || LINK="${LINK}@raw"
 
     echo $LINK
 }
