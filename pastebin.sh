@@ -295,7 +295,7 @@ function pastebin {
         -d privacy="$P" -d lifespan="$L" $URL 2> /dev/null |\
         awk -F '"' '/url/ {print $4}')
 
-    [ "$R" ] || LINK="${LINK}@raw"
+    [ "$R" ] && LINK="${LINK}@raw"
 
     echo $LINK
 }
