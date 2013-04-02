@@ -273,6 +273,7 @@ function pastebin {
                     sed -ir 's#%20&#%2026#g' /tmp/pastebin.tmp      # space&
                     sed -ir 's#@#%40#g' /tmp/pastebin.tmp           # @
                     sed -ir 's#-#%2d#g' /tmp/pastebin.tmp           # -
+                    sed -ir 's#+#%2b#g' /tmp/pastebin.tmp           # +
                     sed -ir 's#=%20#%3d%20#g' /tmp/pastebin.tmp     # =space
                     sed -ir 's#%20=#%20%3d#g' /tmp/pastebin.tmp     # space=
                     TEXT=$(cat /tmp/pastebin.tmp)
