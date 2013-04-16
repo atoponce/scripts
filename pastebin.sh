@@ -262,20 +262,41 @@ function pastebin {
                 # if $1 is a file on the filesystem
                 if [ -e $1 ]; then
                     # curl(1) interprets special characters in the source file
-                    # conert those to unicode equivalents
+                    # conert those to their hexadecimal ASCII value:
                     cat $1 > /tmp/pastebin.tmp
-                    sed -ir 's# #%20#g' /tmp/pastebin.tmp           # space
-                    sed -ir 's#"#%22#g' /tmp/pastebin.tmp           # "
-                    sed -ir "s#'#%27#g" /tmp/pastebin.tmp           # '
-                    sed -ir 's#`#%60#g' /tmp/pastebin.tmp           # `
-                    sed -ir 's#\\#%5c#g' /tmp/pastebin.tmp          # \
-                    sed -ir 's#&%20#26%20#g' /tmp/pastebin.tmp      # &space;
-                    sed -ir 's#%20&#%2026#g' /tmp/pastebin.tmp      # space&
-                    sed -ir 's#@#%40#g' /tmp/pastebin.tmp           # @
-                    sed -ir 's#-#%2d#g' /tmp/pastebin.tmp           # -
-                    sed -ir 's#+#%2b#g' /tmp/pastebin.tmp           # +
-                    sed -ir 's#=%20#%3d%20#g' /tmp/pastebin.tmp     # =space
-                    sed -ir 's#%20=#%20%3d#g' /tmp/pastebin.tmp     # space=
+                    sed -i 's/ /%20/' /tmp/pastebin.tmp                                                                                                                                                                                                           
+                    sed -i 's/!/%21/' /tmp/pastebin.tmp                                                                                                                                                                                                           
+                    sed -i 's/"/%22/' /tmp/pastebin.tmp                                                                                                                                                                                                           
+                    sed -i 's/#/%23/' /tmp/pastebin.tmp                                                                                                                                                                                                           
+                    sed -i 's/\$/%24/' /tmp/pastebin.tmp                                                                                                                                                                                                           
+                    sed -i 's/%/%25/' /tmp/pastebin.tmp                                                                                                                                                                                                           
+                    sed -i 's/&/%26/' /tmp/pastebin.tmp                                                                                                                                                                                                           
+                    sed -i "s/'/%27/" /tmp/pastebin.tmp                                                                                                                                                                                                           
+                    sed -i 's/(/%28/' /tmp/pastebin.tmp                                                                                                                                                                                                           
+                    sed -i 's/)/%29/' /tmp/pastebin.tmp                                                                                                                                                                                                           
+                    sed -i 's/*/%2A/' /tmp/pastebin.tmp                                                                                                                                                                                                           
+                    sed -i 's/+/%2B/' /tmp/pastebin.tmp                                                                                                                                                                                                           
+                    sed -i 's/,/%2C/' /tmp/pastebin.tmp                                                                                                                                                                                                           
+                    sed -i 's/-/%2D/' /tmp/pastebin.tmp                                                                                                                                                                                                           
+                    sed -i 's/./%2E/' /tmp/pastebin.tmp                                                                                                                                                                                                           
+                    sed -i 's/\//%2F/' /tmp/pastebin.tmp                                                                                                                                                                                                          
+                    sed -i 's/:/%3A/' /tmp/pastebin.tmp                                                                                                                                                                                                           
+                    sed -i 's/;/%3B/' /tmp/pastebin.tmp                                                                                                                                                                                                           
+                    sed -i 's/</%3C/' /tmp/pastebin.tmp                                                                                                                                                                                                           
+                    sed -i 's/=/%3D/' /tmp/pastebin.tmp                                                                                                                                                                                                           
+                    sed -i 's/>/%3E/' /tmp/pastebin.tmp                                                                                                                                                                                                           
+                    sed -i 's/?/%3F/' /tmp/pastebin.tmp                                                                                                                                                                                                           
+                    sed -i 's/@/%40/' /tmp/pastebin.tmp                                                                                                                                                                                                           
+                    sed -i 's/[/%5B/' /tmp/pastebin.tmp                                                                                                                                                                                                           
+                    sed -i 's/\/%5C/' /tmp/pastebin.tmp                                                                                                                                                                                                           
+                    sed -i 's/]/%5D/' /tmp/pastebin.tmp                                                                                                                                                                                                           
+                    sed -i 's/\^/%5E/' /tmp/pastebin.tmp                                                                                                                                                                                                           
+                    sed -i 's/_/%5F/' /tmp/pastebin.tmp                                                                                                                                                                                                           
+                    sed -i 's/`/%60/' /tmp/pastebin.tmp                                                                                                                                                                                                           
+                    sed -i 's/{/%7B/' /tmp/pastebin.tmp                                                                                                                                                                                                           
+                    sed -i 's/|/%7C/' /tmp/pastebin.tmp                                                                                                                                                                                                           
+                    sed -i 's/}/%7D/' /tmp/pastebin.tmp                                                                                                                                                                                                           
+                    sed -i 's/~/%7E/' /tmp/pastebin.tmp                                                                                                                                                                                                           
                     TEXT=$(cat /tmp/pastebin.tmp)
                     rm /tmp/pastebin.tmp
                     break
