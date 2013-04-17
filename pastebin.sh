@@ -1,4 +1,4 @@
-#!/bin/sh -X
+#!/bin/sh
 
 # Author: Aaron Toponce
 # Date: Mar 28, 2013
@@ -260,43 +260,43 @@ function pastebin {
             -h|--help) usage; return 0; ;;
             *)
                 # if $1 is a file on the filesystem
-                if [ -e $1 ]; then
+                if [ -e "$1" ]; then
                     # curl(1) interprets special characters in the source file
                     # conert those to their hexadecimal ASCII value:
-                    cat $1 > /tmp/pastebin.tmp
-                    sed -i 's/ /%20/g' /tmp/pastebin.tmp                                                                                                                                                                                                           
-                    sed -i 's/!/%21/g' /tmp/pastebin.tmp                                                                                                                                                                                                           
-                    sed -i 's/"/%22/g' /tmp/pastebin.tmp                                                                                                                                                                                                           
-                    sed -i 's/#/%23/g' /tmp/pastebin.tmp                                                                                                                                                                                                           
-                    sed -i 's/\$/%24/g' /tmp/pastebin.tmp                                                                                                                                                                                                           
-                    sed -i 's/%/%25/g' /tmp/pastebin.tmp                                                                                                                                                                                                           
-                    sed -i 's/&/%26/g' /tmp/pastebin.tmp                                                                                                                                                                                                           
-                    sed -i "s/'/%27/g" /tmp/pastebin.tmp                                                                                                                                                                                                           
-                    sed -i 's/(/%28/g' /tmp/pastebin.tmp                                                                                                                                                                                                           
-                    sed -i 's/)/%29/g' /tmp/pastebin.tmp                                                                                                                                                                                                           
-                    sed -i 's/*/%2A/g' /tmp/pastebin.tmp                                                                                                                                                                                                           
-                    sed -i 's/+/%2B/g' /tmp/pastebin.tmp                                                                                                                                                                                                           
-                    sed -i 's/,/%2C/g' /tmp/pastebin.tmp                                                                                                                                                                                                           
-                    sed -i 's/-/%2D/g' /tmp/pastebin.tmp                                                                                                                                                                                                           
-                    sed -i 's/./%2E/g' /tmp/pastebin.tmp                                                                                                                                                                                                           
-                    sed -i 's/\//%2F/g' /tmp/pastebin.tmp                                                                                                                                                                                                          
-                    sed -i 's/:/%3A/g' /tmp/pastebin.tmp                                                                                                                                                                                                           
-                    sed -i 's/;/%3B/g' /tmp/pastebin.tmp                                                                                                                                                                                                           
-                    sed -i 's/</%3C/g' /tmp/pastebin.tmp                                                                                                                                                                                                           
-                    sed -i 's/=/%3D/g' /tmp/pastebin.tmp                                                                                                                                                                                                           
-                    sed -i 's/>/%3E/g' /tmp/pastebin.tmp                                                                                                                                                                                                           
-                    sed -i 's/?/%3F/g' /tmp/pastebin.tmp                                                                                                                                                                                                           
-                    sed -i 's/@/%40/g' /tmp/pastebin.tmp                                                                                                                                                                                                           
-                    sed -i 's/[/%5B/g' /tmp/pastebin.tmp                                                                                                                                                                                                           
-                    sed -i 's/\/%5C/g' /tmp/pastebin.tmp                                                                                                                                                                                                           
-                    sed -i 's/]/%5D/g' /tmp/pastebin.tmp                                                                                                                                                                                                           
-                    sed -i 's/\^/%5E/g' /tmp/pastebin.tmp                                                                                                                                                                                                           
-                    sed -i 's/_/%5F/g' /tmp/pastebin.tmp                                                                                                                                                                                                           
-                    sed -i 's/`/%60/g' /tmp/pastebin.tmp                                                                                                                                                                                                           
-                    sed -i 's/{/%7B/g' /tmp/pastebin.tmp                                                                                                                                                                                                           
-                    sed -i 's/|/%7C/g' /tmp/pastebin.tmp                                                                                                                                                                                                           
-                    sed -i 's/}/%7D/g' /tmp/pastebin.tmp                                                                                                                                                                                                           
-                    sed -i 's/~/%7E/g' /tmp/pastebin.tmp                                                                                                                                                                                                           
+                    cat "$1" > /tmp/pastebin.tmp
+                    sed -i 's/%/%25/g' /tmp/pastebin.tmp    # % - match 1st
+                    sed -i 's/ /%20/g' /tmp/pastebin.tmp    # <space>
+                    sed -i 's/!/%21/g' /tmp/pastebin.tmp    # !
+                    sed -i 's/"/%22/g' /tmp/pastebin.tmp    # "
+                    sed -i 's/#/%23/g' /tmp/pastebin.tmp    # #
+                    sed -i 's/\$/%24/g' /tmp/pastebin.tmp   # $ - special
+                    sed -i 's/&/%26/g' /tmp/pastebin.tmp    # &
+                    sed -i "s/'/%27/g" /tmp/pastebin.tmp    # '
+                    sed -i 's/(/%28/g' /tmp/pastebin.tmp    # (
+                    sed -i 's/)/%29/g' /tmp/pastebin.tmp    # )
+                    sed -i 's/\*/%2A/g' /tmp/pastebin.tmp   # * - special
+                    sed -i 's/+/%2B/g' /tmp/pastebin.tmp    # +
+                    sed -i 's/,/%2C/g' /tmp/pastebin.tmp    # ,
+                    sed -i 's/-/%2D/g' /tmp/pastebin.tmp    # -
+                    sed -i 's/\./%2E/g' /tmp/pastebin.tmp   # . - special
+                    sed -i 's,/,%2F,g' /tmp/pastebin.tmp    # /
+                    sed -i 's/:/%3A/g' /tmp/pastebin.tmp    # :
+                    sed -i 's/;/%3B/g' /tmp/pastebin.tmp    # ;
+                    sed -i 's/</%3C/g' /tmp/pastebin.tmp    # <
+                    sed -i 's/=/%3D/g' /tmp/pastebin.tmp    # =
+                    sed -i 's/>/%3E/g' /tmp/pastebin.tmp    # >
+                    sed -i 's/?/%3F/g' /tmp/pastebin.tmp    # ?
+                    sed -i 's/@/%40/g' /tmp/pastebin.tmp    # @
+                    sed -i 's/\[/%5B/g' /tmp/pastebin.tmp   # [ - special
+                    sed -i 's/\\/%5C/g' /tmp/pastebin.tmp   # \ - special
+                    sed -i 's/]/%5D/g' /tmp/pastebin.tmp    # ]
+                    sed -i 's/\^/%5E/g' /tmp/pastebin.tmp   # ^ - special
+                    sed -i 's/_/%5F/g' /tmp/pastebin.tmp    # _
+                    sed -i 's/`/%60/g' /tmp/pastebin.tmp    # `
+                    sed -i 's/{/%7B/g' /tmp/pastebin.tmp    # {
+                    sed -i 's/|/%7C/g' /tmp/pastebin.tmp    # |
+                    sed -i 's/}/%7D/g' /tmp/pastebin.tmp    # }
+                    sed -i 's/~/%7E/g' /tmp/pastebin.tmp    # ~
                     TEXT=$(cat /tmp/pastebin.tmp)
                     rm /tmp/pastebin.tmp
                     break
@@ -309,9 +309,9 @@ function pastebin {
         esac
     done
 
-    [ -z $H ] && H="plaintext"  # <select name=highlighter>
-    [ -z $P ] && P="public"     # <select name=privacy>
-    [ -z $L ] && L="0"          # <select name=lifespan>
+    [ -z "$H" ] && H="plaintext"  # <select name=highlighter>
+    [ -z "$P" ] && P="public"     # <select name=privacy>
+    [ -z "$L" ] && L="0"          # <select name=lifespan>
 
     LINK=$(curl -d author="$AUTHOR" -d pasteEnter="$TEXT" -d highlighter="$H"\
         -d privacy="$P" -d lifespan="$L" $URL 2> /dev/null |\
@@ -319,5 +319,5 @@ function pastebin {
 
     [ "$R" ] && LINK="${LINK}@raw"
 
-    echo $LINK
+    echo "$LINK"
 }
