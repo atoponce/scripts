@@ -288,7 +288,6 @@ function pastebin {
                     sed -i 's/?/%3F/g' /tmp/pastebin.tmp    # ?
                     sed -i 's/@/%40/g' /tmp/pastebin.tmp    # @
                     sed -i 's/\[/%5B/g' /tmp/pastebin.tmp   # [ - special
-                    sed -i 's/\\/%5C/g' /tmp/pastebin.tmp   # \ - special
                     sed -i 's/]/%5D/g' /tmp/pastebin.tmp    # ]
                     sed -i 's/\^/%5E/g' /tmp/pastebin.tmp   # ^ - special
                     sed -i 's/_/%5F/g' /tmp/pastebin.tmp    # _
@@ -297,6 +296,7 @@ function pastebin {
                     sed -i 's/|/%7C/g' /tmp/pastebin.tmp    # |
                     sed -i 's/}/%7D/g' /tmp/pastebin.tmp    # }
                     sed -i 's/~/%7E/g' /tmp/pastebin.tmp    # ~
+                    sed -i 's/\\/%5C/g' /tmp/pastebin.tmp   # \ - special
                     TEXT=$(cat /tmp/pastebin.tmp)
                     rm /tmp/pastebin.tmp
                     break
