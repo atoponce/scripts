@@ -32,6 +32,12 @@
 #     newlines; useful for arrays where a string could contain spaces
 #   - FOO="${BAR[(ws,:,)10]}" returns only the 10th colon-delimited field from
 #     every element in the $BAR array
+#
+# Exit codes:
+#   1: GnuPG is not installed or not available in $PATH
+#   2: Hashcash is not installed or not avaialble in $PATH
+#   3: Current dir is not writable
+#   4: Targeted keyring is not readable or does not exist
 
 # Only user-editable variables. Provide only absolute paths
 GPG="/usr/bin/gpg"
@@ -43,10 +49,10 @@ BASEDIR="$(dirname $KEYRING)"
 touch "$BASEDIR/tokens.txt"
 : > "$BASEDIR/tokens.txt"
 
-if [ ! -x "$GPG" ]; then echo "GnuPG is not installed. Please install it before continuing."; exit 1; fi
-if [ ! -x "$HASHCASH" ]; then echo "Hashcash is not installed. Please install it before continuing."; exit 2; fi
-if [ ! -w "$BASEDIR" ]; then echo "Permission denied: $BASEDIR is not writable by the current process."; exit 3; fi
-if [ ! -f "$KEYRING" ]; then echo "$KEYRING does not exist."; exit 4; fi
+[ ! -x "$GPG" ] && echo "GnuPG is not installed. Please install it before continuing." && exit 1
+[ ! -x "$HASHCASH" ] && echo "Hashcash is not installed. Please install it before continuing." && exit 2
+[ ! -w "$BASEDIR" ] && echo "Permission denied: $BASEDIR is not writable by the current process." && exit 3
+[ ! -f "$KEYRING" ] && echo "$KEYRING does not exist." && exit 4
 
 KEYS=("${(@f)$("$GPG" --fixed-list-mode --with-colons --list-keys --no-default-keyring --keyring="$KEYRING" | awk -F ':' '$1 == "pub" {print $5}')}")
 
