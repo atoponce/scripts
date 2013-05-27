@@ -8,9 +8,9 @@
 [ ! -e $1 ] && echo "$1 does not exist." && exit 2
 
 function topkcs8 {
+    umask 0077
     mv $1 ${1}.old
     openssl pkcs8 -topk8 -v2 des3 -in ${1}.old -out $1
-    chmod 0600 $1
 }
 
 CRYPTO=$(head -n 1 $1 | awk '{print $2}')
