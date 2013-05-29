@@ -34,13 +34,19 @@
 #
 # Each position on the board contains an ASCII character the represents the
 # frequency of visits by the bishop. A blank position has not been visited.
-# See the table below:
+# The more the bishop has visited a square, the heavier or more dense the
+# ASCII character should be. From dark -> light, the following scale should
+# be used:
 #
-# +-+-+-+-+-+-+-+-+-+-+--+--+--+--+--+--+--+--+--+
-# |0|1|2|3|4|5|6|7|8|9|10|11|12|13|14|15|16|17|18|
-# +-+-+-+-+-+-+-+-+-+-+--+--+--+--+--+--+--+--+--+
-# | |.|o|+|=|*|B|O|X|@|% |& |# |/ |^ |$ |M |S |E |
-# +-+-+-+-+-+-+-+-+-+-+--+--+--+--+--+--+--+--+--+
+#   "$@B%8&WM#*oahkbdpqwmZO0QLCJUYXzcvunxrjft/\|()1{}[]?-_+~<>i!lI;:,"^`'. "
+#
+# See the table below (note, this does not necessarily follow OpenSSH):
+#
+# +-+-+-+-+-+-+-+-+-+-+--+--+--+--+--+--+--+--+--++--+--+
+# |0|1|2|3|4|5|6|7|8|9|10|11|12|13|14|15|16|17|18||19|20|
+# +-+-+-+-+-+-+-+-+-+-+--+--+--+--+--+--+--+--+--++--+--+
+# | |.|^|:|l|i|?|{|f|x|X |Z |# |M |W |& |8 |% |@ ||S |E |
+# +-+-+-+-+-+-+-+-+-+-+--+--+--+--+--+--+--+--+--++--+--+
 #
 # 'S' and 'E' are special characters that represent the starting and ending
 # location of the bishop respectively. 'S' always starts at coordinates
