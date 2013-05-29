@@ -174,3 +174,13 @@
 #   |     |  10  |   SW    |    SW    |   +18  |
 #   |     |  11  |   SE    |    SE    |   +20  |
 #   +-----+------+---------+----------+--------+
+
+import gnupg
+import sys
+
+file_name = sys.argv[1]
+f = open(file_name,'r')
+
+gpg = gnupg.GPG(gnupghome=None)
+finger_print = gpg.list_keys(f)[0]['fingerprint']
+print finger_print
