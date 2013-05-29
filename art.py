@@ -3,6 +3,9 @@
 # Reimplement the "Drunken Bishop" walk as implemented by OpenSSH. We use a
 # larger field size for GnuPG due to SHA1 fingerprint sizes (11x19).
 #
+# See http://www.dirk-loss.de/sshvis/drunken_bishop.pdf for the algorithm
+# and security analysis for OpenSSH.
+#
 # The field is as defined:
 #
 #              111111111
