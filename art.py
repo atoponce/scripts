@@ -184,7 +184,9 @@ f = open(file_name,'r')
 gpg = gnupg.GPG(gnupghome=None)
 finger_print = gpg.list_keys(f)[0]['fingerprint']
 
-f_bytes, walk, pos = [], [], 104
+f_bytes, walk, visits = [], [], [0]*208
+coins = [' ','.','^',':','l','i','?','{','f','x','X','Z','#','M','W','&','@']
+pos = 104
 
 for c in str(finger_print):
     f_bytes.append(bin(int(c,16))[2:].zfill(4)[:2])
@@ -305,10 +307,13 @@ for d in f_bytes:
             pos = pos + 20
             walk.append(pos)
 
-print finger_print
-print
-print f_bytes
-print
-print walk
-print
-print len(walk)
+for s in walk:
+    visits[s] = visits[s] + 1
+
+r = ''
+for v in visits:
+    r += coins[v]
+    if v % 19 == 18:
+        r = ''
+    else:
+        print r
