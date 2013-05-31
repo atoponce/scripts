@@ -183,4 +183,127 @@ f = open(file_name,'r')
 
 gpg = gnupg.GPG(gnupghome=None)
 finger_print = gpg.list_keys(f)[0]['fingerprint']
-print finger_print
+
+f_bytes, walk, pos = [], [], 104
+
+for c in str(finger_print):
+    f_bytes.append(bin(int(c,16))[2:].zfill(4)[:2])
+    f_bytes.append(bin(int(c,16))[2:].zfill(4)[2:])
+
+for d in f_bytes:
+    if pos == 0:    # NW corner, square 'a'
+        if d == '00':
+            walk.append(pos)    # no move
+        elif d == '01':
+            pos = pos + 1
+            walk.append(pos)
+        elif d == '10':
+            pos = pos + 19
+            walk.append(pos)
+        else:   # d = '11'
+            pos = pos + 20
+            walk.append(pos)
+    elif pos == 18:    # NE corner, square 'b'
+        if d == '00':
+            pos = pos - 1
+            walk.append(pos-1)
+        elif d == '01':
+            walk.append(pos)    # no move
+        elif d == '10':
+            pos = pos + 18
+            walk.append(pos)
+        else:   # d = '11'
+            pos = pos + 19
+            walk.append(pos)
+    elif pos == 190:    # SW corner, square 'c'
+        if d == '00':
+            pos = pos - 19
+            walk.append(pos9)
+        elif d == '01':
+            pos = pos - 18
+            walk.append(pos)
+        elif d == '10':
+            walk.append(pos)    # no move
+        else:   # d = '11'
+            pos = pos - 1
+            walk.append(pos)
+    elif pos == 208:    # SE corner, square 'd'
+        if d == '00':
+            pos = pos - 20
+            walk.append(pos)
+        elif d == '01':
+            pos = pos - 19
+            walk.append(pos)
+        elif d == '10':
+            pas = pos - 1
+            walk.append(pos)
+        else:   # d = '11'
+            walk.append(pos)    # no move
+    elif 0 < pos < 18:    # Top edge, square 'T'
+        if d == '00':
+            pos = pos - 1
+            walk.append(pos)
+        elif d == '01':
+            pos = pos + 1
+            walk.append(pos)
+        elif d == '10':
+            pos = pos + 18
+            walk.append(pos)
+        else:   # d = '11'
+            pos = pos + 20
+            walk.append(pos)
+    elif 190 < pos < 208: # Bottom edge, square 'B'
+        if d == '00':
+            pos = pos - 20
+            walk.append(pos)
+        elif d == '01':
+            pos = pos - 18
+            walk.append(pos)
+        elif d == '10':
+            pos = pos - 1
+            walk.append(pos)
+        else:   # d = '11'
+            pos = pos + 1
+            walk.append(pos)
+    elif pos in [19, 38, 57, 76, 95, 114, 133, 152, 171]:  # Left edge, square 'L'
+        if d == '00':
+            pos = pos - 20
+            walk.append(pos)
+        elif d == '01':
+            pos = pos - 19
+            walk.append(pos)
+        elif d == '10':
+            pos = pos + 18
+            walk.append(pos)
+        else:   # d = '11'
+            pos = pos + 19
+            walk.append(pos)
+    elif pos in [37, 56, 75, 94, 113, 132, 151, 170, 189]:  # Right edge, square 'R'
+        if d == '00':
+            pos = pos - 19
+            walk.append(pos)
+        elif d == '01':
+            pos = pos - 18
+            walk.append(pos)
+        elif d == '10':
+            pos = pos + 19
+            walk.append(pos)
+        else:   # d = '11'
+            pos = pos + 20
+            walk.append(pos)
+    else:   # middle of the board
+        if d == '00':
+            pos = pos - 20
+            walk.append(pos)
+        elif d == '01':
+            pos = pos - 18
+            walk.append(pos)
+        elif d == '10':
+            pos = pos + 18
+            walk.append(pos)
+        else:   # d = '11'
+            pos = pos + 20
+            walk.append(pos)
+
+print f_bytes
+print walk
