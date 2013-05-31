@@ -195,9 +195,7 @@ for c in str(finger_print):
 
 for d in f_bytes:
     if pos == 0:    # NW corner, square 'a'
-        if d == '00':
-            pos = pos + 0
-        elif d == '01':
+        if d == '01':
             pos = pos + 1
         elif d == '10':
             pos = pos + 19
@@ -206,8 +204,6 @@ for d in f_bytes:
     elif pos == 18:    # NE corner, square 'b'
         if d == '00':
             pos = pos - 1
-        elif d == '01':
-            pos = pos + 0
         elif d == '10':
             pos = pos + 18
         else:   # d = '11'
