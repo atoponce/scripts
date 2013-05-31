@@ -183,9 +183,10 @@ f = open(file_name,'r')
 
 gpg = gnupg.GPG(gnupghome=None)
 finger_print = gpg.list_keys(f)[0]['fingerprint']
+#finger_print = '93ab'*10
 
 f_bytes, walk, visits = [], [], [0]*208
-coins = [' ','.','^',':','l','i','?','{','f','x','X','Z','#','M','W','&','@']
+coins = [' ','.','^',':','l','i','?','{','f','x','X','Z','#','M','W','&','8','%','@']
 pos = 104
 
 for c in str(finger_print):
@@ -307,13 +308,20 @@ for d in f_bytes:
             pos = pos + 20
             walk.append(pos)
 
+print walk
+
+# FIXME: there be bugs with different fingerprint values
+# FIXME: it's not printing the last row
 for s in walk:
     visits[s] = visits[s] + 1
+    if visits[s] > 18:
+        visits[s] = 18
 
-r = ''
+# FIXME: the ascii art seems to have dots that don't make sense
+i,r = 0,''
 for v in visits:
     r += coins[v]
-    if v % 19 == 18:
-        r = ''
-    else:
+    if i % 19 == 18:
         print r
+        r = ''
+    i = i + 1
