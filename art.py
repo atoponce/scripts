@@ -218,7 +218,7 @@ for d in f_bytes:
     elif pos == 190:    # SW corner, square 'c'
         if d == '00':
             pos = pos - 19
-            walk.append(pos9)
+            walk.append(pos)
         elif d == '01':
             pos = pos - 18
             walk.append(pos)
@@ -235,7 +235,7 @@ for d in f_bytes:
             pos = pos - 19
             walk.append(pos)
         elif d == '10':
-            pas = pos - 1
+            pos = pos - 1
             walk.append(pos)
         else:   # d = '11'
             walk.append(pos)    # no move
@@ -291,7 +291,7 @@ for d in f_bytes:
         else:   # d = '11'
             pos = pos + 20
             walk.append(pos)
-    else:   # middle of the board
+    else:   # middle of the board, square 'M'
         if d == '00':
             pos = pos - 20
             walk.append(pos)
@@ -305,5 +305,4 @@ for d in f_bytes:
             pos = pos + 20
             walk.append(pos)
 
-print f_bytes
 print walk
