@@ -206,7 +206,7 @@ for d in f_bytes:
     elif pos == 18:    # NE corner, square 'b'
         if d == '00':
             pos = pos - 1
-            walk.append(pos-1)
+            walk.append(pos)
         elif d == '01':
             walk.append(pos)    # no move
         elif d == '10':
@@ -305,4 +305,10 @@ for d in f_bytes:
             pos = pos + 20
             walk.append(pos)
 
+print finger_print
+print
+print f_bytes
+print
 print walk
+print
+print len(walk)
