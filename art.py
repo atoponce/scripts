@@ -199,23 +199,21 @@ for d in f_bytes:
             pos = pos + 1
         elif d == '10':
             pos = pos + 19
-        else:   # d = '11'
+        elif d == '11':
             pos = pos + 20
     elif pos == 18:    # NE corner, square 'b'
         if d == '00':
             pos = pos - 1
         elif d == '10':
             pos = pos + 18
-        else:   # d = '11'
+        elif d == '11':
             pos = pos + 19
     elif pos == 190:    # SW corner, square 'c'
         if d == '00':
             pos = pos - 19
         elif d == '01':
             pos = pos - 18
-        elif d == '10':
-            pos = pos + 0
-        else:   # d = '11'
+        elif d == '11':
             pos = pos - 1
     elif pos == 208:    # SE corner, square 'd'
         if d == '00':
@@ -224,8 +222,6 @@ for d in f_bytes:
             pos = pos - 19
         elif d == '10':
             pos = pos - 1
-        else:   # d = '11'
-            pos = pos + 0
     elif 0 < pos < 18:    # Top edge, square 'T'
         if d == '00':
             pos = pos - 1
