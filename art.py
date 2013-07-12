@@ -63,8 +63,8 @@
 #   1010001111100001 1001001001011001 0010001011101110 1110000001001000
 #   1000000010000110 0000011000001111
 #
-# The movement is found using bit-pairs at a time, left to right, least
-# significant bit to most sifginifant bit. So:
+# In OpenSSH, the movement is found using bit-pairs at a time, left to
+# right, least significant bit to most sifginifant bit. So:
 #
 #               +-----+-----++-----+-----++-----++-----+-----++-----+-----+
 # Fingerprint:  |  E  |  0  ||  4  |  1  || ... ||  0  |  6  ||  0  |  F  |
@@ -73,6 +73,12 @@
 #               +--+--+--+--++--+--+--+--++-----++--+--+--+--++--+--+--+--+
 #        Step:  |4 |3 |2 |1 ||8 |7 |6 |5 || ... ||76|75|74|73||80|79|78|77|
 #               +--+--+--+--++--+--+--+--++-----++--+--+--+--++--+--+--+--+
+#
+# For this GnuPG implementation, rather than following OpenSSH and read the
+# bits with little endian, I've decided to read the bits in big endian
+# (left to right the full way). This greatly simplifies the code, and I
+# don't see any advantage to reading the bits with little endian, as the
+# SHA1 output should be random anyway.
 #
 # The direction of our drunken bishop follows standard Chess rules for the
 # bishop piece, moving only on the diagnal across the beard, which is
@@ -193,6 +199,10 @@ for c in str(finger_print):
     f_bytes.append(bin(int(c,16))[2:].zfill(4)[:2])
     f_bytes.append(bin(int(c,16))[2:].zfill(4)[2:])
 
+# I break from the OpenSSH implementation here. Rather than reading the
+# bytes in little endian, the code is simpler reading in big endian. I
+# don't see the point in complicating the code for little endian reading,
+# when the fingerprint is SHA1 output, and should provide random output.
 for d in f_bytes:
     if pos == 0:    # NW corner, square 'a'
         if d == '01':

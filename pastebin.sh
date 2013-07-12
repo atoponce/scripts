@@ -5,8 +5,8 @@
 # License: Public Domain
 
 ### Edit only these variables as needed ###
-URL="http://ae7.st/p/api" # $URL should point to the external API
-AUTHOR="eightyeight"  # Your name as you want it to appear on the paste
+[ -z $PURL ] && PURL="http://ae7.st/p/api" # $PURL should point to the external API
+[ -z $PAUTHOR ] && PAUTHOR="eightyeight"  # Your name as you want it to appear on the paste
 
 ### DO NOT EDIT BELOW HERE ###
 function usage {
@@ -313,8 +313,8 @@ function pastebin {
     [ -z "$P" ] && P="public"     # <select name=privacy>
     [ -z "$L" ] && L="0"          # <select name=lifespan>
 
-    LINK=$(curl -d author="$AUTHOR" -d pasteEnter="$TEXT" -d highlighter="$H"\
-        -d privacy="$P" -d lifespan="$L" $URL 2> /dev/null |\
+    LINK=$(curl -d author="$PAUTHOR" -d pasteEnter="$TEXT" -d highlighter="$H"\
+        -d privacy="$P" -d lifespan="$L" $PURL 2> /dev/null |\
         awk -F '"' '/url/ {print $4}')
 
     [ "$R" ] && LINK="${LINK}@raw"
