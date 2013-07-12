@@ -1,8 +1,10 @@
-#!/bin/sh
-
 # Author: Aaron Toponce
 # Date: Mar 28, 2013
 # License: Public Domain
+#
+# Do not call with './pastebin.sh'. This script is meant to be sourced.
+# Instead, run 'source pastebin.sh' then you can run 'pastebin file' from
+# the shell.
 
 ### Edit only these variables as needed ###
 [ -z $PURL ] && PURL="http://ae7.st/p/api" # $PURL should point to the external API
