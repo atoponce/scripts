@@ -21,13 +21,7 @@ fi
 
 # Function to generate each Diceware word from the list
 function five-dice-roll {
-    DIE1=$(< /dev/random tr -dc 1-6 | head -c 1)
-    DIE2=$(< /dev/random tr -dc 1-6 | head -c 1)
-    DIE3=$(< /dev/random tr -dc 1-6 | head -c 1)
-    DIE4=$(< /dev/random tr -dc 1-6 | head -c 1)
-    DIE5=$(< /dev/random tr -dc 1-6 | head -c 1)
-    ROLL=${DIE1}${DIE2}${DIE3}${DIE4}${DIE5}
-    echo -n "$ROLL"
+    echo -n $(< /dev/random tr -dc 1-6 | head -c 5)
 }
 
 # Function to find the Diceware word based on our dice roll
