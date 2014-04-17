@@ -50,7 +50,7 @@
 #
 # 'S' and 'E' are special characters that represent the starting and ending
 # location of the bishop respectively. 'S' always starts at coordinates
-# (9,5), which is position 103, the center of the board.
+# (9,5), which is position 104, the center of the board.
 #
 # Movement is defined by taking the fingerprint, and coverting each
 # character to its binary value. For exmaple, the fingerprint:
@@ -96,20 +96,20 @@
 #   |  11  | SE  |
 #   +------+-----+
 #
-# The bishop starts in the center of the board at position 103. So, each
+# The bishop starts in the center of the board at position 104. So, each
 # possible move would place him on the following positions on the board,
 # after the first move:
 #
 #   +------+-----+------+
 #   | Pair | Pos | Diff |
 #   +------+-----+------+
-#   |  00  | 83  | -20  |
+#   |  00  | 84  | -20  |
 #   +------+-----+------+
-#   |  01  | 85  | -18  |
+#   |  01  | 86  | -18  |
 #   +------+-----+------+
-#   |  10  | 121 | +18  |
+#   |  10  | 122 | +18  |
 #   +------+-----+------+
-#   |  11  | 123 | +20  |
+#   |  11  | 124 | +20  |
 #   +------+-----+------+
 #
 # We must cleanly handle how the bishop behaves when he reaches the edge of
@@ -188,16 +188,19 @@ file_name = sys.argv[1]
 f = open(file_name,'r')
 
 gpg = gnupg.GPG(gnupghome=None)
-finger_print = gpg.list_keys(f)[0]['fingerprint']
-#finger_print = '93ab'*10
+#fingerprint = gpg.list_keys(f)[0]['fingerprint']
+fingerprint = '5555'*10
 
-f_bytes, walk, visits = [], [], [0]*208
+f_bytes = []
+walk = []
+visits = [0]*209
 coins = [' ','.','^',':','l','i','?','{','f','x','X','Z','#','M','W','&','8','%','@']
 pos = 104
 
-for c in str(finger_print):
-    f_bytes.append(bin(int(c,16))[2:].zfill(4)[:2])
-    f_bytes.append(bin(int(c,16))[2:].zfill(4)[2:])
+for c in fingerprint:
+    # zero-pad the 4-bit string
+    f_bytes.append(bin(int(c,16))[2:].zfill(4)[:2]) # last 2 bits
+    f_bytes.append(bin(int(c,16))[2:].zfill(4)[2:]) # first 2 bits
 
 # I break from the OpenSSH implementation here. Rather than reading the
 # bytes in little endian, the code is simpler reading in big endian. I
@@ -211,6 +214,8 @@ for d in f_bytes:
             pos = pos + 19
         elif d == '11':
             pos = pos + 20
+        else:   # d = '00'
+            pos = pos   # no move
     elif pos == 18:    # NE corner, square 'b'
         if d == '00':
             pos = pos - 1
@@ -218,13 +223,17 @@ for d in f_bytes:
             pos = pos + 18
         elif d == '11':
             pos = pos + 19
+        else:   # d = '01'
+            pos = pos   # no move
     elif pos == 190:    # SW corner, square 'c'
         if d == '00':
             pos = pos - 19
         elif d == '01':
             pos = pos - 18
         elif d == '11':
-            pos = pos - 1
+            pos = pos + 1
+        else:   # d = '10'
+            pos = pos   # no move
     elif pos == 208:    # SE corner, square 'd'
         if d == '00':
             pos = pos - 20
@@ -232,7 +241,9 @@ for d in f_bytes:
             pos = pos - 19
         elif d == '10':
             pos = pos - 1
-    elif 0 < pos < 18:    # Top edge, square 'T'
+        else:   # d = '11'
+            pos = pos   # no move
+    elif 1 <= pos <= 17:    # Top edge, square 'T'
         if d == '00':
             pos = pos - 1
         elif d == '01':
@@ -241,7 +252,7 @@ for d in f_bytes:
             pos = pos + 18
         else:   # d = '11'
             pos = pos + 20
-    elif 190 < pos < 208: # Bottom edge, square 'B'
+    elif 191 <= pos <= 207: # Bottom edge, square 'B'
         if d == '00':
             pos = pos - 20
         elif d == '01':
@@ -252,15 +263,6 @@ for d in f_bytes:
             pos = pos + 1
     elif pos in [19, 38, 57, 76, 95, 114, 133, 152, 171]:  # Left edge, square 'L'
         if d == '00':
-            pos = pos - 20
-        elif d == '01':
-            pos = pos - 19
-        elif d == '10':
-            pos = pos + 18
-        else:   # d = '11'
-            pos = pos + 19
-    elif pos in [37, 56, 75, 94, 113, 132, 151, 170, 189]:  # Right edge, square 'R'
-        if d == '00':
             pos = pos - 19
         elif d == '01':
             pos = pos - 18
@@ -268,6 +270,15 @@ for d in f_bytes:
             pos = pos + 19
         else:   # d = '11'
             pos = pos + 20
+    elif pos in [37, 56, 75, 94, 113, 132, 151, 170, 189]:  # Right edge, square 'R'
+        if d == '00':
+            pos = pos - 20
+        elif d == '01':
+            pos = pos - 19
+        elif d == '10':
+            pos = pos + 18
+        else:   # d = '11'
+            pos = pos + 19
     else:   # middle of the board, square 'M'
         if d == '00':
             pos = pos - 20
@@ -279,20 +290,21 @@ for d in f_bytes:
             pos = pos + 20
     walk.append(pos)
 
-print walk
+walk.insert(0,104)
 
-# FIXME: there be bugs with different fingerprint values
-# FIXME: it's not printing the last row
-for s in walk:
-    visits[s] = visits[s] + 1
-    if visits[s] > 18:
-        visits[s] = 18
+for w in walk:
+    visits[w] = visits[w] + 1
+    if visits[w] > 18:
+        visits[w] = 18
 
-# FIXME: the ascii art seems to have dots that don't make sense
-i,r = 0,''
-for v in visits:
-    r += coins[v]
+c = ''
+
+for i, v in enumerate(visits):
+    c += coins[v]
+    if i == 104:
+        c = c[:9] + 'S'
+    if i == walk[len(walk)-1]:
+        c = c[:len(c)-1] + 'E'
     if i % 19 == 18:
-        print r
-        r = ''
-    i = i + 1
+        print c
+        c = ''
