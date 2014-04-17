@@ -193,7 +193,7 @@ with open(keyfile) as f:
     fingerprint = key.fingerprints[0]
 
 f_bytes = []
-walk = []
+walk = [104]
 visits = [0]*209
 coin = ''
 coins = [' ','.','^',':','l','i','?','{','f','x','X','Z','#','M','W','&','8','%','@']
@@ -291,8 +291,6 @@ for d in f_bytes:
         else:   # d = '11'
             pos = pos + 20
     walk.append(pos)
-
-walk.insert(0,104)
 
 for w in walk:
     visits[w] = visits[w] + 1
