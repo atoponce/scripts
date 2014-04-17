@@ -35,10 +35,10 @@
 # Each position on the board contains an ASCII character the represents the
 # frequency of visits by the bishop. A blank position has not been visited.
 # The more the bishop has visited a square, the heavier or more dense the
-# ASCII character should be. From dark -> light, the following scale should
+# ASCII character should be. From light -> dark, the following scale should
 # be used:
 #
-#   "$@B%8&WM#*oahkbdpqwmZO0QLCJUYXzcvunxrjft/\|()1{}[]?-_+~<>i!lI;:,"^`'. "
+#   " .'`^",:;Il!i><~+_-?][}{1)(|\/tfjrxnuvczXYUJCLQ0OZmwqpdbkhao*#MW&8%B@$"
 #
 # See the table below (note, this does not necessarily follow OpenSSH):
 #
@@ -184,16 +184,18 @@
 import gnupg
 import sys
 
-file_name = sys.argv[1]
-f = open(file_name,'r')
+keyfile = sys.argv[1]
+gpg = gnupg.GPG()
 
-gpg = gnupg.GPG(gnupghome=None)
-#fingerprint = gpg.list_keys(f)[0]['fingerprint']
-fingerprint = '5555'*10
+with open(keyfile) as f:
+    key_data = f.read()
+    key = gpg.import_keys(key_data)
+    fingerprint = key.fingerprints[0]
 
 f_bytes = []
 walk = []
 visits = [0]*209
+coin = ''
 coins = [' ','.','^',':','l','i','?','{','f','x','X','Z','#','M','W','&','8','%','@']
 pos = 104
 
@@ -297,14 +299,18 @@ for w in walk:
     if visits[w] > 18:
         visits[w] = 18
 
-c = ''
-
+print "Key fingerprint is {0}".format(fingerprint)
+print "The key's randomart image is:"
+print '+-------------------+'
 for i, v in enumerate(visits):
-    c += coins[v]
+    coin += coins[v]
+    if i % 19 == 0:
+        coin = '|' + coin
     if i == 104:
-        c = c[:9] + 'S'
+        coin = coin[:10] + 'S'
     if i == walk[len(walk)-1]:
-        c = c[:len(c)-1] + 'E'
+        coin = coin[:len(coin)-1] + 'E'
     if i % 19 == 18:
-        print c
-        c = ''
+        print coin + '|'
+        coin = ''
+print '+-------------------+'
