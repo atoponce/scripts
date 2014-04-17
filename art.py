@@ -191,6 +191,8 @@ with open(keyfile) as f:
     key_data = f.read()
     key = gpg.import_keys(key_data)
     fingerprint = key.fingerprints[0]
+    key_size = gpg.search_keys(fingerprint[-8:])[0]['length']
+    key_algo = gpg.search_keys(fingerprint[-8:])[0]['algo']
 
 f_bytes = []
 walk = [104]
@@ -297,9 +299,47 @@ for w in walk:
     if visits[w] > 18:
         visits[w] = 18
 
-print "Key fingerprint is {0}".format(fingerprint)
-print "The key's randomart image is:"
-print '+-------------------+'
+# See https://tools.ietf.org/html/rfc4880#section-9.1
+# Also https://tools.ietf.org/html/rfc6637#section4
+if key_algo == '1' or key_algo == '2' or key_algo == '3':
+    key_algo = 'RSA'
+elif key_algo == '16':
+    key_algo = 'Elg'
+elif key_algo == '17':
+    key_algo = 'DSA'
+elif key_algo == '18':
+    key_algo = 'ECDH'
+elif key_algo == '19':
+    key_algo = 'ECDSA'
+elif key_algo == '20':
+    key_algo = 'Elg'
+elif key_algo == '21':
+    key_algo = 'X9.42'
+else:
+    key_algo = 'N/A'
+
+
+if len("["+key_algo+" "+key_size+"]") == 9:
+    print '+-----[{0} {1}]-----+'.format(key_algo, key_size)
+elif len("["+key_algo+" "+key_size+"]") == 10:
+    print '+----[{0} {1}]-----+'.format(key_algo, key_size)
+elif len("["+key_algo+" "+key_size+"]") == 11:
+    print '+----[{0} {1}]----+'.format(key_algo, key_size)
+elif len("["+key_algo+" "+key_size+"]") == 12:
+    print '+---[{0} {1}]----+'.format(key_algo, key_size)
+elif len("["+key_algo+" "+key_size+"]") == 13:
+    print '+---[{0} {1}]---+'.format(key_algo, key_size)
+elif len("["+key_algo+" "+key_size+"]") == 14:
+    print '+--[{0} {1}]---+'.format(key_algo, key_size)
+elif len("["+key_algo+" "+key_size+"]") == 15:
+    print '+--[{0} {1}]--+'.format(key_algo, key_size)
+elif len("["+key_algo+" "+key_size+"]") == 16:
+    print '+-[{0} {1}]--+'.format(key_algo, key_size)
+elif len("["+key_algo+" "+key_size+"]") == 17:
+    print '+-[{0} {1}]-+'.format(key_algo, key_size)
+else:
+    print '+-------------------+'
+
 for i, v in enumerate(visits):
     coin += coins[v]
     if i % 19 == 0:
@@ -311,4 +351,4 @@ for i, v in enumerate(visits):
     if i % 19 == 18:
         print coin + '|'
         coin = ''
-print '+-------------------+'
+print '+----[{0}]-----+'.format(fingerprint[-8:])
