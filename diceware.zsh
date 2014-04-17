@@ -21,18 +21,7 @@ fi
 
 # Function to generate each Diceware word from the list
 function five-dice-roll {
-    I=0
-    while [[ "$I" -lt 5 ]]; do
-        RND=$(echo -n $((0x$(head -c 1 /dev/random | xxd -ps))))
-        if [[ "$RND" -lt 252 ]]; then
-            DIE=$(((RND%6)+1))
-            DICE="${DICE}$DIE"
-            I=$((I+1))
-        else
-            continue
-        fi
-    done
-    echo -n "$DICE"
+    echo -n $(< /dev/random tr -dc 1-6 | head -c 5)
 }
 
 # Function to find the Diceware word based on our dice roll
