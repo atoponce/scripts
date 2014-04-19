@@ -185,146 +185,105 @@ import gnupg
 import sys
 
 keyfile = sys.argv[1]
-gpg = gnupg.GPG()
+gpg = gnupg.GPG(gnupghome='/tmp', keyring='/tmp/keyring.pgp')
 
 with open(keyfile) as f:
     key_data = f.read()
-    key = gpg.import_keys(key_data)
-    fingerprint = key.fingerprints[0]
-    key_size = gpg.search_keys(fingerprint[-8:])[0]['length']
-    key_algo = gpg.search_keys(fingerprint[-8:])[0]['algo']
 
-f_bytes = []
-walk = [104]
-visits = [0]*209
+key = gpg.import_keys(key_data)
+fingerprint = key.fingerprints[0]
+key_size = gpg.search_keys(fingerprint[-16:])[0]['length']
+key_algo = gpg.search_keys(fingerprint[-16:])[0]['algo']
+
 coin = ''
-coins = [' ','.','^',':','l','i','?','{','f','x','X','Z','#','M','W','&','8','%','@']
+f_bytes = []
 pos = 104
+walk = [pos]
+visits = [0]*209
+coins = [' ','.','^',':','l','i','?','{','f','x','X','Z','#','M','W','&','8','%','@']
+
+zfill = str.zfill
 
 for c in fingerprint:
-    # zero-pad the 4-bit string
-    f_bytes.append(bin(int(c,16))[2:].zfill(4)[:2]) # last 2 bits
-    f_bytes.append(bin(int(c,16))[2:].zfill(4)[2:]) # first 2 bits
+    f_bytes.append(zfill(bin(int(c,16))[2:],4)[:2]) # last 2 bits
+    f_bytes.append(zfill(bin(int(c,16))[2:],4)[2:]) # first 2 bits
 
 # I break from the OpenSSH implementation here. Rather than reading the
 # bytes in little endian, the code is simpler reading in big endian. I
 # don't see the point in complicating the code for little endian reading,
 # when the fingerprint is SHA1 output, and should provide random output.
 for d in f_bytes:
-    if pos == 0:    # NW corner, square 'a'
-        if d == '01':
-            pos = pos + 1
-        elif d == '10':
-            pos = pos + 19
-        elif d == '11':
-            pos = pos + 20
-        else:   # d = '00'
-            pos = pos   # no move
-    elif pos == 18:    # NE corner, square 'b'
-        if d == '00':
-            pos = pos - 1
-        elif d == '10':
-            pos = pos + 18
-        elif d == '11':
-            pos = pos + 19
-        else:   # d = '01'
-            pos = pos   # no move
-    elif pos == 190:    # SW corner, square 'c'
-        if d == '00':
-            pos = pos - 19
-        elif d == '01':
-            pos = pos - 18
-        elif d == '11':
-            pos = pos + 1
-        else:   # d = '10'
-            pos = pos   # no move
-    elif pos == 208:    # SE corner, square 'd'
-        if d == '00':
-            pos = pos - 20
-        elif d == '01':
-            pos = pos - 19
-        elif d == '10':
-            pos = pos - 1
-        else:   # d = '11'
-            pos = pos   # no move
-    elif 1 <= pos <= 17:    # Top edge, square 'T'
-        if d == '00':
-            pos = pos - 1
-        elif d == '01':
-            pos = pos + 1
-        elif d == '10':
-            pos = pos + 18
-        else:   # d = '11'
-            pos = pos + 20
-    elif 191 <= pos <= 207: # Bottom edge, square 'B'
-        if d == '00':
-            pos = pos - 20
-        elif d == '01':
-            pos = pos - 18
-        elif d == '10':
-            pos = pos - 1
-        else:   # d = '11'
-            pos = pos + 1
-    elif pos in [19, 38, 57, 76, 95, 114, 133, 152, 171]:  # Left edge, square 'L'
-        if d == '00':
-            pos = pos - 19
-        elif d == '01':
-            pos = pos - 18
-        elif d == '10':
-            pos = pos + 19
-        else:   # d = '11'
-            pos = pos + 20
-    elif pos in [37, 56, 75, 94, 113, 132, 151, 170, 189]:  # Right edge, square 'R'
-        if d == '00':
-            pos = pos - 20
-        elif d == '01':
-            pos = pos - 19
-        elif d == '10':
-            pos = pos + 18
-        else:   # d = '11'
-            pos = pos + 19
-    else:   # middle of the board, square 'M'
-        if d == '00':
-            pos = pos - 20
-        elif d == '01':
-            pos = pos - 18
-        elif d == '10':
-            pos = pos + 18
-        else:   # d = '11'
-            pos = pos + 20
+    if (20 <= pos <=  36 or  39 <= pos <=  55 or  58 <= pos <=  74 or
+        77 <= pos <=  93 or  96 <= pos <= 112 or 115 <= pos <= 131 or
+       134 <= pos <= 150 or 153 <= pos <= 169 or 172 <= pos <= 188):
+        if   d == '00': pos -= 20 # Square 'M'
+        elif d == '01': pos -= 18
+        elif d == '10': pos += 18
+        else: pos += 20
+    elif 1 <= pos <= 17: # Square 'T'
+        if   d == '00': pos -= 1
+        elif d == '01': pos += 1
+        elif d == '10': pos += 18
+        else: pos += 20
+    elif 191 <= pos <= 207: # Square 'B'
+        if   d == '00': pos -= 20
+        elif d == '01': pos -= 18
+        elif d == '10': pos -= 1
+        else: pos += 1
+    elif pos in [19, 38, 57, 76, 95, 114, 133, 152, 171]: # Square 'L'
+        if   d == '00': pos -= 19
+        elif d == '01': pos -= 18
+        elif d == '10': pos += 19
+        else: pos += 20
+    elif pos in [37, 56, 75, 94, 113, 132, 151, 170, 189]: # Square 'R'
+        if   d == '00': pos -= 20
+        elif d == '01': pos -= 19
+        elif d == '10': pos += 18
+        else: pos += 19
+    elif pos == 0: # Square 'a'
+        if   d == '01': pos += 1
+        elif d == '10': pos += 19
+        elif d == '11': pos += 20
+    elif pos == 18: # Square 'b'
+        if   d == '00': pos -= 1
+        elif d == '10': pos += 18
+        elif d == '11': pos += 19
+    elif pos == 190: # Square 'c'
+        if   d == '00': pos -= 19
+        elif d == '01': pos -= 18
+        elif d == '11': pos += 1
+    else: # Square 'd'
+        if   d == '00': pos -= 20
+        elif d == '01': pos -= 19
+        elif d == '10': pos -= 1
     walk.append(pos)
 
 for w in walk:
-    visits[w] = visits[w] + 1
-    if visits[w] > 18:
-        visits[w] = 18
+    visits[w] += 1
+    if visits[w] > 18: visits[w] = 18
 
 # See https://tools.ietf.org/html/rfc4880#section-9.1
 # Also https://tools.ietf.org/html/rfc6637#section4
-if key_algo == '1' or key_algo == '2' or key_algo == '3':
-    key_algo = 'RSA'
-elif key_algo == '16':
-    key_algo = 'Elg'
-elif key_algo == '17':
+if key_algo == '17':
     key_algo = 'DSA'
+elif key_algo == '1' or key_algo == '2' or key_algo == '3':
+    key_algo = 'RSA'
+elif key_algo == '16' or key_algo == '20':
+    key_algo = 'Elg'
 elif key_algo == '18':
     key_algo = 'ECDH'
 elif key_algo == '19':
     key_algo = 'ECDSA'
-elif key_algo == '20':
-    key_algo = 'Elg'
 elif key_algo == '21':
     key_algo = 'X9.42'
-else:
-    key_algo = 'N/A'
+else: key_algo = 'N/A'
 
-
-if len("["+key_algo+" "+key_size+"]") == 9:
-    print '+-----[{0} {1}]-----+'.format(key_algo, key_size)
-elif len("["+key_algo+" "+key_size+"]") == 10:
+if len("["+key_algo+" "+key_size+"]") == 10:
     print '+----[{0} {1}]-----+'.format(key_algo, key_size)
 elif len("["+key_algo+" "+key_size+"]") == 11:
     print '+----[{0} {1}]----+'.format(key_algo, key_size)
+elif len("["+key_algo+" "+key_size+"]") == 9:
+    print '+-----[{0} {1}]-----+'.format(key_algo, key_size)
 elif len("["+key_algo+" "+key_size+"]") == 12:
     print '+---[{0} {1}]----+'.format(key_algo, key_size)
 elif len("["+key_algo+" "+key_size+"]") == 13:
@@ -343,12 +302,12 @@ else:
 for i, v in enumerate(visits):
     coin += coins[v]
     if i % 19 == 0:
-        coin = '|' + coin
+        coin = "|%s" % coin
     if i == 104:
-        coin = coin[:10] + 'S'
+        coin = "%sS" % coin[:10]
     if i == walk[len(walk)-1]:
-        coin = coin[:len(coin)-1] + 'E'
+        coin = "%sE" % coin[:len(coin)-1]
     if i % 19 == 18:
-        print coin + '|'
+        print "%s|" % coin
         coin = ''
 print '+----[{0}]-----+'.format(fingerprint[-8:])
