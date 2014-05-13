@@ -1,11 +1,8 @@
 #!/usr/bin/env python
 
-# Currently the GnuPG python module is used. The search_keys() requires an
-# online connection. This is less than optimal, and slow. Eventually, it
-# will be replaced with subprocess, and fully offline.
-import gnupg
 import os
 import os.path
+import subprocess
 import sys
 
 try:
@@ -14,24 +11,21 @@ except IndexError:
     print "Usage: keyart /path/to/exported-key"
     sys.exit(1)
 
-if os.path.isfile(keyfile) and os.access(keyfile, os.R_OK):
-    with open(keyfile) as f:
-        key_data = f.read()
 elif not os.path.isfile(keyfile):
     print "No such file or directory: {0}".format(keyfile)
     sys.exit(2)
-else:
+elif not os.access(keyfile, os.R_OK):
     print "{0} is not readable. Check permissions.".format(keyfile)
     sys.exit(3)
 
-gpg = gnupg.GPG(gnupghome='/tmp', keyring='/tmp/keyring.pgp')
-key = gpg.import_keys(key_data)
-fingerprint = key.fingerprints[0]
+gpg = subprocess.Popen(
+    ('gpg','--with-fingerprint','--with-colons', keyfile),
+    stdout=subprocess.PIPE)
+out = gpg.communicate()
 
-# search_keys(query, keyserver='pgp.mit.edu')
-key_dict = gpg.search_keys(fingerprint[-16:])[0]
-key_size = key_dict['length']
-key_algo = key_dict['algo']
+key_size = [i.strip() for i in out[0].split(':')][2]
+key_algo = [i.strip() for i in out[0].split(':')][3]
+key_fpr = [i.strip() for i in out[0].split(':')][19]
 
 coin = ''
 f_bytes = []
@@ -42,7 +36,7 @@ coins = [' ','.','^',':','l','i','?','{','f','x','X','Z','#','M','W','&','8','%'
 
 zfill = str.zfill
 
-for c in fingerprint:
+for c in key_fpr:
     f_bytes.append(zfill(bin(int(c,16))[2:],4)[:2]) # last 2 bits
     f_bytes.append(zfill(bin(int(c,16))[2:],4)[2:]) # first 2 bits
 
@@ -148,4 +142,4 @@ for i, v in enumerate(visits):
     if i % 19 == 18:
         print "%s|" % coin
         coin = ''
-print '+----[{0}]-----+'.format(fingerprint[-8:])
+print '+----[{0}]-----+'.format(key_fpr[-8:])
