@@ -1,7 +1,6 @@
 #!/usr/bin/env python
 
 import os
-import os.path
 import subprocess
 import sys
 
@@ -18,10 +17,14 @@ elif not os.access(keyfile, os.R_OK):
     print "{0} is not readable. Check permissions.".format(keyfile)
     sys.exit(3)
 
-gpg = subprocess.Popen(
-    ('gpg','--with-fingerprint','--with-colons', keyfile),
-    stdout=subprocess.PIPE)
-out = gpg.communicate()
+try:
+    gpg = subprocess.Popen(
+        ('gpg','--with-fingerprint','--with-colons', keyfile),
+        stdout=subprocess.PIPE)
+    out = gpg.communicate()
+except OSError:
+    print "Please install GnuPG before using this script."
+    sys.exit(4)
 
 key_size = [i.strip() for i in out[0].split(':')][2]
 key_algo = [i.strip() for i in out[0].split(':')][3]
