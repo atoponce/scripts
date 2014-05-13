@@ -11,7 +11,7 @@ except IndexError:
     print "Usage: keyart /path/to/exported-key"
     sys.exit(1)
 
-elif not os.path.isfile(keyfile):
+if not os.path.isfile(keyfile):
     print "No such file or directory: {0}".format(keyfile)
     sys.exit(2)
 elif not os.access(keyfile, os.R_OK):
