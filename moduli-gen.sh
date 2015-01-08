@@ -55,8 +55,8 @@ while [ $BITS -le 8192 ]; do
         fi
         TMP=$((${TMP}+1))
     done
-    cat moduli.${BITS}.safe.? >> moduli.${BITS}.safe
-    rm moduli.${BITS}.safe.? moduli.${BITS}.x?.gz
+    cat moduli.${BITS}.safe.* >> moduli.${BITS}.safe
+    rm moduli.${BITS}.safe.* moduli.${BITS}.x*.gz
     BITS=$((${BITS}+512))
 done
 
