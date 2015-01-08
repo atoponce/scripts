@@ -68,4 +68,4 @@ done
 sort -u moduli.tmp > moduli
 
 echo # blank line
-echo "Finished."
+echo "Finished. The 'moduli' file is ready for install to /etc/ssh/moduli."
