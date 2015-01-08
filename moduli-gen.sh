@@ -66,3 +66,6 @@ done
 
 # remove any possible duplicates
 sort -u moduli.tmp > moduli
+
+echo # blank line
+echo "Finished."
