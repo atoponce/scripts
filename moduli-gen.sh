@@ -15,7 +15,9 @@
 # Date: Wed Jan 7, 2015
 # License: Public Domain
 
-NPROC=$(nproc)
+NSOCK=$(grep 'physical id' /proc/cpuinfo | sort -u | wc -l)
+NCORE=$(grep 'cpu cores' /proc/cpuinfo | sort -u | cut -d ':' -f 2)
+NPROC=$((${NSOCK}*${NCORE}))
 
 grep -qo ' ht ' /proc/cpuinfo && NPROC=$((${NPROC}/2 ))
 
