@@ -42,15 +42,15 @@ while [ $BITS -le 8192 ]; do
     TOTAL_LINES=$(gzip -dc moduli.${BITS}.gz | wc -l)
     LINES_PER_FILE=$(((${TOTAL_LINES}+${NPROC}-1)/${NPROC}))
     
-    gzip -dc moduli.${BITS}.gz | split -a 1 -dl $LINES_PER_FILE 
+    gzip -dc moduli.${BITS}.gz | split -a 1 -dl $LINES_PER_FILE \
         --filter="gzip -1c > moduli.${BITS}.\$FILE.gz"
 
     while [ $TMP -lt $NPROC ]; do
         if [ $TMP -lt $((${NPROC}-1)) ]; then
-            gzip -dc moduli.${BITS}.x${TMP}.gz | 
+            gzip -dc moduli.${BITS}.x${TMP}.gz | \
                 ssh-keygen -T moduli.${BITS}.safe.${TMP} &
         else
-            gzip -dc moduli.${BITS}.x${TMP}.gz | 
+            gzip -dc moduli.${BITS}.x${TMP}.gz | \
                 ssh-keygen -T moduli.${BITS}.safe.${TMP}
         fi
         TMP=$((${TMP}+1))
