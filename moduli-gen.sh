@@ -51,15 +51,20 @@ while [ $BITS -le 8192 ]; do
             gzip -dc moduli.${BITS}.x${TMP}.gz | \
                 ssh-keygen -T moduli.${BITS}.safe.${TMP} &
         else
+            # This job could finish before the previous backgrounded ones
+            # So, more ssh-keygen(1) PIDs may be briefly working than $NPROC
             gzip -dc moduli.${BITS}.x${TMP}.gz | \
                 ssh-keygen -T moduli.${BITS}.safe.${TMP}
         fi
         TMP=$((${TMP}+1))
     done
-    cat moduli.${BITS}.safe.* >> moduli.${BITS}.safe
-    rm moduli.${BITS}.safe.* moduli.${BITS}.x*.gz
+
+    # because the non-backgrounded PID may finish first, dupes may exist
+    cat moduli.${BITS}.safe.* >> moduli.tmp
+    rm moduli.${BITS}.x${TMP}.gz # already in RAM if still working
     BITS=$((${BITS}+512))
 done
 
-cat moduli.????.safe > moduli
-rm moduli.????.safe
+# remove any possible duplicates
+sort -u moduli.tmp > moduli
+rm moduli.????.safe.* moduli.tmp
