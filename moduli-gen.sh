@@ -22,9 +22,9 @@ NPROC=$((${NSOCK}*${NCORE}))
 # generate the candidate primes files first
 BITS=1024
 while [ $BITS -le 8192 ]; do
-    TMP=$NPROC
-    until [ $TMP -eq 0 ]; do
-        if [ $TMP -gt 1 ]; then
+    TMP=0
+    while [ $TMP -lt $NPROC ]; do
+        if [ $TMP -lt $((${NPROC}-1)) ]; then
             ssh-keygen -G /dev/stdout -b $BITS | gzip -1c > moduli.${BITS}.gz &
             BITS=$((${BITS}+512))
         else
