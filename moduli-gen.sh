@@ -4,12 +4,13 @@
 #
 # This script executes in two parts:
 #
-# 1. Generate candidate primes for DH key exachange.
+# 1. Generate candidate primes for DH key exchange
 # 2. Run the candidates through the Miller-Rabin primality test.
 # 
 # Prime bit sizes range from 1024-bits to 8192-bits, in 512-bit intervals.
-# Generating the candidates takes about 45 minutes on an older quad core Xeon.
-# Generating the safe primes takes about 2 weeks on the same machine.
+# Generating the candidates takes about 25 minutes on an older 8-core Xeon.
+# Generating the safe primes takes about 7 days on the same machine.
+# Currently requires procfs, which limits use to GNU/Linux. Sorry BSD.
 #
 # Author: Aaron Toponce
 # Date: Wed Jan 7, 2015
