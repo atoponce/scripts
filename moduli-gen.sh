@@ -43,7 +43,7 @@ while [ $BITS -le 8192 ]; do
     LINES_PER_FILE=$(((${TOTAL_LINES}+${NPROC}-1)/${NPROC}))
     
     gzip -dc moduli.${BITS}.gz | split -a 1 -dl $LINES_PER_FILE 
-        --filter="gzip -1c > moduli.${BITS}.$FILE.gz"
+        --filter="gzip -1c > moduli.${BITS}.\$FILE.gz"
 
     while [ $TMP -lt $NPROC ]; do
         if [ $TMP -lt $((${NPROC}-1)) ]; then
