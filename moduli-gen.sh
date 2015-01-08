@@ -31,7 +31,7 @@ while [ $BITS -le 8192 ]; do
             ssh-keygen -G /dev/stdout -b $BITS | gzip -1c > moduli.${BITS}.gz
             BITS=$((${BITS}+512))
         fi
-        TMP=$((${TMP}-1))
+        TMP=$((${TMP}+1))
     done
 done
 
