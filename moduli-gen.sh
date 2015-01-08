@@ -19,8 +19,6 @@ NSOCK=$(grep 'physical id' /proc/cpuinfo | sort -u | wc -l)
 NCORE=$(grep 'cpu cores' /proc/cpuinfo | sort -u | cut -d ':' -f 2)
 NPROC=$((${NSOCK}*${NCORE}))
 
-grep -qo ' ht ' /proc/cpuinfo && NPROC=$((${NPROC}/2 ))
-
 # generate the candidate primes files first
 BITS=1024
 while [ $BITS -le 8192 ]; do
