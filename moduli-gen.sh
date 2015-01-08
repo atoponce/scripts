@@ -61,10 +61,8 @@ while [ $BITS -le 8192 ]; do
 
     # because the non-backgrounded PID may finish first, dupes may exist
     cat moduli.${BITS}.safe.* >> moduli.tmp
-    rm moduli.${BITS}.x${TMP}.gz # already in RAM if still working
     BITS=$((${BITS}+512))
 done
 
 # remove any possible duplicates
 sort -u moduli.tmp > moduli
-rm moduli.????.safe.* moduli.tmp
