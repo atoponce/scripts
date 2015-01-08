@@ -35,12 +35,9 @@ while [ $BITS -le 8192 ]; do
     done
 done
 
-echo -n "$(date +'%F %T')"
-
 # now work on getting to the safe primes
 BITS=1024
 while [ $BITS -le 8192 ]; do
-    echo "$BITS: $(date +'%F %T')"
     TMP=0
     TOTAL_LINES=$(gzip -dc moduli.${BITS}.gz | wc -l)
     LINES_PER_FILE=$(((${TOTAL_LINES}+${NPROC}-1)/${NPROC}))
