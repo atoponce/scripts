@@ -7,7 +7,8 @@
 # 1. Generate candidate primes for DH key exchange
 # 2. Run the candidates through the Miller-Rabin primality test.
 # 
-# Prime bit sizes range from 1024-bits to 8192-bits, in 512-bit intervals.
+# By default, only 1024, 1536, 2048, 3072, 4096, 6144, & 8192-bit primes exist.
+# Inestead, 1024-bits to 8704-bits, in 512-bit intervals are generated.
 # Generating the candidates takes about 25 minutes on an older 8-core Xeon.
 # Generating the safe primes takes about 7 days on the same machine.
 # Currently requires procfs, which limits use to GNU/Linux. Sorry BSD.
