@@ -8,9 +8,9 @@
 # 2. Run the candidates through the Miller-Rabin primality test.
 # 
 # By default, only 1024, 1536, 2048, 3072, 4096, 6144, & 8192-bit primes exist.
-# Inestead, 1024-bits to 8704-bits, in 512-bit intervals are generated.
+# Inestead, 1024-bits to 8192-bits, in 512-bit intervals are generated.
 # Generating the candidates takes about 25 minutes on an older 8-core Xeon.
-# Generating the safe primes takes about 7 days on the same machine.
+# Generating the safe primes takes about 40 hours on the same machine.
 # Currently requires procfs, which limits use to GNU/Linux. Sorry BSD.
 #
 # Author: Aaron Toponce
@@ -28,11 +28,10 @@ while [ $BITS -le 8192 ]; do
     while [ $TMP -lt $NPROC ]; do
         if [ $TMP -lt $((${NPROC}-1)) ]; then
             ssh-keygen -G /dev/stdout -b $BITS | gzip -1c > moduli.${BITS}.gz &
-            BITS=$((${BITS}+512))
         else
             ssh-keygen -G /dev/stdout -b $BITS | gzip -1c > moduli.${BITS}.gz
-            BITS=$((${BITS}+512))
         fi
+        BITS=$((${BITS}+512))
         TMP=$((${TMP}+1))
     done
 done
