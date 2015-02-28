@@ -1,5 +1,9 @@
 #!/bin/bash
 # apt-get install scrot imagemagick i3lock
-scrot /tmp/screenshot.png
-convert /tmp/screenshot.png -blur 0x5 /tmp/blur.png
-i3lock -i /tmp/blur.png
+#cd ~/Private/screenshots/
+#scrot screenshot.png
+#convert -scale 10% -scale 1000% screenshot.png blur.png
+#shred screenshot.png
+#rm screenshot.png
+#i3lock -i blur.png
+xscreensaver-command -lock

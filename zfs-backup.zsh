@@ -15,13 +15,13 @@
 # with automating the script.
 
 # Edit as necessary
-BACKUP="offsite"    # pool name of offsite ZFS pool
+BACKUP="backup"    # pool name of offsite ZFS pool
 ZFS="/sbin/zfs"     # full path to zfs(8) binary
 ZPOOL="/sbin/zpool" # full path to zpool(8) binary
 
 # Do not edit beneath here. Please.
 SERVER="$(hostname -s)"
-DSETS=($("$ZFS" list -H -o name -t filesystem -r pool))
+DSETS=($("$ZFS" list -H -o name -t filesystem -r tank))
 
 for D in $DSETS; do
     POOL=$(echo "$D" | awk -F '@' '{split($1,a,"/"); print a[1]}')
@@ -39,5 +39,6 @@ for D in $DSETS; do
     MNTH_SNAP=(${(M)SNAPS:#*monthly*})
 
     # FIXME: change "ssh -c arcfour server.example.com" as necessary
-    "$ZFS" send -RI "$FREQ_SNAP[2]" "$FREQ_SNAP[1]" | ssh -c arcfour server.example.com "$ZFS recv -Fduv $BACKUP/$SERVER"
+    #"$ZFS" send -RI "$FREQ_SNAP[2]" "$FREQ_SNAP[1]" | ssh -c arcfour server.example.com "$ZFS recv -Fduv $BACKUP/$SERVER"
+    "$ZFS" send -RI "$FREQ_SNAP[2]" "$FREQ_SNAP[1]" | "$ZFS recv -Fduv $BACKUP/$SERVER"
 done

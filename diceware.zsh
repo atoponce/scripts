@@ -21,7 +21,7 @@ fi
 
 # Function to generate each Diceware word from the list
 function five-dice-roll {
-    echo -n $(< /dev/random tr -dc 1-6 | head -c 5)
+    echo -n $(< /dev/urandom tr -dc 1-6 | head -c 5)
 }
 
 # Function to find the Diceware word based on our dice roll
