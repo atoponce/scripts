@@ -5,6 +5,9 @@
 #  inseminate is a fork of pollinate by Dustin Kirkland found at:
 #       https://github.com/dustinkirkland/pollinate/blob/master/pollinate
 #
+# Put in crontab as follows:
+#       * * * * * sh inseminate > /dev/random
+#
 #  Copyright (C) 2015 Aaron Toponce <aaron.toponce@gmail.com>
 #
 #  This program is free software: you can redistribute it and/or modify
@@ -19,33 +22,26 @@
 #  You should have received a copy of the GNU General Public License
 #  along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-# Necessary variables
+# Working directory
 TMPDIR=$(mktemp -d -t "inseminate.XXXXXXXXXXXX")
-TMPOUT="${TMPDIR}/out"
-TMPERR="${TMPDIR}/err"
-F1="${TMPDIR}/challenge"
 
 # Construct a user agent, with useful debug information
-# Very similar to Firefox and Chrome
-IVER="0.1"
-CURL_VER="$(apt-cache policy curl | grep 'Installed:' | awk '{print $2}')"
+CURL_VER="$(apt-cache policy curl | awk '/Installed:/ {print $2}')"
 LSB="$(lsb_release -is)/$(lsb_release -rs)"
 PLATFORM="$(uname -o)/$(uname -r)/$(uname -m)"
-USER_AGENT="inseminate/$IVER curl/$CURL_VER $LSB $PLATFORM"
+USER_AGENT="inseminate/0.2 curl/$CURL_VER $LSB $PLATFORM"
 
-# Read and print urandom bytes
+# Setup the challenge with a response
 CHALLENGE=$(head -c 64 /dev/urandom | sha512sum | awk '{print $1}')
 CHALLENGE_RESPONSE=$(echo -n "$CHALLENGE" | sha512sum | awk '{print $1}')
-
-# Create the challenge file
-echo -n "challenge=$CHALLENGE" > "$F1"
+F1=$(echo -n "challenge=$CHALLENGE")
 
 # Get the data
-curl -A "$USER_AGENT" -o- -v --trace-time --connect-timeout 3 -m 3 -d @$F1 \
-    https://entropy.ubuntu.com > "$TMPOUT" 2> "$TMPERR"
+curl -A "$USER_AGENT" -o- -v --trace-time --connect-timeout 3 -m 3 -d $F1 \
+    https://entropy.ubuntu.com > "${TMPDIR}/out" 2> "${TMPDIR}/err"
 
-RESPONSE=$(head -n 1 "$TMPOUT")
-RESULT=$(cat "$TMPOUT" "$TMPERR" | sha512sum | awk '{print $1}')
+RESPONSE=$(head -n 1 "${TMPDIR}/out")
+RESULT=$(cat "${TMPDIR}/out" "${TMPDIR}/err" | sha512sum | awk '{print $1}')
 [ "$CHALLENGE_RESPONSE" = "$RESPONSE" ] && echo "$RESULT"
 
 rm -rf "$TMPDIR"
