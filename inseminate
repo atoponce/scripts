@@ -19,8 +19,6 @@
 #  You should have received a copy of the GNU General Public License
 #  along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-set -e
-
 # Necessary variables
 TMPDIR=$(mktemp -d -t "inseminate.XXXXXXXXXXXX")
 TMPOUT="${TMPDIR}/out"
@@ -48,6 +46,6 @@ curl -A "$USER_AGENT" -o- -v --trace-time --connect-timeout 3 -m 3 -d @$F1 \
 
 RESPONSE=$(head -n 1 "$TMPOUT")
 RESULT=$(cat "$TMPOUT" "$TMPERR" | sha512sum | awk '{print $1}')
-[ "$CHALLENGE_RESPONSE" = "$RESPONSE" ] && echo "$RESULT" > /dev/urandom
+[ "$CHALLENGE_RESPONSE" = "$RESPONSE" ] && echo "$RESULT"
 
 rm -rf "$TMPDIR"
