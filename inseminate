@@ -1,0 +1,55 @@
+#!/bin/sh
+#
+# inseminate: an Entropy-as-a-Service client
+#
+#  inseminate is a fork of pollinate by Dustin Kirkland found at:
+#       https://github.com/dustinkirkland/pollinate/blob/master/pollinate
+#
+#  Copyright (C) 2015 Aaron Toponce <aaron.toponce@gmail.com>
+#
+#  This program is free software: you can redistribute it and/or modify
+#  it under the terms of the GNU General Public License as published by
+#  the Free Software Foundation, version 3 of the License.
+#
+#  This program is distributed in the hope that it will be useful,
+#  but WITHOUT ANY WARRANTY; without even the implied warranty of
+#  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+#  GNU General Public License for more details.
+#
+#  You should have received a copy of the GNU General Public License
+#  along with this program.  If not, see <http://www.gnu.org/licenses/>.
+
+set -e
+
+# Necessary variables
+TMPDIR=$(mktemp -d -t "inseminate.XXXXXXXXXXXX")
+TMPOUT="${TMPDIR}/out"
+TMPERR="${TMPDIR}/err"
+F1="${TMPDIR}/challenge"
+
+# Construct a user agent, with useful debug information
+# Very similar to Firefox and Chrome
+IVER="0.1"
+CURL_VER="$(apt-cache policy curl | grep 'Installed:' | awk '{print $2}')"
+LSB="$(lsb_release -is)/$(lsb_release -rs)"
+PLATFORM="$(uname -o)/$(uname -r)/$(uname -m)"
+USER_AGENT="inseminate/${IVER} curl/${CURL_VER} ${LSB} ${PLATFORM}"
+
+# Read and print urandom bytes
+CHALLENGE=$(head -c 64 /dev/urandom | sha512sum | awk '{print $1}')
+CHALLENGE_RESPONSE=$(echo -n "${CHALLENGE}" | sha512sum | awk '{print $1}')
+echo "$CHALLENGE_RESPONSE"
+
+# Create the challenge file
+echo -n "challenge=$CHALLENGE" > "$F1"
+
+# Get the data
+curl -A "$USER_AGENT" -o- -v --trace-time --connect-timeout 3 -m 3 -d @$F1 \
+    https://entropy.ubuntu.com > "$TMPOUT" 2> "$TMPERR"
+
+RESPONSE=$(head -n 1 "$TMPOUT")
+echo "$RESPONSE"
+RESULT=$(cat "${TMPOUT}" "${TMPERR}" | sha512sum | awk '{print $1}')
+[ "$CHALLENGE_RESPONSE" = "$RESPONSE" ] && echo "$RESULT" > /dev/urandom
+
+rm -rf "$TMPDIR"
