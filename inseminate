@@ -26,10 +26,10 @@
 TMPDIR=$(mktemp -d -t "inseminate.XXXXXXXXXXXX")
 
 # Construct a user agent, with useful debug information
-CURL_VER="$(apt-cache policy curl | awk '/Installed:/ {print $2}')"
+CURL_VER="$(curl -V | head -n 1 | awk '{print $2}')"
 LSB="$(lsb_release -is)/$(lsb_release -rs)"
 PLATFORM="$(uname -o)/$(uname -r)/$(uname -m)"
-USER_AGENT="inseminate/0.2 curl/$CURL_VER $LSB $PLATFORM"
+USER_AGENT="inseminate/0.3 curl/$CURL_VER $LSB $PLATFORM"
 
 # Setup the challenge with a response
 CHALLENGE=$(head -c 64 /dev/urandom | sha512sum | awk '{print $1}')
