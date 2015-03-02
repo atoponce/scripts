@@ -38,7 +38,6 @@ USER_AGENT="inseminate/${IVER} curl/${CURL_VER} ${LSB} ${PLATFORM}"
 # Read and print urandom bytes
 CHALLENGE=$(head -c 64 /dev/urandom | sha512sum | awk '{print $1}')
 CHALLENGE_RESPONSE=$(echo -n "${CHALLENGE}" | sha512sum | awk '{print $1}')
-echo "$CHALLENGE_RESPONSE"
 
 # Create the challenge file
 echo -n "challenge=$CHALLENGE" > "$F1"
@@ -48,7 +47,6 @@ curl -A "$USER_AGENT" -o- -v --trace-time --connect-timeout 3 -m 3 -d @$F1 \
     https://entropy.ubuntu.com > "$TMPOUT" 2> "$TMPERR"
 
 RESPONSE=$(head -n 1 "$TMPOUT")
-echo "$RESPONSE"
 RESULT=$(cat "${TMPOUT}" "${TMPERR}" | sha512sum | awk '{print $1}')
 [ "$CHALLENGE_RESPONSE" = "$RESPONSE" ] && echo "$RESULT" > /dev/urandom
 
