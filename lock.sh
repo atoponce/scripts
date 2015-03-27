@@ -9,3 +9,5 @@ sha512sum SHA256SUMS > /dev/urandom
 shred screenshot.png
 rm screenshot.png
 i3lock -i blur.png
+shred blur.png
+rm blur.png
