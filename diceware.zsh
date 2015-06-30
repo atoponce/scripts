@@ -32,7 +32,7 @@ function diceware-word {
 if [[ "$1" = <-> ]]; then NUM="$1"; else NUM=6; fi
 
 for i in {1.."$NUM"}; do
-    DICEPASS="${DICEPASS}$(diceware-word)"
+    DICEPASS="${DICEPASS}$(diceware-word) "
 done
 
 echo "$DICEPASS"
