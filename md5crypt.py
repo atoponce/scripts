@@ -5,7 +5,7 @@ from hashlib import md5
 
 pw = "toomanysecrets"
 salt = "2Z4e3j5f"
-rounds = 1000000
+rounds = 1000
 
 magic = "$1$"
 pwlen = len(pw)
