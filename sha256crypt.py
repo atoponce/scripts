@@ -60,7 +60,7 @@ for i in xrange(rounds):
     tmp.update(dc if i & 1 else dp)
     dc = tmp.digest()
 
-# mix the final output
+# convert 3 8-bit words to 4 6-bit words
 final = ""
 for x,y,z in ((0,10,20),(21,1,11),(12,22,2),(3,13,23),(24,4,14),
               (15,25,5),(6,16,26),(27,7,17),(18,28,8),(9,19,29)):

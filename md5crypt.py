@@ -38,7 +38,7 @@ for i in xrange(rounds):
     tmp.update(dc if i & 1 else pw)
     dc = tmp.digest()
 
-# mix the final output
+# convert 3 8-bit words to 4 6-bit words
 final = ''
 for x, y, z in ((0, 6, 12), (1, 7, 13), (2, 8, 14), (3, 9, 15), (4, 10, 5)):
     v = ord(dc[x]) << 16 | ord(dc[y]) << 8 | ord(dc[z])
