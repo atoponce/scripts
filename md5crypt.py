@@ -1,5 +1,8 @@
 from hashlib import md5
 
+# $ mkpasswd --method='md5' --salt='2Z4e3j5f' --rounds=1000 --stdin 'toomanysecrets'
+# $1$2Z4e3j5f$sKZptx/P5xzhQZ821BRFX1
+
 pw = "toomanysecrets"
 salt = "2Z4e3j5f"
 rounds = 1000
