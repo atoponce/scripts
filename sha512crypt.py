@@ -10,6 +10,7 @@ rounds = 5000
 magic = "$6$"
 pwlen = len(pw)
 itoa64 = "./0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz"
+quot, rem = divmod(rounds, 42)
 
 # Start digest "a"
 da = sha512(pw + salt)
@@ -49,16 +50,30 @@ dp = tmp
 
 # Create digest "s"
 ds = sha512(salt * (16 + ord(da[0]))).digest()[:len(salt)]
-
 dc = da
 
-# iterate "rounds" times to slow down brute force cracking
-for i in xrange(rounds):
-    tmp = sha512(dp if i & 1 else dc)
-    if i % 3: tmp.update(ds)
-    if i % 7: tmp.update(dp)
-    tmp.update(dc if i & 1 else dp)
-    dc = tmp.digest()
+p = dp
+pp = dp+dp
+ps = dp+ds
+psp = dp+ds+dp
+sp = ds+dp
+spp = ds+dp+dp
+
+permutations = [
+    (p , psp), (spp, pp), (spp, psp), (pp, ps ), (spp, pp), (spp, psp),
+    (pp, psp), (sp , pp), (spp, psp), (pp, psp), (spp, p ), (spp, psp),
+    (pp, psp), (spp, pp), (sp , psp), (pp, psp), (spp, pp), (spp, ps ),
+    (pp, psp), (spp, pp), (spp, psp)
+]
+
+# Optimize!
+while quot:
+    for i, j in permutations:
+        dc = sha512(j + sha512(dc + i).digest()).digest()
+    quot -= 1
+
+for i, j in permutations[:rem/2]:
+    dc = sha512(j + sha512(dc + i).digest()).digest()
 
 # convert 3 8-bit words to 4 6-bit words
 final = ""
