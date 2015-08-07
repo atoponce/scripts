@@ -48,4 +48,4 @@ for i in range(2):
     v >>= 6
 
 # output the result
-print "{0}{1}${2}".format(magic, salt, final)
+print "{0}rounds={1}${2}${3}".format(magic, rounds, salt, final)
