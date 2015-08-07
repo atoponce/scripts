@@ -5,11 +5,26 @@ from hashlib import md5
 
 pw = "toomanysecrets"
 salt = "2Z4e3j5f"
-rounds = 1000
+rounds = 1000000
 
 magic = "$1$"
 pwlen = len(pw)
 itoa64 = "./0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz"
+quot, rem = divmod(rounds, 42)
+
+p = pw
+pp = pw+pw
+ps = pw+salt
+psp = pw+salt+pw
+sp = salt+pw
+spp = salt+pw+pw
+
+permutations = [
+    (p , psp), (spp, pp), (spp, psp), (pp, ps ), (spp, pp), (spp, psp),
+    (pp, psp), (sp , pp), (spp, psp), (pp, psp), (spp, p ), (spp, psp),
+    (pp, psp), (spp, pp), (sp , psp), (pp, psp), (spp, pp), (spp, ps ),
+    (pp, psp), (spp, pp), (spp, psp)
+]
 
 # Start digest "a"
 da = md5(pw + magic + salt)
@@ -30,13 +45,14 @@ while i:
     i >>= 1
 dc = da.digest()
 
-# iterate 1000 times to slow down brute force cracking
-for i in xrange(rounds):
-    tmp = md5(pw if i & 1 else dc)
-    if i % 3: tmp.update(salt)
-    if i % 7: tmp.update(pw)
-    tmp.update(dc if i & 1 else pw)
-    dc = tmp.digest()
+# Optimize!
+while quot:
+    for i, j in permutations:
+        dc = md5(j + md5(dc + i).digest()).digest()
+    quot -= 1
+
+for i, j in permutations[:rem/2]:
+    dc = md5(j + md5(dc + i).digest()).digest()
 
 # convert 3 8-bit words to 4 6-bit words
 final = ''
