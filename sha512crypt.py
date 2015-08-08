@@ -3,14 +3,18 @@ from hashlib import sha512
 # $ mkpasswd --method='sha-512' --salt='q4QD/vCH2sSrLdeb' --rounds=5000 --stdin 'toomanysecrets'
 # $6$rounds=5000$q4QD/vCH2sSrLdeb$8KMwaDhI2jQD/sOGvjxgFB4XWuhTYwjXovFYDku20CFz4ZvCE7030dvTzdxo9P0ce8UjNbKBZ/MhIG8m8A2xm1
 
-pw = "toomanysecrets"
-salt = "q4QD/vCH2sSrLdeb"
-rounds = 5000
+pw = "we have a short salt string but not a short password"
+salt = "short"
+rounds = 77777
 
 magic = "$6$"
 pwlen = len(pw)
 itoa64 = "./0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz"
 quot, rem = divmod(rounds, 42)
+
+# Ensure min and max limits for rounds
+if rounds < 1000: rounds = 1000
+if rounds > 999999999: rounds = 999999999
 
 # Start digest "a"
 da = sha512(pw + salt)

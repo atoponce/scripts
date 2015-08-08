@@ -12,6 +12,10 @@ pwlen = len(pw)
 itoa64 = "./0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz"
 quot, rem = divmod(rounds, 42)
 
+# Ensure min and max limits for rounds
+if rounds < 1000: rounds = 1000
+if rounds > 999999999: rounds = 999999999
+
 # Start digest "a"
 da = sha256(pw + salt)
 
