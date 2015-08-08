@@ -1,16 +1,15 @@
 from hashlib import md5
 
-# $ mkpasswd --method='md5' --salt='2Z4e3j5f' --rounds=1000 --stdin 'toomanysecrets'
+# $ mkpasswd --method='md5' --salt='2Z4e3j5f' --stdin 'toomanysecrets'
 # $1$2Z4e3j5f$sKZptx/P5xzhQZ821BRFX1
 
 pw = "toomanysecrets"
 salt = "2Z4e3j5f"
-rounds = 1000
 
 magic = "$1$"
 pwlen = len(pw)
 itoa64 = "./0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz"
-quot, rem = divmod(rounds, 42)
+quot, rem = divmod(1000, 42) # md5crypt does not support a variable # of rounds
 
 p = pw
 pp = pw+pw
@@ -51,12 +50,8 @@ while quot:
         dc = md5(j + md5(dc + i).digest()).digest()
     quot -= 1
 
-if rem:
-    half_rem = rem >> 1
-    for i, j in permutations[:half_rem]:
-        dc = md5(j + md5(dc + i).digest()).digest()
-    if rem & 1:
-        dc = md5(dc + permutations[half_rem][0]).digest()
+for i, j in permutations[:rem/2]:
+    dc = md5(j + md5(dc + i).digest()).digest()
 
 # convert 3 8-bit words to 4 6-bit words
 final = ''
@@ -71,4 +66,4 @@ for i in range(2):
     v >>= 6
 
 # output the result
-print "{0}rounds={1}${2}${3}".format(magic, rounds, salt, final)
+print "{0}${1}${2}".format(magic, salt, final)
