@@ -1,14 +1,13 @@
 from hashlib import sha256
-
-# $ mkpasswd --method='sha-256' --salt='sQkvOlC7y2nGmCCr' --rounds=5000 --stdin 'toomanysecrets'
-# $5$rounds=5000$sQkvOlC7y2nGmCCr$VCGMywA7NHWyXjDAqWe5GsVxIcBJrfZiYuqYVAunXZ6
+from random import SystemRandom
 
 pw = "toomanysecrets"
-salt = "sQkvOlC7y2nGmCCr"
 rounds = 5000
 
+r = SystemRandom()
 pwlen = len(pw)
 itoa64 = "./0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz"
+salt = "".join(r.choice(itoa64) for i in xrange(16))
 quot, rem = divmod(rounds, 42)
 
 # Ensure min and max limits for rounds

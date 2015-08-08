@@ -1,14 +1,13 @@
 from hashlib import md5
-
-# $ mkpasswd --method='md5' --salt='2Z4e3j5f' --stdin 'toomanysecrets'
-# $1$2Z4e3j5f$sKZptx/P5xzhQZ821BRFX1
+from random import SystemRandom
 
 pw = "toomanysecrets"
-salt = "2Z4e3j5f"
 
+r = SystemRandom()
 magic = "$1$"
 pwlen = len(pw)
 itoa64 = "./0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz"
+salt = "".join(r.choice(itoa64) for i in xrange(16))
 quot, rem = divmod(1000, 42) # md5crypt does not support a variable # of rounds
 
 p = pw
