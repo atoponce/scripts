@@ -53,7 +53,7 @@ while quot:
 for i, j in permutations[:rem/2]:
     dc = md5(j + md5(dc + i).digest()).digest()
 
-# convert 3 8-bit words to 4 6-bit words
+# convert 3 8-bit words to 4 6-bit words while mixing
 final = ''
 for x, y, z in ((0, 6, 12), (1, 7, 13), (2, 8, 14), (3, 9, 15), (4, 10, 5)):
     v = ord(dc[x]) << 16 | ord(dc[y]) << 8 | ord(dc[z])

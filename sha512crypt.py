@@ -82,7 +82,7 @@ if rem:
     if rem & 1:
         dc = sha512(dc + permutations[half_rem][0]).digest()
 
-# convert 3 8-bit words to 4 6-bit words
+# convert 3 8-bit words to 4 6-bit words while mixing
 final = ""
 for x,y,z in ((0,21,42),(22,43,1),(44,2,23),(3,24,45),(25,46,4),(47,5,26),
               (6,27,48),(28,49,7),(50,8,29),(9,30,51),(31,52,10),(53,11,32),

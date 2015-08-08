@@ -81,7 +81,7 @@ if rem:
     if rem & 1:
         dc = sha256(dc + permutations[half_rem][0]).digest()
 
-# convert 3 8-bit words to 4 6-bit words
+# convert 3 8-bit words to 4 6-bit words while mixing
 final = ""
 for x,y,z in ((0,10,20),(21,1,11),(12,22,2),(3,13,23),(24,4,14),
               (15,25,5),(6,16,26),(27,7,17),(18,28,8),(9,19,29)):
