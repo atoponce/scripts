@@ -4,7 +4,6 @@ from random import SystemRandom
 pw = "toomanysecrets"
 
 r = SystemRandom()
-magic = "$1$"
 pwlen = len(pw)
 itoa64 = "./0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz"
 salt = "".join(r.choice(itoa64) for i in xrange(8))
@@ -25,7 +24,7 @@ permutations = [
 ]
 
 # Start digest "a"
-da = md5(pw + magic + salt)
+da = md5(pw + "$1$" + salt)
 
 # Create digest "b"
 db = md5(pw + salt + pw).digest()
@@ -65,4 +64,4 @@ for i in range(2):
     v >>= 6
 
 # output the result
-print "{0}{1}${2}".format(magic, salt, final)
+print "$1${0}${1}".format(salt, final)
