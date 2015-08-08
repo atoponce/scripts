@@ -5,7 +5,7 @@ from hashlib import sha512
 
 pw = "toomanysecrets"
 salt = "q4QD/vCH2sSrLdeb"
-rounds = 5000
+rounds = 5001
 
 magic = "$6$"
 pwlen = len(pw)
@@ -72,8 +72,12 @@ while quot:
         dc = sha512(j + sha512(dc + i).digest()).digest()
     quot -= 1
 
-for i, j in permutations[:rem/2]:
-    dc = sha512(j + sha512(dc + i).digest()).digest()
+if rem:
+    half_rem = rem >> 1
+    for i, j in permutations[:half_rem]:
+        dc = sha512(j + sha512(dc + i).digest()).digest()
+    if rem & 1:
+        dc = sha512(dc + permutations[half_rem][0]).digest()
 
 # convert 3 8-bit words to 4 6-bit words
 final = ""

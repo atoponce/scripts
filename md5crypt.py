@@ -51,8 +51,12 @@ while quot:
         dc = md5(j + md5(dc + i).digest()).digest()
     quot -= 1
 
-for i, j in permutations[:rem/2]:
-    dc = md5(j + md5(dc + i).digest()).digest()
+if rem:
+    half_rem = rem >> 1
+    for i, j in permutations[:half_rem]:
+        dc = md5(j + md5(dc + i).digest()).digest()
+    if rem & 1:
+        dc = md5(dc + permutations[half_rem][0]).digest()
 
 # convert 3 8-bit words to 4 6-bit words
 final = ''
