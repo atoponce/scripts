@@ -7,7 +7,6 @@ pw = "toomanysecrets"
 salt = "sQkvOlC7y2nGmCCr"
 rounds = 5000
 
-magic = "$5$"
 pwlen = len(pw)
 itoa64 = "./0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz"
 quot, rem = divmod(rounds, 42)
@@ -96,4 +95,4 @@ for i in range(3):
     v >>= 6
 
 # output the result
-print "{0}rounds={1}${2}${3}".format(magic, rounds, salt, final)
+print "$5$rounds={0}${1}${2}".format(rounds, salt, final)

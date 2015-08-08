@@ -3,11 +3,10 @@ from hashlib import sha512
 # $ mkpasswd --method='sha-512' --salt='q4QD/vCH2sSrLdeb' --rounds=5000 --stdin 'toomanysecrets'
 # $6$rounds=5000$q4QD/vCH2sSrLdeb$8KMwaDhI2jQD/sOGvjxgFB4XWuhTYwjXovFYDku20CFz4ZvCE7030dvTzdxo9P0ce8UjNbKBZ/MhIG8m8A2xm1
 
-pw = "we have a short salt string but not a short password"
-salt = "short"
-rounds = 77777
+pw = "toomanysecrets"
+salt = "q4QD/vCH2sSrLdeb"
+rounds = 5000
 
-magic = "$6$"
 pwlen = len(pw)
 itoa64 = "./0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz"
 quot, rem = divmod(rounds, 42)
@@ -99,4 +98,4 @@ for i in range(2):
     v >>= 6
 
 # output the result
-print "{0}rounds={1}${2}${3}".format(magic, rounds, salt, final)
+print "$6$rounds={0}${1}${2}".format(rounds, salt, final)
