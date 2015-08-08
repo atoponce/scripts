@@ -90,11 +90,11 @@ for x,y,z in ((0,21,42),(22,43,1),(44,2,23),(3,24,45),(25,46,4),(47,5,26),
               (59,17,38),(18,39,60),(40,61,19),(62,20,41)):
     v = ord(dc[x]) << 16 | ord(dc[y]) << 8 | ord(dc[z])
     for i in range(4):
-        final += itoa64[v & 0x3f]
+        final += itoa64[v & 63]
         v >>= 6
 v = ord(dc[63])
 for i in range(2):
-    final += itoa64[v & 0x3f]
+    final += itoa64[v & 63]
     v >>= 6
 
 # output the result
