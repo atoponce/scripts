@@ -7,7 +7,7 @@ r = SystemRandom()
 magic = "$1$"
 pwlen = len(pw)
 itoa64 = "./0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz"
-salt = "".join(r.choice(itoa64) for i in xrange(16))
+salt = "".join(r.choice(itoa64) for i in xrange(8))
 quot, rem = divmod(1000, 42) # md5crypt does not support a variable # of rounds
 
 p = pw
