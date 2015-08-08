@@ -5,7 +5,7 @@ from hashlib import sha256
 
 pw = "toomanysecrets"
 salt = "sQkvOlC7y2nGmCCr"
-rounds = 5001
+rounds = 5000
 
 magic = "$5$"
 pwlen = len(pw)
