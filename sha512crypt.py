@@ -98,4 +98,9 @@ for i in range(2):
     v >>= 6
 
 # output the result
-print "$6$rounds={0}${1}${2}".format(rounds, salt, final)
+if rounds == 5000:
+    result = "$6${0}${1}".format(salt, final)
+else:
+    result = "$6$rounds={0}${1}${2}".format(rounds, salt, final)
+print result
+
