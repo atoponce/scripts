@@ -27,7 +27,7 @@ permutations = [
 da = md5(pw + "$1$" + salt)
 
 # Create digest "b"
-db = md5(pw + salt + pw).digest()
+db = md5(psp).digest()
 
 # Update digest "a" by repeating digest "b", providing "pwlen" bytes:
 i = pwlen
