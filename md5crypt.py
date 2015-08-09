@@ -40,25 +40,25 @@ i = pwlen
 while i:
     da.update(chr(0) if i & 1 else pw[0])
     i >>= 1
-dc = da.digest()
+da = da.digest()
 
 # Optimize!
 while quot:
     for i, j in permutations:
-        dc = md5(j + md5(dc + i).digest()).digest()
+        da = md5(j + md5(da + i).digest()).digest()
     quot -= 1
 
 for i, j in permutations[:rem/2]:
-    dc = md5(j + md5(dc + i).digest()).digest()
+    da = md5(j + md5(da + i).digest()).digest()
 
 # convert 3 8-bit words to 4 6-bit words while mixing
 final = ''
 for x, y, z in ((0, 6, 12), (1, 7, 13), (2, 8, 14), (3, 9, 15), (4, 10, 5)):
-    v = ord(dc[x]) << 16 | ord(dc[y]) << 8 | ord(dc[z])
+    v = ord(da[x]) << 16 | ord(da[y]) << 8 | ord(da[z])
     for i in range(4):
         final += itoa64[v & 63]
         v >>= 6
-v = ord(dc[11])
+v = ord(da[11])
 for i in range(2):
     final += itoa64[v & 63]
     v >>= 6
