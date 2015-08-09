@@ -34,13 +34,8 @@ while i:
 
 da = da.digest()
 
-# Create digest "p"
-dp = sha256()
-
-# For every character in "pw", add "pw" to digest "p"
-for char in pw:
-    dp.update(pw)
-dp = dp.digest()
+# Create digest "p". For every char in "pw, add "pw" to digest "p"
+dp = sha256(pw * len(pw)).digest()
 
 # Produce byte sequence "p" of the same length as "pw"
 i = pwlen
@@ -52,7 +47,6 @@ dp = tmp
 
 # Create digest "s"
 ds = sha256(salt * (16 + ord(da[0]))).digest()[:len(salt)]
-dc = da
 
 p = dp
 pp = dp+dp
@@ -70,25 +64,25 @@ permutations = [
 # Optimize!
 while quot:
     for i, j in permutations:
-        dc = sha256(j + sha256(dc + i).digest()).digest()
+        da = sha256(j + sha256(da + i).digest()).digest()
     quot -= 1
 
 if rem:
     half_rem = rem >> 1
     for i, j in permutations[:half_rem]:
-        dc = sha256(j + sha256(dc + i).digest()).digest()
+        da = sha256(j + sha256(da + i).digest()).digest()
     if rem & 1:
-        dc = sha256(dc + permutations[half_rem][0]).digest()
+        da = sha256(da + permutations[half_rem][0]).digest()
 
 # convert 3 8-bit words to 4 6-bit words while mixing
 final = ""
 for x,y,z in ((0,10,20),(21,1,11),(12,22,2),(3,13,23),(24,4,14),
               (15,25,5),(6,16,26),(27,7,17),(18,28,8),(9,19,29)):
-    v = ord(dc[x]) << 16 | ord(dc[y]) << 8 | ord(dc[z])
+    v = ord(da[x]) << 16 | ord(da[y]) << 8 | ord(da[z])
     for i in range(4):
         final += itoa64[v & 63]
         v >>= 6
-v = ord(dc[31]) << 8 | ord(dc[30])
+v = ord(da[31]) << 8 | ord(da[30])
 for i in range(3):
     final += itoa64[v & 63]
     v >>= 6

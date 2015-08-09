@@ -34,13 +34,8 @@ while i:
 
 da = da.digest()
 
-# Create digest "p"
-dp = sha512()
-
-# For every character in "pw", add "pw" to digest "p"
-for char in pw:
-    dp.update(pw)
-dp = dp.digest()
+# Create digest "p". For every char in "pw", add "pw" to digest "p"
+dp = sha512(pw * len(pw)).digest()
 
 # Produce byte sequence "p" of the same length as "pw"
 i = pwlen
@@ -52,7 +47,6 @@ dp = tmp
 
 # Create digest "s"
 ds = sha512(salt * (16 + ord(da[0]))).digest()[:len(salt)]
-dc = da
 
 p = dp
 pp = dp+dp
@@ -71,15 +65,15 @@ permutations = [
 # Optimize!
 while quot:
     for i, j in permutations:
-        dc = sha512(j + sha512(dc + i).digest()).digest()
+        da = sha512(j + sha512(da + i).digest()).digest()
     quot -= 1
 
 if rem:
     half_rem = rem >> 1
     for i, j in permutations[:half_rem]:
-        dc = sha512(j + sha512(dc + i).digest()).digest()
+        da = sha512(j + sha512(da + i).digest()).digest()
     if rem & 1:
-        dc = sha512(dc + permutations[half_rem][0]).digest()
+        da = sha512(da + permutations[half_rem][0]).digest()
 
 # convert 3 8-bit words to 4 6-bit words while mixing
 final = ""
@@ -87,11 +81,11 @@ for x,y,z in ((0,21,42),(22,43,1),(44,2,23),(3,24,45),(25,46,4),(47,5,26),
               (6,27,48),(28,49,7),(50,8,29),(9,30,51),(31,52,10),(53,11,32),
               (12,33,54),(34,55,13),(56,14,35),(15,36,57),(37,58,16),
               (59,17,38),(18,39,60),(40,61,19),(62,20,41)):
-    v = ord(dc[x]) << 16 | ord(dc[y]) << 8 | ord(dc[z])
+    v = ord(da[x]) << 16 | ord(da[y]) << 8 | ord(da[z])
     for i in range(4):
         final += itoa64[v & 63]
         v >>= 6
-v = ord(dc[63])
+v = ord(da[63])
 for i in range(2):
     final += itoa64[v & 63]
     v >>= 6
