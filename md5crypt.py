@@ -38,7 +38,7 @@ while i > 0:
 # Upate digest "a" by adding either a NULL or the first char from "pw"
 i = pwlen
 while i:
-    da.update(chr(0) if i & 1 else pw[0])
+    da.update(b"\x00" if i & 1 else pw[0])
     i >>= 1
 da = da.digest()
 
