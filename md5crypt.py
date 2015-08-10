@@ -6,8 +6,7 @@ pw = "toomanysecrets"
 r = SystemRandom()
 pwlen = len(pw)
 itoa64 = "./0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz"
-salt = "".join(r.choice(itoa64) for i in xrange(8))
-quot, rem = divmod(1000, 42) # md5crypt does not support a variable # of rounds
+salt = "".join(r.choice(itoa64) for i in range(8))
 
 p = pw
 pp = pw+pw
@@ -30,10 +29,8 @@ da = md5(pw + "$1$" + salt)
 db = md5(psp).digest()
 
 # Update digest "a" by repeating digest "b", providing "pwlen" bytes:
-i = pwlen
-while i > 0:
+for i in range(pwlen, 0, -16):
     da.update(db if i > 16 else db[:i])
-    i -= 16
 
 # Upate digest "a" by adding either a NULL or the first char from "pw"
 i = pwlen
@@ -43,12 +40,11 @@ while i:
 da = da.digest()
 
 # Optimize!
-while quot:
+for r in range(23):
     for i, j in permutations:
         da = md5(j + md5(da + i).digest()).digest()
-    quot -= 1
 
-for i, j in permutations[:rem/2]:
+for i, j in permutations[:17]:
     da = md5(j + md5(da + i).digest()).digest()
 
 # convert 3 8-bit words to 4 6-bit words while mixing
