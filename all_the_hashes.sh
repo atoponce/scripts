@@ -67,4 +67,5 @@ for IX in ${!HASHES[*]}; do
 done
 
 # For a final dash of entropy, shuffle the output digests
-echo -n "$R" | fold -w 1 | shuf | tr -d '\n'; echo
+echo -n "$R" | fold -w 1 | shuf --random-source=/dev/urandom | tr -d '\n'
+echo # blank line
