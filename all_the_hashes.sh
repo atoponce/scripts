@@ -35,48 +35,36 @@ if [[ -z "$1" ]]; then
     exit 2
 fi
 
-# hash the file in order of output digest size
-# 128-bit
-rhash --md4             "$1"
-rhash --md5             "$1"
-rhash --snefru128       "$1"
+# All the hashes, in output digest bit-length order
+HASHES=('rhash --md4' 'rhash --md5' 'rhash --snefru128' 'rhash --sha1' \
+        'rhash --ripemd160' 'rhash --has160' 'rhash --btih' 'rhash --tiger' \
+        'rhash --sha224' 'rhash --sha3-224' 'b2sum -a blake2s' \
+        'b2sum -a blake2sp' 'rhash --sha256' 'rhash --sha3-256' \
+        'rhash --gost' 'rhash --gost-cryptopro' 'rhash --snefru256' \
+        'rhash --edonr256' 'skein256sum' 'rhash --sha384' 'rhash --sha3-384' \
+        'b2sum -a blake2b' 'b2sum -a blake2bp' 'rhash --sha512' \
+        'rhash --sha3-512' 'rhash --whirlpool' 'rhash --edonr512' \
+        'skein512sum' 'skein1024sum')
 
-# 160-bit
-rhash --sha1            "$1"
-rhash --ripemd160       "$1"
-rhash --has160          "$1"
-rhash --btih            "$1"
+# Fisher-Yates shuffle the array. Adds some entropy
+L=${#HASHES[*]}
+while [[ "$L" -gt 1 ]]; do
+    L=$((L-1))
+    J=$(($(od -vAn -N4 -tu4 < /dev/urandom)%${L}))
+    TMP="${HASHES[${L}]}"
+    HASHES[${L}]="${HASHES[${J}]}"
+    HASHES[${J}]="${TMP}"
+done
 
-#192-bit
-rhash --tiger           "$1"
+# First, reseed the CSPRNG by hashing /proc/interrupts
+for IX in ${!HASHES[*]}; do
+    R="$R$(${HASHES[$IX]} /proc/interrupts | awk '{print $1}' | tr A-F a-f)"
+done
 
-# 224-bit
-rhash --sha224          "$1"
-rhash --sha3-224        "$1"
+# Finally, reseed the CSPRNG by hashing the provided path
+for IX in ${!HASHES[*]}; do
+    R="$R$(${HASHES[$IX]} $1 | cut -d ' ' -f 1 | tr A-F a-f)"
+done
 
-# 256-bit
-b2sum -a 'blake2s'      "$1"
-b2sum -a 'blake2sp'     "$1"
-rhash --sha256          "$1"
-rhash --sha3-256        "$1"
-rhash --gost            "$1"
-rhash --gost-cryptopro  "$1"
-rhash --snefru256       "$1"
-rhash --edonr256        "$1"
-skein256sum             "$1"
-
-# 384-bit
-rhash --sha384          "$1"
-rhash --sha3-384        "$1"
-
-# 512-bit
-b2sum -a 'blake2b'      "$1"
-b2sum -a 'blake2bp'     "$1"
-rhash --sha512          "$1"
-rhash --sha3-512        "$1"
-rhash --whirlpool       "$1"
-rhash --edonr512        "$1"
-skein512sum             "$1"
-
-# 1024-bit
-skein1024sum            "$1"
+# For a final dash of entropy, shuffle the output digests
+echo -n "$R" | fold -w 1 | shuf | tr -d '\n'; echo
