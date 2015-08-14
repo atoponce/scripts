@@ -56,16 +56,12 @@ while [[ "$L" -gt 1 ]]; do
     HASHES[${J}]="${TMP}"
 done
 
-# First, reseed the CSPRNG by hashing /proc/interrupts
 for IX in ${!HASHES[*]}; do
+    # First, mix in a hashed /proc/interrupts
     R="$R$(${HASHES[$IX]} /proc/interrupts | awk '{print $1}' | tr A-F a-f)"
-done
-
-# Finally, reseed the CSPRNG by hashing the provided path
-for IX in ${!HASHES[*]}; do
+    # Next, hash the provided path
     R="$R$(${HASHES[$IX]} $1 | cut -d ' ' -f 1 | tr A-F a-f)"
 done
 
 # For a final dash of entropy, shuffle the output digests
-echo -n "$R" | fold -w 1 | shuf --random-source=/dev/urandom | tr -d '\n'
-echo # blank line
+echo "$R" | fold -w 1 | shuf --random-source=/dev/urandom | xxd -r -p | base64
