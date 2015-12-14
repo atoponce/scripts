@@ -58,9 +58,9 @@ done
 
 for IX in ${!HASHES[*]}; do
     # First, mix in a hashed /proc/interrupts
-    R="$R$(${HASHES[$IX]} /proc/interrupts | awk '{print $1}' | tr A-F a-f)"
+    R="$R$(${HASHES[$IX]} /proc/interrupts | awk '{print $1}')"
     # Next, hash the provided path
-    R="$R$(${HASHES[$IX]} $1 | cut -d ' ' -f 1 | tr A-F a-f)"
+    R="$R$(${HASHES[$IX]} $1 | cut -d ' ' -f 1)"
 done
 
 # For a final dash of entropy, shuffle the output digests
