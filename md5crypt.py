@@ -1,7 +1,7 @@
 from hashlib import md5
 from random import SystemRandom
 
-pw = "toomanysecrets"
+pw = "kpdCE8aSt2gaqKKcU"
 
 r = SystemRandom()
 pwlen = len(pw)
