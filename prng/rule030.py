@@ -11,12 +11,14 @@ args = parser.parse_args()
 
 s = int(args.seed[0])
 
-bits = 8
+bits = 30
 s = bin(s)[2:].zfill(bits)
 t = ''
 
-for i in xrange(2**len(s)):
-    print int(s, 2)
+#for i in xrange(2**len(s)):
+for i in xrange(10):
+    #print int(s, 2)
+    print s
     for j, b in enumerate(xrange(len(s))):
         p, q, r = int(s[j-1]), int(s[j]), int(s[(j+1)%bits])
         rule = (p + q + r + q * r) % 2
