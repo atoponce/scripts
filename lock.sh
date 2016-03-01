@@ -1,14 +1,15 @@
 #!/bin/bash
-# apt-get install scrot imagemagick i3lock
+# apt-get install imagemagick i3lock
+TS=$(date +%Y%m%d%H%M%S%N)
 cd ~/Private/screenshots/
-scrot screenshot.png
-sha256sum screenshot.png >> SHA256SUMS
-convert -scale 10% -scale 1000% screenshot.png blur.png
-sha256sum blur.png >> SHA256SUMS
+import -window root ${TS}.png
+sha256sum ${TS}.png >> SHA256SUMS
+convert -scale 10% -scale 1000% ${TS}.png ${TS}-sm.png
+sha256sum ${TS}-sm.png >> SHA256SUMS
 sha512sum SHA256SUMS > /dev/urandom
 tac SHA256SUMS | sha512sum /dev/stdin > /dev/urandom
-shred screenshot.png
-rm screenshot.png
-i3lock -i blur.png
-shred blur.png
-rm blur.png
+shred ${TS}.png
+rm ${TS}.png
+i3lock -i ${TS}-sm.png
+shred ${TS}-sm.png
+rm ${TS}-sm.png
