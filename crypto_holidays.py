@@ -6,7 +6,7 @@
 #
 # Each month in the year gets a non-religious "crypto holiday" (static):
 #   Found with SHA256($FULL_MONTH_NAME)
-# Each year also gets a non-religious "crypto holidy" (dynamic):
+# Each year also gets a non-religious "crypto holiday" (dynamic):
 #   Found with SHA256($4_DIGIT_YEAR)
 #
 # Other ideas for holidays:
