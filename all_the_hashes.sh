@@ -64,8 +64,7 @@ KEY=""
 while [[ $(printf "$KEY" | wc -c) -lt 32 || $(python -c "import zxcvbn;\
     p = zxcvbn.password_strength('$KEY')['entropy']; print int(p)") -lt 128 ]]
     do
-        printf "Enter a key with at least 128-bits of entropy and 32-chars: "
-        read KEY
+        read -p "Enter a key with at least 128-bits of entropy and 32-chars: " >&2 KEY
 done
 
 # All the hashes, in output digest bit-length order
