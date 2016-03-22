@@ -42,22 +42,11 @@ if [[ -z "$1" ]]; then
 fi
 
 function  xor() {
-    local res=($(echo "$1" | sed "s/../0x& /g"))
-    shift 1
-    while [[ "$1" ]]; do
-        local one=(`echo "$1" | sed "s/../0x& /g"`)
-        local count1=${#res[@]}
-        if [ $count1 -lt ${#one[@]} ]
-        then
-            count1=${#one[@]}
-        fi
-        for (( i = 0; i < $count1; i++ ))
-        do
-            res[$i]=$((${one[$i]:-0} ^ ${res[$i]:-0}))
-        done
-        shift 1
-    done
-    printf "%02x" "${res[@]}"
+    R=()
+    R1=($(echo "$1" | sed -r 's/(..)/0x\1 /g'))
+    R2=($(echo "$2" | sed -r 's/(..)/0x\1 /g'))
+    for I in $(seq 1 ${#R1[@]}); do R[$I]=$((R1[$I]^R2[$I])); done
+    printf "%02x" "${R[@]}"
 }
 
 KEY=""
@@ -85,10 +74,14 @@ for IX in ${!HASHES[*]}; do
     else
         R1="$(printf $KEY | ${HASHES[$IX]} | cut -d ' ' -f 1 | tr A-F a-f)"
     fi
+    #echo "${HASHES[$IX]}: $R1"
     # Next, hash the provided path with the passphrase
     R2="$(${HASHES[$IX]} $1 | cut -d ' ' -f 1 | tr A-F a-f)"
+    #echo "${HASHES[$IX]}: $R2"
     # XOR the two digests into one
     R="$R$(xor $R1 $R2)"
+    #echo "xor: $(xor $R1 $R2)"
+    #echo
 done
 
 # Print the final combined hash in base64
