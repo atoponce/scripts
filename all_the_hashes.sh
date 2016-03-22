@@ -45,7 +45,8 @@ function  xor() {
     R=()
     R1=($(echo "$1" | sed -r 's/(..)/0x\1 /g'))
     R2=($(echo "$2" | sed -r 's/(..)/0x\1 /g'))
-    for I in $(seq 1 ${#R1[@]}); do R[$I]=$((R1[$I]^R2[$I])); done
+    #for I in $(seq 0 ${#R1[@]}); do R[$I]=$((R1[$I]^R2[$I])); done
+    for (( I=0; I<${#R1[@]}; I++ )); do R[$I]=$((R1[$I]^R2[$I])); done
     printf "%02x" "${R[@]}"
 }
 
