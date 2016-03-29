@@ -12,24 +12,6 @@ if [[ ! -x /usr/local/bin/b2sum ]]; then
     exit 1
 fi
 
-if [[ ! -x /usr/local/bin/skein256sum ]]; then
-    echo "skein256sum(1) needs to be installed."
-    echo "git clone https://jxself.org/git/skeinsum.git"
-    exit 1
-fi
-
-if [[ ! -x /usr/local/bin/skein512sum ]]; then
-    echo "skein512sum(1) needs to be installed."
-    echo "git clone https://jxself.org/git/skeinsum.git"
-    exit 1
-fi
-
-if [[ ! -x /usr/local/bin/skein1024sum ]]; then
-    echo "skein1024sum(1) needs to be installed."
-    echo "git clone https://jxself.org/git/skeinsum.git"
-    exit 1
-fi
-
 if [[ ! $(dpkg-query -W python-zxcvbn) ]]; then
     echo "python-zxcvbn needs to be installed."
     echo "sudo apt-get install python-zxcvbn"
