@@ -51,9 +51,9 @@ HASHES=('rhash --md4' 'rhash --md5' 'rhash --snefru128' 'rhash --sha1' \
 for IX in ${!HASHES[*]}; do
     # First, add a hashed passphrase
     if [[ ${HASHES[$IX]} =~ "rhash"* || ${HASHES[$IX]} =~ "b2sum"* ]]; then
-        R1="$(printf $KEY|${HASHES[$IX]} /dev/stdin|cut -d' ' -f1|tr A-F a-f)"
+        R1="$(printf $KEY|${HASHES[$IX]} /dev/stdin|cut -d' ' -f1)"
     else
-        R1="$(printf $KEY | ${HASHES[$IX]} | cut -d' ' -f1|tr A-F a-f)"
+        R1="$(printf $KEY | ${HASHES[$IX]} | cut -d' ' -f1)"
     fi
     # Next, hash the provided path with the passphrase
     R2="$(${HASHES[$IX]} $1 | cut -d' ' -f1|tr A-F a-f)"
