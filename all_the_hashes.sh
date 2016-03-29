@@ -56,7 +56,7 @@ for IX in ${!HASHES[*]}; do
         R1="$(printf $KEY | ${HASHES[$IX]} | cut -d' ' -f1)"
     fi
     # Next, hash the provided path with the passphrase
-    R2="$(${HASHES[$IX]} $1 | cut -d' ' -f1|tr A-F a-f)"
+    R2="$(${HASHES[$IX]} $1 | cut -d' ' -f1)"
     # XOR the two digests into one
     R="$R$(xor $R1 $R2)"
 done
