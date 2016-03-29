@@ -41,11 +41,10 @@ if [[ -z "$1" ]]; then
     exit 2
 fi
 
-function  xor() {
+function xor() {
     R=()
     R1=($(echo "$1" | sed -r 's/(..)/0x\1 /g'))
     R2=($(echo "$2" | sed -r 's/(..)/0x\1 /g'))
-    #for I in $(seq 0 ${#R1[@]}); do R[$I]=$((R1[$I]^R2[$I])); done
     for (( I=0; I<${#R1[@]}; I++ )); do R[$I]=$((R1[$I]^R2[$I])); done
     printf "%02x" "${R[@]}"
 }
@@ -65,24 +64,19 @@ HASHES=('rhash --md4' 'rhash --md5' 'rhash --snefru128' 'rhash --sha1' \
         'rhash --gost' 'rhash --gost-cryptopro' 'rhash --snefru256' \
         'rhash --edonr256' 'skein256sum' 'rhash --sha384' 'rhash --sha3-384' \
         'b2sum -a blake2b' 'b2sum -a blake2bp' 'rhash --sha512' \
-        'rhash --sha3-512' 'rhash --whirlpool' 'rhash --edonr512' \
-        'skein512sum' 'skein1024sum')
+        'rhash --sha3-512' 'rhash --whirlpool' 'rhash --edonr512')
 
 for IX in ${!HASHES[*]}; do
     # First, add a hashed passphrase
     if [[ ${HASHES[$IX]} =~ "rhash"* || ${HASHES[$IX]} =~ "b2sum"* ]]; then
-        R1="$(printf $KEY | ${HASHES[$IX]} /dev/stdin | cut -d ' ' -f 1 | tr A-F a-f)"
+        R1="$(printf $KEY|${HASHES[$IX]} /dev/stdin|cut -d' ' -f1|tr A-F a-f)"
     else
-        R1="$(printf $KEY | ${HASHES[$IX]} | cut -d ' ' -f 1 | tr A-F a-f)"
+        R1="$(printf $KEY | ${HASHES[$IX]} | cut -d' ' -f1|tr A-F a-f)"
     fi
-    #echo "${HASHES[$IX]}: $R1"
     # Next, hash the provided path with the passphrase
-    R2="$(${HASHES[$IX]} $1 | cut -d ' ' -f 1 | tr A-F a-f)"
-    #echo "${HASHES[$IX]}: $R2"
+    R2="$(${HASHES[$IX]} $1 | cut -d' ' -f1|tr A-F a-f)"
     # XOR the two digests into one
     R="$R$(xor $R1 $R2)"
-    #echo "xor: $(xor $R1 $R2)"
-    #echo
 done
 
 # Print the final combined hash in base64
