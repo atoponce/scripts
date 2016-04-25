@@ -39,12 +39,15 @@ while [[ $(printf "$KEY" | wc -c) -lt 32 || $(python -c "import zxcvbn;\
 done
 
 # All the hashes, in output digest bit-length order
+# 944 total bytes output
+# broken: md4, md5
+# weak: sha-1, btih, snefru128, edonr256, edonr512
 HASHES=('rhash --md4' 'rhash --md5' 'rhash --snefru128' 'rhash --sha1' \
         'rhash --ripemd160' 'rhash --has160' 'rhash --btih' 'rhash --tiger' \
         'rhash --sha224' 'rhash --sha3-224' 'b2sum -a blake2s' \
         'b2sum -a blake2sp' 'rhash --sha256' 'rhash --sha3-256' \
         'rhash --gost' 'rhash --gost-cryptopro' 'rhash --snefru256' \
-        'rhash --edonr256' 'skein256sum' 'rhash --sha384' 'rhash --sha3-384' \
+        'rhash --edonr256' 'rhash --sha384' 'rhash --sha3-384' \
         'b2sum -a blake2b' 'b2sum -a blake2bp' 'rhash --sha512' \
         'rhash --sha3-512' 'rhash --whirlpool' 'rhash --edonr512')
 
