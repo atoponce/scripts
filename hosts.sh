@@ -7,8 +7,9 @@
 FILE="/tmp/hosts.tmp"
 
 curl -so $FILE -G -d hostformat=hosts -d showintro=0 -d mimetype=plaintext 'http://pgl.yoyo.org/adservers/serverlist.php'
-curl -s 'http://hosts-file.net/ad_servers.asp' >> $FILE
+curl -s 'http://hosts-file.net/.%5Cad_servers.txt' >> $FILE
 curl -s 'http://winhelp2002.mvps.org/hosts.txt' >> $FILE
+sed -i 's/127.0.0.1/0.0.0.0/g' $FILE
 awk '(NF){sub(/\#.*/,"")}; (NF){sub(/\r$/,""); $1=$1; print}' $FILE | sort -u > /tmp/hosts
 sed -i '$d' /tmp/hosts
 
