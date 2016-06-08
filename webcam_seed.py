@@ -41,6 +41,7 @@ while True:
     digest = b2sum.digest()
 
     fifo.write(digest)
+    fifo.flush()
 
     ### Uncomment if you want to watch the video capture.
     ### The video will freeze after so many fifo writes.
