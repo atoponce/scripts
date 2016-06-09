@@ -46,7 +46,7 @@ while True:
 
     ### Uncomment if you want to watch the video capture.
     ### The video will freeze after so many fifo writes.
-    ### Not sure why. Stream still conitunes
+    ### Not sure why. Stream still continues.
 
     #cv2.imshow('webcamlamp', frame)
     #k = cv2.waitKey(1) & 0xFF
