@@ -39,6 +39,7 @@ while True:
     b2sum = pyblake2.blake2b(key)
     b2sum.update(frame)
     digest = b2sum.digest()
+    key = digest
 
     fifo.write(digest)
     fifo.flush()
