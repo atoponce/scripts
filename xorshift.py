@@ -1,6 +1,6 @@
 class xorshift(object):
     def __init__(self, *args):
-        self.seed(*args)
+        self._seed(*args)
 
     def _int32(self, n):
         return int(0xFFFFFFFF & n)
@@ -8,47 +8,47 @@ class xorshift(object):
     def _int64(self, n):
         return int(0xFFFFFFFFFFFFFFFF & n)
 
-    def seed(self, *args):
+    def _seed(self, *args):
         import time
         if len(args) > 4:
             raise ValueError('Maximum of 4 seeds allowed.')
-        self.x = self._int64(args[0] if len(args) > 0 else int(time.time() * 1000000))
-        self.y = self._int64(args[1] if len(args) > 1 else int(time.time() * 1000000))
-        self.z = self._int64(args[2] if len(args) > 2 else int(time.time() * 1000000))
-        self.w = self._int64(args[3] if len(args) > 3 else int(time.time() * 1000000))
+        self._x = self._int64(args[0] if len(args) > 0 else int(time.time() * 1000000))
+        self._y = self._int64(args[1] if len(args) > 1 else int(time.time() * 1000000))
+        self._z = self._int64(args[2] if len(args) > 2 else int(time.time() * 1000000))
+        self._w = self._int64(args[3] if len(args) > 3 else int(time.time() * 1000000))
 
     def xorshift32(self):
-        t = self.x
-        t ^= t << 13
-        t ^= t >> 17
-        t ^= t << 5
-        self.x = self._int64(t)
-        return self._int32(t)
+        x = self._x
+        x ^= (x << 13)
+        x ^= (x >> 17)
+        x ^= (x << 5)
+        self._x = self._int64(x)
+        return self._int32(x)
 
     def xorshift128(self):
-        t = self.w
-        t ^= t << 11
-        t ^= t >> 8
-        self.w = self.z
-        self.z = self.y
-        self.y = self.x
-        t ^= self.x
-        t ^= self.x >> 19
-        self.x = self._int64(t)
+        t = self._w
+        t ^= (t << 11)
+        t ^= (t >> 8)
+        self._w = self._z
+        self._z = self._y
+        self._y = self._x
+        t ^= self._x
+        t ^= (self._x >> 19)
+        self._x = self._int64(t)
         return self._int32(t)
 
     def xorshift64star(self):
-        t = self.x
-        t ^= t >> 12
-        t ^= t << 25
-        t ^= t >> 27
-        self.x = self._int64(t)
-        return self._int64(t * 0x2545F4914F6CDD1D)
+        x = self._x
+        x ^= (x >> 12)
+        x ^= (x << 25)
+        x ^= (x >> 27)
+        self._x = self._int64(x)
+        return self._int64(x * 0x2545F4914F6CDD1D)
 
     def xorshift128plus(self):
-        t = self.x
-        u = self.y
-        self.x = self._int64(u)
-        t ^= t << 23
-        self.y = self._int64(t ^ u ^ (t >> 17) ^ (u >> 26))
-        return self._int64(self.y + u)
+        x = self._x
+        y = self._y
+        self._x = self._int64(y)
+        x ^= (x << 23)
+        self._y = self._int64(x ^ y ^ (x >> 17) ^ (y >> 26))
+        return self._int64(self._y + y)
