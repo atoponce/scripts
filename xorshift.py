@@ -9,13 +9,13 @@ class xorshift(object):
         return int(0xFFFFFFFFFFFFFFFF & n)
 
     def seed(self, *args):
+        import time
         if len(args) > 4:
             raise ValueError('Maximum of 4 seeds allowed.')
-        # euler's number if no args
-        self.x = self._int64(args[0] if len(args) > 0 else 0xDC61CD557619CC40)
-        self.y = self._int64(args[1] if len(args) > 1 else 0x636F96C252272888)
-        self.z = self._int64(args[2] if len(args) > 2 else 0x78F3E37386EDEA6F)
-        self.w = self._int64(args[3] if len(args) > 3 else 0xDF9DE125357FD6CD)
+        self.x = self._int64(args[0] if len(args) > 0 else int(time.time() * 1000000))
+        self.y = self._int64(args[1] if len(args) > 1 else int(time.time() * 1000000))
+        self.z = self._int64(args[2] if len(args) > 2 else int(time.time() * 1000000))
+        self.w = self._int64(args[3] if len(args) > 3 else int(time.time() * 1000000))
 
     def xorshift32(self):
         t = self.x
@@ -48,7 +48,7 @@ class xorshift(object):
     def xorshift128plus(self):
         t = self.x
         u = self.y
-        self.x = u
+        self.x = self._int64(u)
         t ^= t << 23
         self.y = self._int64(t ^ u ^ (t >> 17) ^ (u >> 26))
         return self._int64(self.y + u)
