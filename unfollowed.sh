@@ -8,9 +8,9 @@ if [[ ! -f ~/Private/old.txt ]]; then
 fi
 
 /usr/local/bin/t followers | sort > ~/Private/new.txt
+diff ~/Private/old.txt ~/Private/new.txt > ~/Private/diff.txt
 
-if [[ -s ~/Private/new.txt ]]; then 
-    diff ~/Private/old.txt ~/Private/new.txt > ~/Private/diff.txt
+if [[ -s ~/Private/diff.txt ]]; then 
     awk '/^</ {print $2}' ~/Private/diff.txt > ~/Private/gone.txt
     cat ~/Private/gone.txt | mail -s "Unfollowed $(date +%F)" $GW
     mv ~/Private/new.txt ~/Private/old.txt
