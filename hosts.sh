@@ -25,3 +25,5 @@ ff02::2 ip6-allrouters
 # The following lines are to block advertising
 $(cat /tmp/hosts)
 EOF
+
+cp /etc/hosts.tmp /etc/hosts
