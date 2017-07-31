@@ -12,7 +12,7 @@ tr -cd '[:print:][:cntrl:]' < /dev/urandom | head -c 74 >> ${TS}.png
 sha256sum ${TS}.png >> /keybase/public/atoponce/SHA256SUMS
 convert -scale 10% -scale 1000% ${TS}.png ${TS}-sm.png
 # ~ 512-bits entropy appended to end of PNG
-tr -cd '[:print:][:cntrl:]' < /dev/urandom | head -c 74 >> ${TS}.png
+tr -cd '[:print:][:cntrl:]' < /dev/urandom | head -c 74 >> ${TS}-sm.png
 sha256sum ${TS}-sm.png >> /keybase/public/atoponce/SHA256SUMS
 sha512sum /keybase/public/atoponce/SHA256SUMS > /dev/urandom
 tac /keybase/public/atoponce/SHA256SUMS | sha512sum /dev/stdin > /dev/urandom
