@@ -10,16 +10,17 @@ tk.resizable(0,0)
 tk.wm_attributes("-topmost", 1)
 
 def von_neumann_extractor(bit_str):
-    index = 0
-    tmp = ''
-    while index < len(bit_str):
-        if index+1 < len(bit_str):
-            bit_1 = bit_str[index]
-            bit_2 = bit_str[index+1]
-            if bit_1 <> bit_2:
-                tmp += bit_1
-        index += 2
-    return tmp
+    extracted = ''
+    bits = iter(bit_str)
+    try:
+        while True:
+            x, y = bits.next(), bits.next()
+            if x <> y:
+                extracted += str(x)
+    except StopIteration:
+        pass
+
+    return extracted
 
 def draw_image():
     size = 16 # square
@@ -29,7 +30,7 @@ def draw_image():
 
     while len(extracted) <= 256:
         with open('/dev/urandom', 'rb') as f:
-            data = f.read(64)
+            data = f.read(128) # read 4x data as necessary before extraction
 
         raw_bytes = BitArray(bytes=data)
         raw_bits = raw_bytes.bin
@@ -45,6 +46,8 @@ def draw_image():
 
     img = img.resize((512, 512), Image.NEAREST)
     tkimg = ImageTk.PhotoImage(img)
+    label = Tkinter.Label(tk)
+    label.pack()
     # need to git image from --^ to --v somehow
     tk.after(500, draw_image)
 
