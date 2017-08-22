@@ -1,9 +1,14 @@
 import Image
-from bitstring import BitArray
+import ImageTk
+import Tkinter
 
-size = 16 # square
-extracted = ''
-pic = Image.new('RGB', (size, size)) # default background is black
+from bitstring import BitArray
+    
+tk = Tkinter.Tk()
+tk.title = "Entropy"
+tk.resizable(0,0)
+tk.wm_attributes("-topmost", 1)
+
 
 def von_neumann_extractor(bit_str):
     index = 0
@@ -17,20 +22,33 @@ def von_neumann_extractor(bit_str):
         index += 2
     return tmp
 
-while len(extracted) <= 256:
-    with open('/dev/urandom', 'rb') as f:
-        data = f.read(1)
+def draw_image():
+    size = 16 # square
+    extracted = ''
 
-    raw_bytes = BitArray(bytes=data)
-    raw_bits = raw_bytes.bin
-    extracted += von_neumann_extractor(raw_bits)
+    img = Image.new('RGB', (size, size)) # default background is black
 
-bits = extracted[:256]
+    while len(extracted) <= 256:
+        with open('/dev/urandom', 'rb') as f:
+            data = f.read(1)
 
-for x in xrange(size):
-    for y in xrange(size):
+        raw_bytes = BitArray(bytes=data)
+        raw_bits = raw_bytes.bin
+        extracted += von_neumann_extractor(raw_bits)
+
+    bits = extracted[:256]
+
+    for x in xrange(size):
+        for y in xrange(size):
             bit = int(bits[((x+1)+(y*8))])
             if bit % 2 == 0:
-                pic.putpixel((x, y), (255,255,255)) # white pixel against black
+                img.putpixel((x, y), (255,255,255)) # white pixel against black
 
-pic.save('random.png')
+    img = img.resize((512, 512), Image.NEAREST)
+    label = Tkinter.Label(tk, image=img)
+    label.pack()
+    tkimg = ImageTk.PhotoImage(img)
+    tk.after(500, draw_image)
+
+draw_image()
+tk.mainloop()
