@@ -9,7 +9,6 @@ tk.title = "Entropy"
 tk.resizable(0,0)
 tk.wm_attributes("-topmost", 1)
 
-
 def von_neumann_extractor(bit_str):
     index = 0
     tmp = ''
@@ -30,7 +29,7 @@ def draw_image():
 
     while len(extracted) <= 256:
         with open('/dev/urandom', 'rb') as f:
-            data = f.read(1)
+            data = f.read(64)
 
         raw_bytes = BitArray(bytes=data)
         raw_bits = raw_bytes.bin
@@ -45,9 +44,8 @@ def draw_image():
                 img.putpixel((x, y), (255,255,255)) # white pixel against black
 
     img = img.resize((512, 512), Image.NEAREST)
-    label = Tkinter.Label(tk, image=img)
-    label.pack()
     tkimg = ImageTk.PhotoImage(img)
+    # need to git image from --^ to --v somehow
     tk.after(500, draw_image)
 
 draw_image()
