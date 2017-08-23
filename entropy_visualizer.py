@@ -5,9 +5,8 @@ import Tkinter
 from bitstring import BitArray
     
 tk = Tkinter.Tk()
-tk.title = "Entropy"
-tk.resizable(0,0)
-tk.wm_attributes("-topmost", 1)
+label = Tkinter.Label(tk)
+label.pack()
 
 def von_neumann_extractor(bit_str):
     extracted = ''
@@ -46,10 +45,9 @@ def draw_image():
 
     img = img.resize((512, 512), Image.NEAREST)
     tkimg = ImageTk.PhotoImage(img)
-    label = Tkinter.Label(tk)
-    label.pack()
-    # need to git image from --^ to --v somehow
-    tk.after(500, draw_image)
+    label.config(image=tkimg)
+    tk.update_idletasks()
+    tk.after(0, draw_image)
 
 draw_image()
 tk.mainloop()
