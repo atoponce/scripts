@@ -20,9 +20,26 @@ import os
 import cv2
 import pyblake2
 
-cap = cv2.VideoCapture(0)
 webcamfile = '/tmp/webcamfile.fifo'
 key = os.urandom(64)
+
+def frame_diff(frame1, frame2):
+    return cv2.absdiff(frame1, frame2)
+
+def max_brightness(frame, value=255):
+    hsv = cv2.cvtColor(frame, cv2.COLOR_BGR2HSV)
+    h, s, v = cv2.split(hsv)
+    lim = 255 - value
+    v[v > lim] = 255
+    v[v <= lim] += value
+    final_hsv = cv2.merge((h, s, v))
+    frame = cv2.cvtColor(final_hsv, cv2.COLOR_HSV2BGR)
+    return frame
+
+def amplify(noise):
+    min, max = noise.min(), noise.max()
+    amp = 255.0 / (max - min)
+    return (noise * amp).astype("uint8")
 
 try:
     os.mkfifo(webcamfile)
@@ -31,23 +48,35 @@ except OSError, e:
 else:
     fifo = open(webcamfile, 'w+')
 
+cap = cv2.VideoCapture(0)
+framecount = 0
+last_frame = None
+
 while True:
-    ret, frame = cap.read()
+    ret, curr_frame = cap.read()
     if not ret:
         break
 
-    b2sum = pyblake2.blake2b(key)
-    b2sum.update(frame)
-    digest = b2sum.digest()
-    key = digest
+    if last_frame is not None:
+        framecount += 1
 
-    fifo.write(digest)
-    fifo.flush()
+        noise = frame_diff(last_frame, curr_frame)
+        max_noise = max_brightness(noise)
+        amp_noise = amplify(max_noise)
 
-    #cv2.imshow('webcamlamp', frame)
-    #k = cv2.waitKey(1) & 0xFF
-    #if k == 27:
-    #    break
+        b2sum = pyblake2.blake2b(amp_noise)
+        b2sum.update(amp_noise)
+        digest = b2sum.digest()
+        key = digest
+
+        cv2.imshow('webcamlamp', amp_noise)
+        if cv2.waitKey(1) & 0xff == 27:
+            break
+
+        fifo.write(digest)
+        fifo.flush()
+
+    last_frame = curr_frame
 
 fifo.close()
 os.remove(webcamfile)
