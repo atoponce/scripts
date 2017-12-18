@@ -11,19 +11,17 @@
 #   * Rayleigh-Benard convection
 #   * Brownian motion
 #
-# Performance is ~ 8.5 MiB/s.
-# Requires python-pycryptodome: https://www.pycryptodome.org/
+# Performance is ~ 8.75 MiB/s on my Intel Core 2 Duo T7500
+# Requires numpy & python-pycryptodome (https://www.pycryptodome.org/)
 #
 # Released to the public domain.
 
 import os
 import cv2
+import numpy
 from Cryptodome.Hash import SHAKE128
 
 webcamfile = '/tmp/webcamfile.fifo'
-
-def frame_diff(frame1, frame2):
-    return cv2.absdiff(frame1, frame2)
 
 def max_brightness(frame, value=255):
     hsv = cv2.cvtColor(frame, cv2.COLOR_BGR2HSV)
@@ -35,10 +33,33 @@ def max_brightness(frame, value=255):
     frame = cv2.cvtColor(final_hsv, cv2.COLOR_HSV2BGR)
     return frame
 
-def amplify(noise):
-    min, max = noise.min(), noise.max()
-    amp = 255.0 / (max - min)
-    return (noise * amp).astype("uint8")
+def decorrelate(frame):
+    # Simple shuffle: f(x) = ax mod m, where a and m are coprime
+    # Linear algorithm- you will still see linear correlations in the frame
+
+    # First shuffle rows
+    for row in xrange(480):
+        # swap rows
+        dest = (401*row) % 480
+        source_row = frame[row]
+        frame[row] = frame[dest]
+        frame[dest] = source_row
+
+        # rotate row
+        frame[row] = numpy.roll(frame[row], dest)
+
+    # Now shuffle cols
+    for col in xrange(640):
+        # swap cols
+        dest = (509*col) % 640
+        source_col = frame[:,col]
+        frame[:,col] = frame[:,dest]
+        frame[:,dest] = source_col
+
+        # rotate cols
+        frame[:,col] = numpy.roll(frame[:,col], dest)
+
+    return frame
 
 try:
     os.mkfifo(webcamfile)
@@ -48,7 +69,6 @@ else:
     fifo = open(webcamfile, 'w+')
 
 cap = cv2.VideoCapture(0)
-framecount = 0
 last_frame = None
 
 while True:
@@ -57,21 +77,28 @@ while True:
         break
 
     if last_frame is not None:
-        framecount += 1
+        # For visual demonstrations
+        # 1. diff two frames
+        frame = cv2.absdiff(last_frame, curr_frame)
 
-        noise = frame_diff(last_frame, curr_frame)
-        max_noise = max_brightness(noise)
-        amp_noise = amplify(max_noise)
+        # 2. maximize the luminance
+        frame = max_brightness(frame)
+
+        # 3. convert to grayscale
+        #frame = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
+
+        # 4. decorrelate the frames (reduce bandwidth by 2/3)
+        #frame = decorrelate(frame)
 
         # Randomness extraction using the SHAKE128 XOF
         # The image size is 640x480. At 2 bytes per pixel, that's 614400 bytes.
         # The XOF hashes all 614400 bytes but only outputs 307200 bytes (1/2).
         # This will be CPU-intensive. Not recommended for running long-term.
         shake = SHAKE128.new()
-        shake.update(bytes(amp_noise))
+        shake.update(bytes(frame))
         digest = shake.read(307200)
 
-        cv2.imshow('webcamlamp', amp_noise)
+        cv2.imshow('webcamlamp', frame)
         if cv2.waitKey(1) & 0xff == 27:
             break
 
