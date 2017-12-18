@@ -11,17 +11,16 @@
 #   * Rayleigh-Benard convection
 #   * Brownian motion
 #
-# Performance is ~ 2 KiB/s.
-# Requires pyblake2: https://pypi.python.org/pypi/pyblake2
+# Performance is ~ 8.5 MiB/s.
+# Requires python-pycryptodome: https://www.pycryptodome.org/
 #
 # Released to the public domain.
 
 import os
 import cv2
-import pyblake2
+from Cryptodome.Hash import SHAKE128
 
 webcamfile = '/tmp/webcamfile.fifo'
-key = os.urandom(64)
 
 def frame_diff(frame1, frame2):
     return cv2.absdiff(frame1, frame2)
@@ -64,10 +63,13 @@ while True:
         max_noise = max_brightness(noise)
         amp_noise = amplify(max_noise)
 
-        b2sum = pyblake2.blake2b(key)
-        b2sum.update(amp_noise)
-        digest = b2sum.digest()
-        key = digest
+        # Randomness extraction using the SHAKE128 XOF
+        # The image size is 640x480. At 2 bytes per pixel, that's 614400 bytes.
+        # The XOF hashes all 614400 bytes but only outputs 307200 bytes (1/2).
+        # This will be CPU-intensive. Not recommended for running long-term.
+        shake = SHAKE128.new()
+        shake.update(bytes(amp_noise))
+        digest = shake.read(307200)
 
         cv2.imshow('webcamlamp', amp_noise)
         if cv2.waitKey(1) & 0xff == 27:
