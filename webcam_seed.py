@@ -64,7 +64,7 @@ while True:
         max_noise = max_brightness(noise)
         amp_noise = amplify(max_noise)
 
-        b2sum = pyblake2.blake2b(amp_noise)
+        b2sum = pyblake2.blake2b(key)
         b2sum.update(amp_noise)
         digest = b2sum.digest()
         key = digest
