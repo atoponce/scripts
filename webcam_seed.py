@@ -3,10 +3,9 @@
 
 # Create true random seeds (near as we can tell) with your webcam.
 #
-# This script will use your webcam pointed at a source of entropy, keyed with
-# random data from the OS CSPRNG. There is no need to point it at anything. The
-# CCD in the camera in providing enough entropy via (sorted in order of most to
-# least entropy):
+# This script will use your webcam as a source of entropy. There is no need to
+# point it at anything. The CCD in the camera is providing enough entropy via
+# (sorted in order of most to least entropy):
 # 
 #   * Dark shot noise- Main source of entropy via thermal fluctuations
 #   * Read noise- Sensor design producting electronic RF
@@ -66,13 +65,13 @@ def decorrelate(frame):
     # Now shuffle cols
     for col in xrange(640):
         # swap cols
-        dest = (409*col + 1) % 640
+        dest = (409*col + 2) % 640
         source_col = frame[:,col]
         frame[:,col] = frame[:,dest]
         frame[:,dest] = source_col
 
         # rotate cols
-        part = (509*col + 1) % 640
+        part = (509*col + 2) % 640
         frame[:,col] = numpy.roll(frame[:,col], part)
 
     return frame
@@ -101,10 +100,10 @@ while True:
         frame = max_brightness(frame)
 
         # 3. convert to black-and-white
-        frame = cv2.threshold(cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY), 127, 255, cv2.THRESH_BINARY)[1]
+        #frame = cv2.threshold(cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY), 127, 255, cv2.THRESH_BINARY)[1]
 
         # 4. decorrelate the frames (reduces bandwidth by ~ 2/3)
-        frame = decorrelate(frame)
+        #frame = decorrelate(frame)
 
         # Randomness extraction using the SHAKE128 XOF
         # The image size is 640x480. At 2 bytes per pixel, that's 614400 bytes.
