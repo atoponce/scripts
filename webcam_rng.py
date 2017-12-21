@@ -31,7 +31,7 @@ import cv2
 import numpy
 from Cryptodome.Hash import SHAKE128
 
-webcamfile = '/tmp/webcamfile.fifo'
+webcamfile = '/tmp/webcam-rng.fifo'
 
 def max_brightness(frame, value=255):
     hsv = cv2.cvtColor(frame, cv2.COLOR_BGR2HSV)
@@ -84,6 +84,8 @@ else:
     fifo = open(webcamfile, 'w+')
 
 cap = cv2.VideoCapture(0)
+cap.set(3, 640) # set width
+cap.set(4, 480) # set height
 last_frame = None
 
 while True:
@@ -113,7 +115,7 @@ while True:
         shake.update(bytes(frame))
         digest = shake.read(307200)
 
-        cv2.imshow('webcamlamp', frame)
+        cv2.imshow('webcam noise', frame)
         if cv2.waitKey(1) & 0xff == 27:
             break
 
