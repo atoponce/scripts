@@ -44,38 +44,6 @@ def max_brightness(frame, value=255):
 
     return frame
 
-def decorrelate(frame):
-    # Simple shuffle: f(x) = (ax+b) mod m, a and m are coprime, b non-zero
-    # Linear algorithm- you will still see linear correlations in the frame
-    # Possible idea:
-    #   - use a nonlinear algorithm like Mix+Permute from the Threefish cipher
-
-    # First shuffle rows
-    for row in xrange(480):
-        # swap rows
-        dest = (211*row + 1) % 480
-        source_row = frame[row]
-        frame[row] = frame[dest]
-        frame[dest] = source_row
-
-        # rotate row
-        part = (311*row + 1) % 480
-        frame[row] = numpy.roll(frame[row], part)
-
-    # Now shuffle cols
-    for col in xrange(640):
-        # swap cols
-        dest = (409*col + 2) % 640
-        source_col = frame[:,col]
-        frame[:,col] = frame[:,dest]
-        frame[:,dest] = source_col
-
-        # rotate cols
-        part = (509*col + 2) % 640
-        frame[:,col] = numpy.roll(frame[:,col], part)
-
-    return frame
-
 try:
     os.mkfifo(webcamfile)
 except OSError, e:
@@ -105,9 +73,6 @@ while True:
 
         # 3. convert to black-and-white
         #frame = cv2.threshold(cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY), 127, 255, cv2.THRESH_BINARY)[1]
-
-        # 4. decorrelate the frames (reduces bandwidth by ~ 2/3)
-        #frame = decorrelate(frame)
 
         # Randomness extraction using the SHAKE128 XOF
         #
