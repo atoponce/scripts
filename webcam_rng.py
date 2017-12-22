@@ -85,13 +85,14 @@ while True:
         # per frame, or 4,224 bytes per frame.
         #
         # The security margin of SHAKE128 is the min(d/2, 128), where "d" is
-        # our digest. So by outputting 8192 KB, my security margin is between
-        # 128-bits to 4,096-bits with SHAKE128, exactly where I want to be.
+        # our digest. So by outputting 4096 KB, my collision security margin is
+        # between 128-bits to 2,048-bits with SHAKE128. Preimage and 2nd
+        # preimage collision resistance will have the full 4,096-bits.
         #
         # The XOF hashes all 307,200 bytes but outputs a conservative 8 KB.
         shake = SHAKE128.new()
         shake.update(bytes(frame))
-        digest = shake.read(8192)
+        digest = shake.read(4096)
 
         cv2.imshow('webcam noise', frame)
         if cv2.waitKey(1) & 0xff == 27:
