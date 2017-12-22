@@ -94,6 +94,8 @@ while True:
         break
 
     if last_frame is not None:
+        frame = curr_frame
+
         # For visual demonstrations
         # 1. diff two frames
         frame = cv2.absdiff(last_frame, curr_frame)
@@ -108,12 +110,19 @@ while True:
         #frame = decorrelate(frame)
 
         # Randomness extraction using the SHAKE128 XOF
-        # The image size is 640x480. At 2 bytes per pixel, that's 614400 bytes.
-        # The XOF hashes all 614400 bytes but only outputs 307200 bytes (1/2).
-        # This will be CPU-intensive. Not recommended for running long-term.
+        #
+        # The image size is 640x480. My PS3 Eye cam only hase 1 byte per pixel
+        # of color depth, which is 307,200 bytes per frame.
+        #
+        # The raw entropy of each frame, with the camera cooled to 20 degrees
+        # Celsius and no light entering the lens, is about 0.11 bits per byte,
+        # +/- 0.02 bits per byte. This provides about 33,792-bits of entropy
+        # per frame, or 4,224 bytes per frame.
+        #
+        # The XOF hashes all 307,200 bytes but outputs a conservative 4 KB.
         shake = SHAKE128.new()
         shake.update(bytes(frame))
-        digest = shake.read(307200)
+        digest = shake.read(4096)
 
         cv2.imshow('webcam noise', frame)
         if cv2.waitKey(1) & 0xff == 27:
