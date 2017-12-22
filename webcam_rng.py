@@ -119,10 +119,14 @@ while True:
         # +/- 0.02 bits per byte. This provides about 33,792-bits of entropy
         # per frame, or 4,224 bytes per frame.
         #
-        # The XOF hashes all 307,200 bytes but outputs a conservative 4 KB.
+        # The security margin of SHAKE128 is the min(d/2, 128), where "d" is
+        # our digest. So by outputting 8192 KB, my security margin is between
+        # 128-bits to 4,096-bits with SHAKE128, exactly where I want to be.
+        #
+        # The XOF hashes all 307,200 bytes but outputs a conservative 8 KB.
         shake = SHAKE128.new()
         shake.update(bytes(frame))
-        digest = shake.read(4096)
+        digest = shake.read(8192)
 
         cv2.imshow('webcam noise', frame)
         if cv2.waitKey(1) & 0xff == 27:
