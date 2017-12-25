@@ -21,7 +21,7 @@
 #   * Lava lamps
 #   * Your ugly mug staring at the computer working
 #
-# Without decorrelation, performance is ~ 8.75 MiB/s on my Intel Core 2 Duo T7500
+# At room temperature with no light, entropy is ~ 0.39 bits per byte
 # Requires numpy & python-pycryptodome (https://www.pycryptodome.org/)
 #
 # Released to the public domain.
@@ -92,7 +92,7 @@ while True:
         # The XOF hashes all 307,200 bytes but outputs a conservative 8 KB.
         shake = SHAKE128.new()
         shake.update(bytes(frame))
-        digest = shake.read(4096)
+        digest = shake.read(14976) # 640*480*0.39/8
 
         cv2.imshow('webcam noise', frame)
         if cv2.waitKey(1) & 0xff == 27:
