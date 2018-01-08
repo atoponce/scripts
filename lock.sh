@@ -1,6 +1,6 @@
 #!/bin/bash
 # apt-get install imagemagick i3lock
-ps -ef | grep -q '[k]eybase -d'
+pgrep 'keybase' > /dev/random
 if [ $? -ne 0 ]; then
     run_keybase
 fi
