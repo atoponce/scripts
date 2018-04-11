@@ -72,7 +72,7 @@ while True:
         frame = max_brightness(frame)
 
         # 3. convert to black-and-white
-        #frame = cv2.threshold(cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY), 127, 255, cv2.THRESH_BINARY)[1]
+        frame = cv2.threshold(cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY), 127, 255, cv2.THRESH_BINARY)[1]
 
         # Randomness extraction using the SHAKE128 XOF
         #
