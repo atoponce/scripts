@@ -1,5 +1,11 @@
 #!/bin/sh
 
+# Just a stupid script for generating some simple password hashes that are
+# common among various *NIX systems and daemons. Public domain.
+
+command -v htpasswd &>/dev/random || { echo >&2 "htpasswd not installed."; exit 1; }
+command -v mkpasswd &>/dev/random || { echo >&2 "mkpasswd not installed."; exit 2; }
+
 read -p "Enter password: " pw
 echo # blank line
 
