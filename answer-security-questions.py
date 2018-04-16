@@ -10,20 +10,22 @@
 # bcrypt is based on Blowfish which uses the feistel construction
 # BLAKE2 is based on ChaCha and uses the HAIFA construction
 
-import sha3
-import bcrypt
-import pyblake2
+from Cryptodome.Hash import BLAKE2b
+from Cryptodome.Hash import SHAKE256
+from Cryptodome.Protocol.KDF import scrypt
 
 print("Answers are case-sensitive.")
 site = raw_input("What site is this for? Root domain and TLD only (E.G.: example.com) ")
 key = raw_input("What is a secret key with at least 128-bits entropy only you know? ")
 answer = raw_input("What is the answer to the security question? ")
 
-b2salt = sha3.sha3_256(key).digest()
-bcrypt_salt = pyblake2.blake2s(data=site, key=b2salt, digest_size=16).digest()
+shake = SHAKE256.new()
+secret = shake.update(bytes(key)).read(32)
+salt = BLAKE2b.new(digest_bits=256, key=(secret))
+salt.update(bytes(site))
 
-# A cost of 16 for bcrypt takes a full 5+ seconds on my ThinkPad T61
-result = bcrypt.hashpw(answer, "$2b$16${}".format(bcrypt_salt.encode('base64').strip()[:22]))
+# A cost of 32 MiB of RAM and 5+ seconds computation
+crypt = scrypt(bytes(answer), salt.digest(), 16, 2**15, 8, 1)
 
 print("")
-print("Enter this into your security question form: {}".format(result[30:]))
+print("Enter this into your security question form: {}".format(crypt.encode('hex')[:22]))
