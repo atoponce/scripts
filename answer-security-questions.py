@@ -28,4 +28,4 @@ salt.update(bytes(site))
 crypt = scrypt(bytes(answer), salt.digest(), 16, 2**15, 8, 1)
 
 print("")
-print("Enter this into your security question form: {}".format(crypt.encode('hex')[:22]))
+print("Enter this into your security question form: {}".format(crypt.encode('hex')))
