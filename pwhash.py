@@ -18,9 +18,9 @@ from passlib import hash as ph
 @click.option("--sha512", is_flag=1, help="GNU libc sha512crypt hash.")
 @click.option("--cost", type=int, help="Password hashing cost, if applicable.")
 @click.option("--salt", type=str, help="Password salt in the character set [A-Za-z0-9./], if applicable.")
-@click.option("--verify", type=str, help="Verify a password hash.")
+@click.option("--check", type=str, help="Check a password hash. Must be wrapped in single quotes.")
 @click.password_option(help="User-supplied password in cleartext.")
-def main(verify, password, apache, mysql, des, md5, cisco, bcrypt, bcrypt_sha256, sha256, sha512, cost, salt):
+def main(check, password, apache, mysql, des, md5, cisco, bcrypt, bcrypt_sha256, sha256, sha512, cost, salt):
     sr = random.SystemRandom()
     chars = string.ascii_letters + string.digits + "/."
 
@@ -115,8 +115,38 @@ def main(verify, password, apache, mysql, des, md5, cisco, bcrypt, bcrypt_sha256
             os.sys.exit(2)
         print(ph.sha512_crypt.using(rounds=cost, salt=salt).hash(password))
 
-    if verify:
-        pass
+    if check:
+        ret = 0
+        try:
+            magic = check.split("$")[1]
+            if magic == "apr1":
+                ret = ph.apr_md5_crypt.verify(password, check)
+            elif magic == "1":
+                ret = ph.md5_crypt.verify(password, check)
+            elif magic == "2b":
+                ret = ph.bcrypt.verify(password, check)
+            elif magic == "bcrypt-sha256":
+                ret = ph.bcrypt_sha256.verify(password, check)
+            elif magic == "5":
+                ret = ph.sha256_crypt.verify(password, check)
+            elif magic == "6":
+                ret = ph.sha512_crypt.verify(password, check)
+            else:
+                print("Unknown hash format.")
+                os.sys.exit(4)
+        except IndexError:
+            if len(check) == 8:
+                ret = ph.des_crypt.verify(password, check)
+            elif len(check) == 41 and check[0] == "*":
+                ret = ph.mysql41.verify(password, check)
+            else:
+                print("Unknown hash format.")
+                os.sys.exit(4)
+        else:
+            if ret:
+                print("\033[92m\033[1mPassword matches crypt.\033[0m")
+            else:
+                print("\033[91m\033[1mPassword does not match crypt.\033[0m")
         
 if __name__ == '__main__':
     main()
