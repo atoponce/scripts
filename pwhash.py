@@ -99,7 +99,7 @@ def main(verify, password, apache, mysql, des, md5, cisco, bcrypt, bcrypt_sha256
         if not cost:
             cost = 5000
         if cost < 1000 or cost > 999999999:
-            print("Cost bust be between 1000 and 999999999.")
+            print("Cost must be between 1000 and 999999999.")
             os.sys.exit(2)
         print(ph.sha256_crypt.using(rounds=cost, salt=salt).hash(password))
 
@@ -111,7 +111,7 @@ def main(verify, password, apache, mysql, des, md5, cisco, bcrypt, bcrypt_sha256
         if not cost:
             cost = 5000
         if cost < 1000 or cost > 999999999:
-            print("Cost bust be between 1000 and 999999999.")
+            print("Cost must be between 1000 and 999999999.")
             os.sys.exit(2)
         print(ph.sha512_crypt.using(rounds=cost, salt=salt).hash(password))
 
