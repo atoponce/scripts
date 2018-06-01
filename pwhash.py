@@ -1,9 +1,20 @@
 #!/usr/bin/python
 
+# Released to the public domain
+#
+# Exit codes:
+#   0: Successful execution
+#   1: Wrong salt length
+#   2: Invalid cost parameter
+#   3: Wrong salt format
+#   4: Unknown crypt format
+#   5: bcrypt password longer than 72 bytes
+
 import os
 import click
 import string
 import random
+from passlib.exc import PasswordTruncateError
 from passlib import hash as ph
 
 @click.command()
@@ -71,7 +82,11 @@ def main(check, password, apache, mysql, des, md5, cisco, bcrypt, bcrypt_sha256,
         if cost < 4 or cost > 31:
             print("Cost must be between 4 and 31.")
             os.sys.exit(2)
-        print(ph.bcrypt.using(rounds=cost, salt=salt, truncate_error=1).hash(password))
+        try:
+            print(ph.bcrypt.using(rounds=cost, salt=salt, truncate_error=1).hash(password))
+        except PasswordTruncateError:
+            print("bcrypt truncates passwords to 72 bytes. Truncate your password, or use --bcrypt_sha256 instead.")
+            os.sys.exit(5)
 
     if bcrypt_sha256:
         if not salt:
