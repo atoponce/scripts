@@ -9,6 +9,8 @@
 #   3: Wrong salt format
 #   4: Unknown crypt format
 #   5: bcrypt password longer than 72 bytes
+#
+# Requires passlib >= 1.7
 
 import os
 import click
@@ -35,17 +37,17 @@ def main(check, password, apache, mysql, des, md5, cisco, bcrypt, bcrypt_sha256,
     sr = random.SystemRandom()
     chars = string.ascii_letters + string.digits + "/."
 
-    if apache:
+    if apache and not check:
         if not salt:
             salt = "".join(sr.choice(chars) for i in range(8))
         if len(salt) > 8:
             salt = salt[:8]
         print(ph.apr_md5_crypt.using(salt=salt).hash(password))
 
-    if mysql:
+    if mysql and not check:
         print(ph.mysql41.hash(password))
 
-    if des:
+    if des and not check:
         if not salt:
             salt = "".join(sr.choice(chars) for i in range(2))
         if len(salt) != 2:
@@ -53,7 +55,7 @@ def main(check, password, apache, mysql, des, md5, cisco, bcrypt, bcrypt_sha256,
             os.sys.exit(1)
         print(ph.des_crypt.using(salt=salt).hash(password))
 
-    if md5:
+    if md5 and not check:
         if not salt:
             if cisco:
                 salt = "".join(sr.choice(chars) for i in range(4))
@@ -66,7 +68,7 @@ def main(check, password, apache, mysql, des, md5, cisco, bcrypt, bcrypt_sha256,
                 salt = salt[:8]
         print(ph.md5_crypt.using(salt=salt).hash(password))
 
-    if bcrypt:
+    if bcrypt and not check:
         if not salt:
             salt = "".join(sr.choice(chars) for i in range(22))
             salt = salt[:-1] + sr.choice(".Oeu")
@@ -88,7 +90,7 @@ def main(check, password, apache, mysql, des, md5, cisco, bcrypt, bcrypt_sha256,
             print("bcrypt truncates passwords to 72 bytes. Truncate your password, or use --bcrypt_sha256 instead.")
             os.sys.exit(5)
 
-    if bcrypt_sha256:
+    if bcrypt_sha256 and not check:
         if not salt:
             salt = "".join(sr.choice(chars) for i in range(22))
             salt = salt[:-1] + sr.choice(".Oeu")
@@ -106,7 +108,7 @@ def main(check, password, apache, mysql, des, md5, cisco, bcrypt, bcrypt_sha256,
             os.sys.exit(2)
         print(ph.bcrypt_sha256.using(rounds=cost, salt=salt).hash(password))
 
-    if sha256:
+    if sha256 and not check:
         if not salt:
             salt = "".join(sr.choice(chars) for i in range(16))
         if len(salt) > 16:
@@ -118,7 +120,7 @@ def main(check, password, apache, mysql, des, md5, cisco, bcrypt, bcrypt_sha256,
             os.sys.exit(2)
         print(ph.sha256_crypt.using(rounds=cost, salt=salt).hash(password))
 
-    if sha512:
+    if sha512 and not check:
         if not salt:
             salt = "".join(sr.choice(chars) for i in range(16))
         if len(salt) > 16:
