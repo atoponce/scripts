@@ -55,6 +55,7 @@ cap = cv2.VideoCapture(0)
 cap.set(3, 640) # set width
 cap.set(4, 480) # set height
 last_frame = None
+key = None
 
 while True:
     ret, curr_frame = cap.read()
@@ -85,20 +86,26 @@ while True:
         # per frame, or 4,224 bytes per frame.
         #
         # The security margin of SHAKE128 is the min(d/2, 128), where "d" is
-        # our digest. So by outputting 4096 KB, my collision security margin is
-        # between 128-bits to 2,048-bits with SHAKE128. Preimage and 2nd
-        # preimage collision resistance will have the full 4,096-bits.
+        # our digest. So by outputting 4096 bytes, my collision security margin
+        # is between 128-bits to 32,768-bits with SHAKE128. Preimage and 2nd
+        # preimage collision resistance will have the full 4,096 bytes.
         #
-        # The XOF hashes all 307,200 bytes but outputs a conservative 8 KB.
-        shake = SHAKE128.new()
+        # The XOF hashes all 307,200 bytes but outputs a conservative 4 KB.
+        shake = SHAKE128.new(data=key)
         shake.update(bytes(frame))
-        digest = shake.read(14976) # 640*480*0.39/8
+        digest = shake.read(32+4096) # 32-byte key, 4096-byte output
+
+        # Fast key erasure - https://blog.cr.yp.to/20170723-random.html
+        # Ensures that if two frames are ever exactly identical, they will be
+        # keyed differently, ensuring unique outputs
+        key = digest[:32]
+        data = digest[32:]
 
         cv2.imshow('webcam noise', frame)
         if cv2.waitKey(1) & 0xff == 27:
             break
 
-        fifo.write(digest)
+        fifo.write(data)
         fifo.flush()
 
     last_frame = curr_frame
