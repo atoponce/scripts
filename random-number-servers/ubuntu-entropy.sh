@@ -22,26 +22,19 @@
 #  You should have received a copy of the GNU General Public License
 #  along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-# Working directory
-TMPDIR=$(mktemp -d -t "inseminate.XXXXXXXXXXXX")
-
 # Construct a user agent, with useful debug information
-CURL_VER="$(curl -V | head -n 1 | awk '{print $2}')"
-LSB="$(lsb_release -is)/$(lsb_release -rs)"
-PLATFORM="$(uname -o)/$(uname -r)/$(uname -m)"
-USER_AGENT="inseminate/0.3 curl/$CURL_VER $LSB $PLATFORM"
+curl_ver="$(curl -V | head -n 1 | awk '{print $2}')"
+lsb="$(lsb_release -is)/$(lsb_release -rs)"
+platform="$(uname -o)/$(uname -r)/$(uname -m)"
+user_agent="inseminate/0.4 curl/$curl_ver $lsb $platform"
 
 # Setup the challenge with a response
-CHALLENGE=$(head -c 64 /dev/urandom | sha512sum | awk '{print $1}')
-CHALLENGE_RESPONSE=$(echo -n "$CHALLENGE" | sha512sum | awk '{print $1}')
-F1=$(echo -n "challenge=$CHALLENGE")
+challenge=$(head -c 64 /dev/urandom | sha512sum | awk '{print $1}')
+challenge_response=$(echo -n "$challenge" | sha512sum | awk '{print $1}')
+f1=$(echo -n "challenge=$challenge")
 
 # Get the data
-curl -A "$USER_AGENT" -o- -v --trace-time --connect-timeout 3 -m 3 -d $F1 \
-    https://entropy.ubuntu.com > "${TMPDIR}/out" 2> "${TMPDIR}/err"
+results=$(curl -A "$user_agent" -o- -s -m 3 -d "$f1" https://entropy.ubuntu.com)
+response=$(echo "$results" | head -n 1)
 
-RESPONSE=$(head -n 1 "${TMPDIR}/out")
-RESULT=$(cat "${TMPDIR}/out" "${TMPDIR}/err" | sha512sum | awk '{print $1}')
-[ "$CHALLENGE_RESPONSE" = "$RESPONSE" ] && echo "$RESULT"
-
-rm -rf "$TMPDIR"
+[ "$challenge_response" = "$response" ] && echo "$results" | tail -n 1
