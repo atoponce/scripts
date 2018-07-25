@@ -20,7 +20,7 @@ to be cleanly copied and pasted.
 | 3        | ~(p\|q)             | (1+p)\*(1+q)               | 131      | p^(p&q&~r)^~q          | 1+p+q+p\*q+p\*q\*r           |
 | 4        | (~(p\|r))&q         | (1+p)\*q\*(1+r)            | 132      | (p^q^r)&q              | q\*(1+p+r)                   |
 | 5        | ~(p\|r)             | (1+p)\*(1+r)               | 133      | p^(p&~q&r)^~r          | 1+p+r+p\*r+p\*q\*r           |
-| 6        | ~p&(q\|r)           | (1+p)\*(q+r)               | 134      | (p&(q\|r))^q^r         | q+p\*q+r+p\*r+p\*q\*r        |
+| 6        | ~p&(q^r)            | (1+p)\*(q+r)               | 134      | (p&(q\|r))^q^r         | q+p\*q+r+p\*r+p\*q\*r        |
 | 7        | ~(p\|(q&r))         | (1+p)\*(1+q\*r)            | 135      | ~p^(q&r)               | 1+p+q\*r                     |
 | 8        | ~p&q&r              | (1+p)\*q\*r                | 136      | q&r                    | q\*r                         |
 | 9        | ~(p\|(q^r))         | (1+p)(1+q+r)               | 137      | (~p\|q\|r)^q^r         | 1+p+q+p\*q+r+p\*r+p\*q\*r    |
@@ -52,7 +52,7 @@ to be cleanly copied and pasted.
 | 34       | ~q&r                | (1+q)\*r                   | 162      | (p\|~q)&r              | (1+q+p\*q)\*r                |
 | 35       | (~p\|q\|r)^q        | (1+q)\*(1+p+p\*r)          | 163      | (~p\|(q^r))^q          | 1+p+q+p\*q+p\*r              |
 | 36       | (p^q)&(q^r)         | q+p\*q+p\*r+q\*r           | 164      | p^(p\|q\|r)^r          | q+p\*q+p\*+q\*r+p\*q\*r      |
-| 37       | p^(p\|q\|r)^~r      | 1+q+r+p\*q\*r              | 165      | p^~r                   | 1+p+r                        |
+| 37       | p^(p\|q\|r)^~r      | 1+p+r+p\*q\*r              | 165      | p^~r                   | 1+p+r                        |
 | 38       | ((p&q)\|r)^q        | q+p\*q+r+p\*q\*r           | 166      | (p&q)^q^r              | q+p\*+r                      |
 | 39       | ((p^~q)\|r)^q       | 1+p+p\*r+q\*r              | 167      | p^(p\|q\|~r)^r         | 1+p+p\*r+q\*r+p\*q\*r        |
 | 40       | (p^q)&r             | (p+q)\*r                   | 168      | (p\|q)&r               | (p+q+p\*q)\*r                |
@@ -60,12 +60,12 @@ to be cleanly copied and pasted.
 | 42       | (p&q&r)^r           | (1+p\*q)\*r                | 170      | r                      | r                            |
 | 43       | p^((p^r)\|(p^~q))   | 1+p+q+p\*q+p\*r+q\*r       | 171      | (~(p\|q))\|r           | 1+p+q+p\*q+p\*r+q\*r+p\*q\*r |
 | 44       | (p&(q\|r))^q        | q+p\*q+p\*r+p\*q\*r        | 172      | (p&(q^r))^q            | q+p\*q+p\*r                  |
-| 45       | p^(q\|~r)           | 1+p+r+q\*r                 | 173      | (p^~r)\|(q&r)          | 1+p+r+q\*+p\*q\*r            |
+| 45       | p^(q\|~r)           | 1+p+r+q\*r                 | 173      | (p^~r)\|(q&r)          | 1+p+r+q\*r+p\*q\*r           |
 | 46       | (p&q)^(q\|r)        | q+p\*q+r+q\*r              | 174      | ((p&q)^q)\|r           | q+p\*q+r+q\*r+p\*q\*r        |
 | 47       | ~p\|(~q&r)          | 1+p+p\*r+p\*q\*r           | 175      | ~p\|r                  | 1+p+p\*r                     |
 | 48       | p&~q                | p\*(1+q)                   | 176      | p&(~q\|r)              | p\*(1+q+q\*r)                |
 | 49       | (p\|q\|~r)^q        | (1+q)\*(1+r+p\*r)          | 177      | p^(~((p^q)\|r))        | 1+q+r+p\*r+q\*r              |
-| 50       | (p\|q\|r)^q         | (1+q)\*(p+r+p\*r)          | 178      | ((p^q)\|(p^r))\|q      | p+p\*q+r+p\*r+q\*r           |
+| 50       | (p\|q\|r)^q         | (1+q)\*(p+r+p\*r)          | 178      | ((p^q)\|(p^r))^q       | p+p\*q+r+p\*r+q\*r           |
 | 51       | ~q                  | 1+q                        | 179      | (p&r)\|~q              | 1+q+p\*q\*r                  |
 | 52       | (p\|(q&r))^q        | p+q+q\*r+p\*q\*r           | 180      | p^q^(q&r)              | p+q+q\*r                     |
 | 53       | (p\|(q^~r))^q       | 1+p\*q+r+p\*r              | 181      | p^(~p\|q\|r)^r         | 1+p\*q+r+p\*r+p\*q\*r        |
@@ -81,7 +81,7 @@ to be cleanly copied and pasted.
 | 63       | ~(p&q)              | 1+p\*q                     | 191      | ~p\|~q\|r              | 1+p\*q+p\*q\*r               |
 | **Rule** | **Boolean**         | **Alegbraic (mod 2)**      | **Rule** | **Boolean**            | **Alegbraic (mod 2)**        |
 | 64       | p&q&~r              | p\*q\*(1+r)                | 192      | p&q                    | p\*q                         |
-| 65       | ~((p^)\|r)          | (1+p+q)\*(1+r)             | 193      | p^(\|q\|~r)^q          | 1+p+q+r+p\*r+q\*r+p\*q\*r    |
+| 65       | ~((p^q)\|r)         | (1+p+q)\*(1+r)             | 193      | p^(p\|q\|~r)^q         | 1+p+q+r+p\*r+q\*r+p\*q\*r    |
 | 66       | (p^r)&(q^r)         | p\*q+r+p\*r+q\*r           | 194      | p^(p\|q\|r)^q          | p\*q+r+p\*r+q\*r+p\*q\*r     |
 | 67       | p^(p&q&r)^~q        | 1+p+q+p\*q\*r              | 195      | p^~q                   | 1+p+q                        |
 | 68       | q&~r                | q\*(1+r)                   | 196      | (p\|~r)&q              | q\*(1+r+p\*r)                |
@@ -94,7 +94,7 @@ to be cleanly copied and pasted.
 | 75       | (p^(~q\|r)          | 1+p+q+q\*r                 | 203      | (p^~q)\|(q&r)          | 1+p+q+q\*r+p\*q\*r           |
 | 76       | (p&q&r)^q           | q\*(1+p\*r)                | 204      | q                      | q                            |
 | 77       | p^((p^q)\|(p^~r))   | 1+p+p\*q+r+p\*r+q\*r       | 205      | (~(p\|r))\|q           | 1+p+p\*q+r+p\*r+q\*r+p\*q\*r |
-| 78       | p^((p^)\|r)         | q+r+p\*r+q\*r              | 206      | (~p&r)\|q              | q+r+p\*r+q\*r+p\*q\*r        |
+| 78       | p^((p^q)\|r)        | q+r+p\*r+q\*r              | 206      | (~p&r)\|q              | q+r+p\*r+q\*r+p\*q\*r        |
 | 79       | ~p\|(q&~r)          | 1+p+p\*q+p\*q\*r           | 207      | ~(p&~q)                | 1+p+p\*q                     |
 | 80       | p&~r                | p\*(1+r)                   | 208      | p&(q\|~r)              | p\*(1+r+q\*r)                |
 | 81       | (p\|~q\|r)^r        | (1+q+p\*q)\*(1+r)          | 209      | ~((p&q)^(q\|r))        | 1+q+p\*q+r+q\*r              |
@@ -111,13 +111,13 @@ to be cleanly copied and pasted.
 | 92       | (p\|(q^r))^r        | p+q+p\*q+p\*r              | 220      | (p&~r)\|q              | p+q+p\*q+p\*r+p\*q\*r        |
 | 93       | ~((p\|~q)&r)        | 1+r+q\*r+p\*q\*r           | 221      | q\|~r                  | 1+r+q\*r                     |
 | 94       | (p&r)^(p\|q\|r)     | p+q+p\*q+r+q\*r+p\*q\*r    | 222      | (p^q^r)\|q             | p+q+p\*q+r+q\*r              |
-| 95       | ~(p&r)              | 1+p\*r                     | 223      | ~(p&~q&r)              | 1+q\*r+p\*q\*r               |
+| 95       | ~(p&r)              | 1+p\*r                     | 223      | ~(p&~q&r)              | 1+p\*r+p\*q\*r               |
 | **Rule** | **Boolean**         | **Alegbraic (mod 2)**      | **Rule** | **Boolean**            | **Alegbraic (mod 2)**        |
 | 96       | p&(q^r)             | p\*(q+r)                   | 224      | p&(q\|r)               | p\*(q+r+q\*r)                |
-| 97       | ~((p^q^r)\|(q&r))   | 1+p+q+r+q\*r+p\*q          | 225      | p^(~(q\|r))            | 1+p+q+r+q\*r                 |
+| 97       | ~((p^q^r)\|(q&r))   | 1+p+q+r+q\*r+p\*q\*r       | 225      | p^(~(q\|r))            | 1+p+q+r+q\*r                 |
 | 98       | ((p\|r)&q)^r        | p\*q+r+q\*r+p\*q\*r        | 226      | (p&q)^(q&r)^r          | p\*q+r+q\*r                  |
 | 99       | (~p\|r)^q           | 1+p+q+p\*r                 | 227      | (p&r)\|(p^~q)          | 1+p+q+p\*r+p\*q\*r           |
-| 100      | ((p&q)\|r)^q        | q+p\*r+q\*r+p\*q\*r        | 228      | ((p^q)&r)^q            | q+p\*r+q\*r                  |
+| 100      | ((p|\q)&r)^q        | q+p\*r+q\*r+p\*q\*r        | 228      | ((p^q)&r)^q            | q+p\*r+q\*r                  |
 | 101      | p^(p&q)^~r          | 1+p+p\*q+r                 | 229      | (p&q)\|(p^~r)          | 1+p+p\*q+r+p\*q\*r           |
 | 102      | q^r                 | q+r                        | 230      | (p&q&r)^q^r            | q+r+p\*q\*r                  |
 | 103      | ~(p\|q\|r)^q^r      | 1+p+p\*q+p\*r+q\*r+p\*q\*r | 231      | (p^~q)\|(q^r)          | 1+p+p\*q+p\*r+q\*r           |
