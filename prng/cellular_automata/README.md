@@ -108,19 +108,19 @@ standard conventions.
 | 94       | (p&r)^(p\|q\|r)     | p+q+p\*q+r+q\*r+p\*q\*r    | 222      |                        | p+q+p\*q+r+q\*r           		|
 | 95       | ~(p&r)              | 1+p\*r                     | 223      |                        | 1+q\*r+p\*q\*r            		|
 | **Rule** | **Boolean**         | **Alegbraic (mod 2)**      | **Rule** | **Boolean**            | **Alegbraic (mod 2)**     		|
-| 96       | p&(q^r)             | p\*(q+r)                   | 224      |                        |                           		|
-| 97       | ~((p^q^r)\|(q&r))   | 1+p+q+r+q\*r+p\*q          | 225      |                        |                           		|
-| 98       | ((p\|r)&q)^r        | p\*q+r+q\*r+p\*q\*r        | 226      |                        |                           		|
-| 99       | (~p\|r)^q           | 1+p+q+p\*r                 | 227      |                        |                           		|
-| 100      | ((p&q)\|r)^q        | q+p\*r+q\*r+p\*q\*r        | 228      |                        |                           		|
-| 101      | p^(p&q)^~r          | 1+p+p\*q+r                 | 229      |                        |                           		|
-| 102      | q^r                 | q+r                        | 230      |                        |                           		|
-| 103      | ~(p\|q\|r)^q^r      | 1+p+p\*q+p\*r+q\*r+p\*q\*r | 231      |                        |                           		|
-| 104      | p^(p\|q\|r)^q^r     | p\*q+p\*r+q\*r+p\*q\*r     | 232      |                        |                           		|
-| 105      | p^q^~r              | 1+p+q+r                    | 233      |                        |                           		|
-| 106      | (p&q)^r             | p\*q+r                     | 234      |                        |                           		|
-| 107      | p^(p\|q\|~r)^q^r    | 1+p+q+p\*r+q\*r+p\*q\*r    | 235      |                        |                           		|
-| 108      | (p&r)^q             | q+p\*r                     | 236      |                        |                           		|
+| 96       | p&(q^r)             | p\*(q+r)                   | 224      |                        | p\*(q+r+q\*r)             		|
+| 97       | ~((p^q^r)\|(q&r))   | 1+p+q+r+q\*r+p\*q          | 225      |                        | 1+p+q+r+q\*r              		|
+| 98       | ((p\|r)&q)^r        | p\*q+r+q\*r+p\*q\*r        | 226      |                        | p\*q+r+q\*r               		|
+| 99       | (~p\|r)^q           | 1+p+q+p\*r                 | 227      |                        | 1+p+q+p\*r+p\*q\*r        		|
+| 100      | ((p&q)\|r)^q        | q+p\*r+q\*r+p\*q\*r        | 228      |                        | q+p\*r+q\*r               		|
+| 101      | p^(p&q)^~r          | 1+p+p\*q+r                 | 229      |                        | 1+p+p\*q+r+p\*q\*r        		|
+| 102      | q^r                 | q+r                        | 230      |                        | q+r+p\*q\*r               		|
+| 103      | ~(p\|q\|r)^q^r      | 1+p+p\*q+p\*r+q\*r+p\*q\*r | 231      |                        | 1+p+p\*q+p\*r+q\*r        		|
+| 104      | p^(p\|q\|r)^q^r     | p\*q+p\*r+q\*r+p\*q\*r     | 232      |                        | p\*q+p\*r+q\*r             		|
+| 105      | p^q^~r              | 1+p+q+r                    | 233      |                        | 1+p+q+r+p\*q\*r           		|
+| 106      | (p&q)^r             | p\*q+r                     | 234      |                        | p\*q+r+p\*q\*r            		|
+| 107      | p^(p\|q\|~r)^q^r    | 1+p+q+p\*r+q\*r+p\*q\*r    | 235      |                        | 1+p+q+p\*r+q\*r           		|
+| 108      | (p&r)^q             | q+p\*r                     | 236      |                        | q+p\*r+p\*q\*r            		|
 | 109      | p^(p\|~q\|r)^q^r    | 1+p+p\*q+r+q\*r+p\*q\*r    | 237      |                        |                           		|
 | 110      | (~p&q&r)^q^r        | q+r+q\*r+p\*q\*r           | 238      |                        |                           		|
 | 111      | ~p\|(q^r)           | 1+p+p\*q+p\*r              | 239      |                        |                           		|
