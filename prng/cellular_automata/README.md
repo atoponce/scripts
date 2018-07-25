@@ -8,7 +8,7 @@ left cell, "q" as the middle cell, and "r" as the right cell, following
 standard conventions.
 
 Both the [boolean logic](http://atlas.wolfram.com/01/01/views/172/TableView.html)
-and [algeraic logic](http://atlas.wolfram.com/01/01/views/173/TableView.html)
+and [algebraic logic](http://atlas.wolfram.com/01/01/views/173/TableView.html)
 sourced and converted from Wolfram Atlas. The rendered Markdown should be able
 to be cleanly copied and pasted.
 
@@ -52,7 +52,7 @@ to be cleanly copied and pasted.
 | 34       | ~q&r                | (1+q)\*r                   | 162      | (p\|~q)&r              | (1+q+p\*q)\*r                |
 | 35       | (~p\|q\|r)^q        | (1+q)\*(1+p+p\*r)          | 163      | (~p\|(q^r))^q          | 1+p+q+p\*q+p\*r              |
 | 36       | (p^q)&(q^r)         | q+p\*q+p\*r+q\*r           | 164      | p^(p\|q\|r)^r          | q+p\*q+p\*+q\*r+p\*q\*r      |
-| 37       | p^(p\|q\|r)^~r      | 1+p+r+p\*q\*r              | 165      | p^~r                   | 1+p+r                        |
+| 37       | p^(p&q&r)^~r        | 1+p+r+p\*q\*r              | 165      | p^~r                   | 1+p+r                        |
 | 38       | ((p&q)\|r)^q        | q+p\*q+r+p\*q\*r           | 166      | (p&q)^q^r              | q+p\*+r                      |
 | 39       | ((p^~q)\|r)^q       | 1+p+p\*r+q\*r              | 167      | p^(p\|q\|~r)^r         | 1+p+p\*r+q\*r+p\*q\*r        |
 | 40       | (p^q)&r             | (p+q)\*r                   | 168      | (p\|q)&r               | (p+q+p\*q)\*r                |
