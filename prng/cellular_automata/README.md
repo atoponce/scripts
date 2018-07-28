@@ -117,7 +117,7 @@ to be cleanly copied and pasted.
 | 97       | ~((p^q^r)\|(q&r))   | 1+p+q+r+q\*r+p\*q\*r       | 225      | p^(~(q\|r))            | 1+p+q+r+q\*r                 |
 | 98       | ((p\|r)&q)^r        | p\*q+r+q\*r+p\*q\*r        | 226      | (p&q)^(q&r)^r          | p\*q+r+q\*r                  |
 | 99       | (~p\|r)^q           | 1+p+q+p\*r                 | 227      | (p&r)\|(p^~q)          | 1+p+q+p\*r+p\*q\*r           |
-| 100      | ((p|\q)&r)^q        | q+p\*r+q\*r+p\*q\*r        | 228      | ((p^q)&r)^q            | q+p\*r+q\*r                  |
+| 100      | ((p\|q)&r)^q        | q+p\*r+q\*r+p\*q\*r        | 228      | ((p^q)&r)^q            | q+p\*r+q\*r                  |
 | 101      | p^(p&q)^~r          | 1+p+p\*q+r                 | 229      | (p&q)\|(p^~r)          | 1+p+p\*q+r+p\*q\*r           |
 | 102      | q^r                 | q+r                        | 230      | (p&q&r)^q^r            | q+r+p\*q\*r                  |
 | 103      | ~(p\|q\|r)^q^r      | 1+p+p\*q+p\*r+q\*r+p\*q\*r | 231      | (p^~q)\|(q^r)          | 1+p+p\*q+p\*r+q\*r           |
