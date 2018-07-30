@@ -1,6 +1,7 @@
 #!/usr/bin/python3
 
 seed = '00000000000000000100000000000000000' # textbook initial state
+#seed = '01011111110010010011010001100100010' # random initial state
 bits = len(seed)
 
 for n in range(5000):
