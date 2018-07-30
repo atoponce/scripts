@@ -8,7 +8,7 @@ left cell, "q" as the middle cell, and "r" as the right cell, following
 standard conventions.
 
 Both the [boolean logic](http://atlas.wolfram.com/01/01/views/172/TableView.html)
-and [algeraic logic](http://atlas.wolfram.com/01/01/views/173/TableView.html)
+and [algebraic logic](http://atlas.wolfram.com/01/01/views/173/TableView.html)
 sourced and converted from Wolfram Atlas. The rendered Markdown should be able
 to be cleanly copied and pasted.
 
@@ -52,7 +52,7 @@ to be cleanly copied and pasted.
 | 34       | ~q&r                | (1+q)\*r                   | 162      | (p\|~q)&r              | (1+q+p\*q)\*r                |
 | 35       | (~p\|q\|r)^q        | (1+q)\*(1+p+p\*r)          | 163      | (~p\|(q^r))^q          | 1+p+q+p\*q+p\*r              |
 | 36       | (p^q)&(q^r)         | q+p\*q+p\*r+q\*r           | 164      | p^(p\|q\|r)^r          | q+p\*q+p\*+q\*r+p\*q\*r      |
-| 37       | p^(p\|q\|r)^~r      | 1+p+r+p\*q\*r              | 165      | p^~r                   | 1+p+r                        |
+| 37       | p^(p&q&r)^~r        | 1+p+r+p\*q\*r              | 165      | p^~r                   | 1+p+r                        |
 | 38       | ((p&q)\|r)^q        | q+p\*q+r+p\*q\*r           | 166      | (p&q)^q^r              | q+p\*+r                      |
 | 39       | ((p^~q)\|r)^q       | 1+p+p\*r+q\*r              | 167      | p^(p\|q\|~r)^r         | 1+p+p\*r+q\*r+p\*q\*r        |
 | 40       | (p^q)&r             | (p+q)\*r                   | 168      | (p\|q)&r               | (p+q+p\*q)\*r                |
@@ -91,7 +91,7 @@ to be cleanly copied and pasted.
 | 72       | (p&q)^(q&r)         | q\*(p+r)                   | 200      | (p\|r)&q               | q\*(p+r+p\*r)                |
 | 73       | ~((p&r)\|(p^q^r))   | 1+p+q+r+p\*r+p\*q\*r       | 201      | (~(q\|r))^q            | 1+p+q+r+p\*r                 |
 | 74       | (p&(q\|r))^r        | p\*q+r+p\*r+p\*q\*r        | 202      | (p&(q^r))^r            | p\*q+r+p\*r                  |
-| 75       | (p^(~q\|r)          | 1+p+q+q\*r                 | 203      | (p^~q)\|(q&r)          | 1+p+q+q\*r+p\*q\*r           |
+| 75       | p^(~q\|r)           | 1+p+q+q\*r                 | 203      | (p^~q)\|(q&r)          | 1+p+q+q\*r+p\*q\*r           |
 | 76       | (p&q&r)^q           | q\*(1+p\*r)                | 204      | q                      | q                            |
 | 77       | p^((p^q)\|(p^~r))   | 1+p+p\*q+r+p\*r+q\*r       | 205      | (~(p\|r))\|q           | 1+p+p\*q+r+p\*r+q\*r+p\*q\*r |
 | 78       | p^((p^q)\|r)        | q+r+p\*r+q\*r              | 206      | (~p&r)\|q              | q+r+p\*r+q\*r+p\*q\*r        |
@@ -117,7 +117,7 @@ to be cleanly copied and pasted.
 | 97       | ~((p^q^r)\|(q&r))   | 1+p+q+r+q\*r+p\*q\*r       | 225      | p^(~(q\|r))            | 1+p+q+r+q\*r                 |
 | 98       | ((p\|r)&q)^r        | p\*q+r+q\*r+p\*q\*r        | 226      | (p&q)^(q&r)^r          | p\*q+r+q\*r                  |
 | 99       | (~p\|r)^q           | 1+p+q+p\*r                 | 227      | (p&r)\|(p^~q)          | 1+p+q+p\*r+p\*q\*r           |
-| 100      | ((p|\q)&r)^q        | q+p\*r+q\*r+p\*q\*r        | 228      | ((p^q)&r)^q            | q+p\*r+q\*r                  |
+| 100      | ((p\|q)&r)^q        | q+p\*r+q\*r+p\*q\*r        | 228      | ((p^q)&r)^q            | q+p\*r+q\*r                  |
 | 101      | p^(p&q)^~r          | 1+p+p\*q+r                 | 229      | (p&q)\|(p^~r)          | 1+p+p\*q+r+p\*q\*r           |
 | 102      | q^r                 | q+r                        | 230      | (p&q&r)^q^r            | q+r+p\*q\*r                  |
 | 103      | ~(p\|q\|r)^q^r      | 1+p+p\*q+p\*r+q\*r+p\*q\*r | 231      | (p^~q)\|(q^r)          | 1+p+p\*q+p\*r+q\*r           |
