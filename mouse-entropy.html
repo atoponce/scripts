@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <title>JavaScript entropy collector</title>
+        <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+        <style>
+            #ent {
+                background-color: white;
+                border: 1px solid black;
+                height: 512px;
+                width: 512px;
+            }
+        </style>
+    </head>
+    <body id="body">
+        <center>
+            <div id="ent"></div>
+        </center>
+        <script>
+            var i=0, limit=1000;
+            var logCoords = function(e) { console.log(e.clientX, e.clientY); };
+            var ent = document.getElementById("ent");
+            var body = document.getElementById("body");
+
+            ent.onmousemove = function(e) {
+                console.log({i, limit}); // debug
+                if(++i <= limit) { return logCoords(e); }
+                body.style.backgroundColor = "red";
+                return (ent.onmousemove = null);
+            };
+        </script>
+    </body>
+</html>
