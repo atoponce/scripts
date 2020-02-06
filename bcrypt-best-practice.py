@@ -7,7 +7,7 @@
 # This is the way.
 #
 # Note: While passlib provides bcrypt_sha256 to address this problem, it does
-# not salt the prehash. As such, is vulnerable to cross-breach attacks.
+# not salt the prehash. As such, is vulnerable to breach correlation attacks.
 # https://passlib.readthedocs.io/en/stable/lib/passlib.hash.bcrypt_sha256.html#algorithm
 
 from passlib.hash import bcrypt
