@@ -1,33 +1,112 @@
 <!DOCTYPE html>
-<html lang="en">
-    <head>
-        <title>JavaScript entropy collector</title>
-        <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
-        <style>
-            #ent {
-                background-color: white;
-                border: 1px solid black;
-                height: 512px;
-                width: 512px;
-            }
-        </style>
-    </head>
-    <body id="body">
-        <center>
-            <div id="ent"></div>
-        </center>
-        <script>
-            var i=0, limit=1000;
-            var logCoords = function(e) { console.log(e.clientX, e.clientY); };
-            var ent = document.getElementById("ent");
-            var body = document.getElementById("body");
+<html>
+  <head>
+    <style>
+      p {
+        text-align: center;
+      }
+      #container {
+        margin: 0 auto;
+        width: 512px;
+      }
+      #progress {
+        background: #dddddd;
+        width: 512px;
+      }
+      #progressBar {
+        background: #0088FF;
+        color: #ffffff;
+        font-weight: bold;
+        height: 40px;
+        line-height: 40px;
+        max-width: 512px;
+        text-align: center;
+        width: 0%;
+      }
+      #entropyResult {
+        font-family: monospace;
+        height: 40px;
+        width: 512px;
+      }
+    </style>
+  </head>
+  <body>
+    <div id='container'>
+      <p>Move your mouse over the randogram below until the progress meter is 100%.</p>
+      <canvas id='randogram' width='512' height='512'></canvas>
+      <div id='progress'>
+        <div id='progressBar'></div>
+      </div>
+      <p id='entropyResult'></p>
+    </div>
+    <script>
+      function randogram() {
+        const rand = new Uint8Array(1)
+        const pixels = []
 
-            ent.onmousemove = function(e) {
-                console.log({i, limit}); // debug
-                if(++i <= limit) { return logCoords(e); }
-                body.style.backgroundColor = "red";
-                return (ent.onmousemove = null);
-            };
-        </script>
-    </body>
+        for (let i = 0; i < 512**2; i++)
+          pixels[i] = crypto.getRandomValues(rand)[0] % 2
+
+        return pixels
+      }
+
+      // https://stackoverflow.com/a/41550641
+      function bin2hex(b) {
+        return b.match(/.{4}/g).reduce(function(acc, i) {
+          return acc + parseInt(i, 2).toString(16);
+        }, '')
+      }
+
+      const canvas = document.getElementById('randogram')
+      const ctx = canvas.getContext('2d')
+      const imgData = ctx.getImageData(0, 0, 512, 512)
+      const pixels = randogram()
+
+      const progressBar = document.getElementById('progressBar')
+      const entropyResult = document.getElementById('entropyResult')
+
+      let entropy = ""
+      let neumann = []
+
+      for (let i = 0; i < imgData.data.length; i += 4) {
+	if (pixels[i / 4] === 0) {
+          imgData.data[i] = 0
+	  imgData.data[i + 1] = 0
+	  imgData.data[i + 2] = 0
+	} else {
+	  imgData.data[i] = 255
+	  imgData.data[i + 1] = 255
+	  imgData.data[i + 2] = 255
+	}
+	imgData.data[i + 3] = 255
+      }
+
+      ctx.putImageData(imgData, 0, 0)
+
+      document.getElementById('randogram').onmousemove = function(e) {
+        if (entropy.length < 256) {
+          const p = 512 * e.offsetX + e.offsetY
+          let progress = 0
+
+          neumann.push(pixels[p])
+
+          // john von neumann randomness extractor
+          if (neumann.length === 2) {
+            if (neumann[0] !== neumann[1]) entropy += neumann[0]
+            neumann = []
+          }
+
+          progress = Math.floor(entropy.length/256 * 100)
+
+          if (progress > 100) progress = 100
+          else {
+            progressBar.style.width = progress + "%"
+            progressBar.innerText = progress + "%"
+          }
+        } else {
+          entropyResult.innerText = bin2hex(entropy)
+        }
+      }
+    </script>
+  </body>
 </html>
