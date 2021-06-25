@@ -1,12 +1,20 @@
 <!DOCTYPE html>
 <html>
   <head>
+    <meta name='viewport' content='width=device-width, initial-scale=1.0' />
+    <meta http-equiv='Content-Type' content='text/html; charset=utf-8' />
+    <title>Mouse entropy</title>
+    <link rel='shortcut icon' href='data:image/x-icon;base64,AAABAAEAFB8QAAEABAA8AgAAFgAAAIlQTkcNChoKAAAADUlIRFIAAAAUAAAAHwgGAAAA507tzgAAAgNJREFUSImtlr9PwkAUx781jqSbSHTQyKC7pn/AheimEBKNJgwMrCxE7FA3hgbTxDDiwMAICZtsXTUNTsw31IQEBw0pJLLhYO68/gAK9Zs0udd3/eR7L/fuKu0f7M3wJwkemabJx4QQX+zVhiee+WasKA7M5/P/AuXAXC6HYrEYGepacjqdhqZpkaDeGoIQgupDFbIsrwX1AQHg5PgE2r0GWZZBCFkJGghkUMMwVobOBQJAMpmEYRhIbCcYdCl4IZBBH2uPSGwnojtkim/FUX+qc6eLShAKCACxWAz1pzqODo+iOxSh1YcqFEURa+pyuxKQQXVdh6Io0R2K0nUdp6dnLORO1wYCgKreiVBEBjKoeFJthv2QUop+v4/xeIzPry9Mv6d4t22MRiMMP4Z8Xmigbduo1WrLpklzl0wphaqqPCaEeLtFCniCa0gpRalUgmVZ6L31+PvLq8tlDv3A3lsPhUIBjuMAANqtNs+lUil2ToYDmqaJ8m3ZNcGyLFBKAfxu6mw2y1KB/cyBzWYTlUpFzPErtSW4zGQy4Rw2Go0gmAQAr68vmEwm3OX5xcVCoHi5Swi47B3HQafT4fHNzTUb+pbNHAaCRHWfu3wc34p7+9gHXCQJAIYfQ9dvyO7ujivPFLpTgN8tNBgM0H3uiu02E6HS/sFeWJ63XoElWve0mVvvH79Op6Tbn+HjAAAAAElFTkSuQmCC' />
     <style>
-      p {
+      body {
         text-align: center;
+      }
+      #randogram {
+        touch-action: none;
       }
       #container {
         margin: 0 auto;
+        pointer-events: auto;
         width: 512px;
       }
       #progress {
@@ -32,7 +40,8 @@
   </head>
   <body>
     <div id='container'>
-      <p>Move your mouse over the randogram below until the progress meter is 100%.</p>
+      <h1>JavaScript Mouse Entropy</h1>
+      <p>Download this page to your computer, and run it offline.<br/>Move your mouse over the randogram below until the progress meter is 100%.</p>
       <canvas id='randogram' width='512' height='512'></canvas>
       <div id='progress'>
         <div id='progressBar'></div>
@@ -40,27 +49,38 @@
       <p id='entropyResult'></p>
     </div>
     <script>
+      // https://exploringjs.com/impatient-js/ch_typed-arrays.html#concatenating-typed-arrays
+      function concatenate(resultConstructor, ...arrays) {
+        let totalLength = 0
+
+        for (const arr of arrays) totalLength += arr.length
+
+        const result = new resultConstructor(totalLength)
+        let offset = 0
+
+        for (const arr of arrays) {
+          result.set(arr, offset)
+          offset += arr.length
+        }
+
+        return result
+      }
+
       function randogram() {
-        const rand = new Uint8Array(1)
-        const pixels = []
-
-        for (let i = 0; i < 512**2; i++)
-          pixels[i] = crypto.getRandomValues(rand)[0] % 2
-
-        return pixels
+        return crypto.getRandomValues(new Uint8Array(65536)) // max ArrayBufferView byte length
       }
 
       // https://stackoverflow.com/a/41550641
       function bin2hex(b) {
         return b.match(/.{4}/g).reduce(function(acc, i) {
-          return acc + parseInt(i, 2).toString(16);
+          return acc + parseInt(i, 2).toString(16)
         }, '')
       }
 
       const canvas = document.getElementById('randogram')
       const ctx = canvas.getContext('2d')
       const imgData = ctx.getImageData(0, 0, 512, 512)
-      const pixels = randogram()
+      const pixels = concatenate(Uint8Array, randogram(), randogram(), randogram(), randogram())
 
       const progressBar = document.getElementById('progressBar')
       const entropyResult = document.getElementById('entropyResult')
@@ -69,44 +89,51 @@
       let neumann = []
 
       for (let i = 0; i < imgData.data.length; i += 4) {
-	if (pixels[i / 4] === 0) {
+        if (pixels[i / 4] % 2 === 0) {
           imgData.data[i] = 0
-	  imgData.data[i + 1] = 0
-	  imgData.data[i + 2] = 0
-	} else {
-	  imgData.data[i] = 255
-	  imgData.data[i + 1] = 255
-	  imgData.data[i + 2] = 255
-	}
-	imgData.data[i + 3] = 255
+          imgData.data[i + 1] = 0
+          imgData.data[i + 2] = 0
+        } else {
+          imgData.data[i] = 255
+          imgData.data[i + 1] = 255
+          imgData.data[i + 2] = 255
+        }
+        imgData.data[i + 3] = 255
       }
 
       ctx.putImageData(imgData, 0, 0)
 
-      document.getElementById('randogram').onmousemove = function(e) {
+      document.getElementById('randogram').onpointermove = function(e) {
+        e.preventDefault()
+
         if (entropy.length < 256) {
-          const p = 512 * e.offsetX + e.offsetY
-          let progress = 0
+          const x = Math.floor(e.offsetX)
+          const y = Math.floor(e.offsetY)
 
-          neumann.push(pixels[p])
+          if (0 <= x && x < 512 && 0 <= y && y < 512) {
+            const p = 512 * y + x
+            let progress = 0
 
-          // john von neumann randomness extractor
-          if (neumann.length === 2) {
-            if (neumann[0] !== neumann[1]) entropy += neumann[0]
-            neumann = []
-          }
+            neumann.push(pixels[p] % 2)
 
-          progress = Math.floor(entropy.length/256 * 100)
+            // john von neumann randomness extractor
+            if (neumann.length === 2) {
+              if (neumann[0] !== neumann[1]) entropy += neumann[0]
+              neumann = []
+            }
 
-          if (progress > 100) progress = 100
-          else {
-            progressBar.style.width = progress + "%"
-            progressBar.innerText = progress + "%"
-          }
+            progress = Math.floor(entropy.length/256 * 100)
+
+            if (progress > 100) progress = 100
+            else {
+              progressBar.style.width = progress + "%"
+              progressBar.innerText = progress + "%"
+            } // if progress > 100
+          } // if 0 <= x < 512 && 0 <= y < 512
         } else {
           entropyResult.innerText = bin2hex(entropy)
-        }
-      }
+        } // if entropy.length < 256
+      } // onpointermove
     </script>
   </body>
 </html>
