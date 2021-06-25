@@ -10,6 +10,7 @@
         text-align: center;
       }
       #randogram {
+        cursor: crosshair;
         touch-action: none;
       }
       #container {
@@ -77,63 +78,86 @@
         }, '')
       }
 
-      const canvas = document.getElementById('randogram')
-      const ctx = canvas.getContext('2d')
-      const imgData = ctx.getImageData(0, 0, 512, 512)
-      const pixels = concatenate(Uint8Array, randogram(), randogram(), randogram(), randogram())
-
-      const progressBar = document.getElementById('progressBar')
-      const entropyResult = document.getElementById('entropyResult')
-
-      let entropy = ""
-      let neumann = []
-
-      for (let i = 0; i < imgData.data.length; i += 4) {
-        if (pixels[i / 4] % 2 === 0) {
-          imgData.data[i] = 0
-          imgData.data[i + 1] = 0
-          imgData.data[i + 2] = 0
-        } else {
-          imgData.data[i] = 255
-          imgData.data[i + 1] = 255
-          imgData.data[i + 2] = 255
-        }
-        imgData.data[i + 3] = 255
+      function sleep(ms) {
+        const date = Date.now()
+        let currentDate = null
+        do currentDate = Date.now()
+        while (currentDate - date < ms)
       }
 
-      ctx.putImageData(imgData, 0, 0)
+      function genPixels() {
+        return concatenate(Uint8Array, randogram(), randogram(), randogram(), randogram())
+      }
 
-      document.getElementById('randogram').onpointermove = function(e) {
-        e.preventDefault()
+      function drawRandogram() {
+        const canvas = document.getElementById('randogram')
+        const ctx = canvas.getContext('2d', {alpha: false})
+        const imgData = ctx.getImageData(0, 0, 512, 512)
+        const pixels = genPixels()
 
-        if (entropy.length < 256) {
-          const x = Math.floor(e.offsetX)
-          const y = Math.floor(e.offsetY)
+        for (let i = 0; i < imgData.data.length; i += 4) {
+          if (pixels[i / 4] % 2 === 0) {
+            imgData.data[i] = 0
+            imgData.data[i + 1] = 136
+            imgData.data[i + 2] = 255
+          } else {
+            imgData.data[i] = 255
+            imgData.data[i + 1] = 255
+            imgData.data[i + 2] = 255
+          }
+        }
 
-          if (0 <= x && x < 512 && 0 <= y && y < 512) {
-            const p = 512 * y + x
-            let progress = 0
+        ctx.putImageData(imgData, 0, 0)
+        requestAnimationFrame(drawRandogram)
 
-            neumann.push(pixels[p] % 2)
+        return pixels
+      }
 
-            // john von neumann randomness extractor
-            if (neumann.length === 2) {
-              if (neumann[0] !== neumann[1]) entropy += neumann[0]
-              neumann = []
-            }
+      function getEntropy() {
+        const progressBar = document.getElementById('progressBar')
+        const entropyResult = document.getElementById('entropyResult')
+        const pixels = drawRandogram()
 
-            progress = Math.floor(entropy.length/256 * 100)
+        let entropy = ""
+        let neumann = []
 
-            if (progress > 100) progress = 100
-            else {
-              progressBar.style.width = progress + "%"
-              progressBar.innerText = progress + "%"
-            } // if progress > 100
-          } // if 0 <= x < 512 && 0 <= y < 512
-        } else {
-          entropyResult.innerText = bin2hex(entropy)
-        } // if entropy.length < 256
-      } // onpointermove
+        document.getElementById('randogram').onpointermove = function(e) {
+          e.preventDefault()
+
+          if (entropy.length < 256) {
+            const x = Math.floor(e.offsetX)
+            const y = Math.floor(e.offsetY)
+
+            if (0 <= x && x < 512 && 0 <= y && y < 512) {
+              const p = 512 * y + x
+              let progress = 0
+
+              neumann.push(pixels[p] % 2)
+
+              // john von neumann randomness extractor
+              if (neumann.length === 2) {
+                if (neumann[0] !== neumann[1]) entropy += neumann[0]
+
+                neumann = []
+              }
+
+              progress = Math.floor(entropy.length/256 * 100)
+
+              if (progress > 100) progress = 100
+              else {
+                progressBar.style.width = progress + "%"
+                progressBar.innerText = progress + "%"
+              } // if progress > 100
+            } // if 0 <= x < 512 && 0 <= y < 512
+          } else {
+            entropyResult.innerText = bin2hex(entropy)
+          } // if entropy.length < 256
+        } // onpointermove
+
+        requestAnimationFrame(drawRandogram)
+      } // getEntropy()
+
+      getEntropy()
     </script>
   </body>
 </html>
