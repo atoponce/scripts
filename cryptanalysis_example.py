@@ -16,29 +16,46 @@ import random
 
 def fractionated_morse(text, key):
     code = ''
-    mapping = ['...', '..-', '..x', '.-.', '.--', '.-x', '.x.', '.x-', '.xx',
-               '-..', '-.-', '-.x', '--.', '---', '--x', '-x.', '-x-', '-xx',
-               'x..', 'x.-', 'x.x', 'x-.', 'x--', 'x-x', 'xx.', 'xx-']
+    mapping = ['···', '··−', '··×', '·−·', '·−−', '·−×', '·×·', '·×−', '·××',
+               '−··', '−·−', '−·×', '−−·', '−−−', '−−×', '−×·', '−×−', '−××',
+               '×··', '×·−', '×·×', '×−·', '×−−', '×−×', '××·', '××−']
 
-    morse_code = {'A': '.-',   'B': '-...', 'C': '-.-.', 'D': '-..',  'E': '.',    'F': '..-.',
-                  'G': '--.',  'H': '....', 'I': '..',   'J': '.---', 'K': '-.-',  'L': '.-..',
-                  'M': '--',   'N': '-.',   'O': '---',  'P': '.--.', 'Q': '--.-', 'R': '.-.',
-                  'S': '...',  'T': '-',    'U': '..-',  'V': '...-', 'W': '.--',  'X': '-..-',
-                  'Y': '-.--', 'Z': '--..'}
+    morse_code = { # Letters
+                  'A': '·−',   'B': '−···', 'C': '−·−·', 'D': '−··',  'E': '·',    'F': '··−·',
+                  'G': '−−·',  'H': '····', 'I': '··',   'J': '·−−−', 'K': '−·−',  'L': '·−··',
+                  'M': '−−',   'N': '−·',   'O': '−−−',  'P': '·−−·', 'Q': '−−·−', 'R': '·−·',
+                  'S': '···',  'T': '−',    'U': '··−',  'V': '···−', 'W': '·−−',  'X': '−··−',
+                  'Y': '−·−−', 'Z': '−−··',
+                  # Numbers
+                  '1': '·−−−−', '2': '··−−−', '3': '···−−', '4': '····−', '5': '·····',
+                  '6': '−····', '7': '−−···', '8': '−−−··', '9': '−−−−·', '0': '−−−−−',
+                  # Punctuation
+                  '.': '·−·−·−', ',': '−−··−−',  '?': '··−−··', "'": '·−−−−·', '!': '−·−·−−',
+                  '/': '−··−·',  '(': '−·−−·',   ')': '−·−−·−', '&': '·−···',  ':': '−−−···',
+                  ';': '−·−·−·', '=': '−···−',   '+': '·−·−·',  '-': '−····−', '_': '··−−·−',
+                  '"': '·−··−·', '$': '···−··−', '@': '·−−·−·',
+                  # Non-Latin (without the Ch digraph)
+                  'À': '·−−·−', 'Ä': '·−·−',  'Å': '·−−·−',   'Ą': '·−·−',   'Æ': '·−·−',
+                  'Ć': '−·−··', 'Ĉ': '−·−··', 'Ç': '−·−··',   'Đ': '··−··',  'Ð': '··−−·',
+                  'É': '··−··', 'È': '·−··−', 'Ę': '··−··',   'Ĝ': '−−·−·',  'Ĥ': '−−−−',
+                  'Ĵ': '·−−−·', 'Ł': '·−··−', 'Ń': '−−·−−',   'Ñ': '−−·−−',  'Ó': '−−−·',
+                  'Ö': '−−−·',  'Ø': '−−−·',  'Ś': '···−···', 'Ŝ': '···−·',  'Š': '−−−−',
+                  'Þ': '·−−··', 'Ü': '··−−',  'Ŭ': '··−−',    'Ź': '−−··−·', 'Ż': '−−··−',
+                 }
 
     text = text.upper()
     key = key.upper()
 
-    for k in morse_code:
-        text = text.replace(k, morse_code[k] + 'x')
+    for m in morse_code:
+        text = text.replace(m, morse_code[m] + '×')
 
-    text = text.replace(' ', 'x')
+    text = text.replace(' ', '×')
     text = text.rstrip(text[-1])
 
     if len(text) % 3 == 1:
-        text += 'xx'
+        text += '××'
     elif len(text) % 3 == 2:
-        text += 'x'
+        text += '×'
 
     for i in range(0, len(text), 3):
         code += key[mapping.index(text[i:i + 3])]
@@ -46,47 +63,17 @@ def fractionated_morse(text, key):
     return code
 
 def columnar_transposition(text, key):
-    block = []
+    block = ''
+    alph = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ'
+    indx = [key.index(char) for char in alph]
 
-    text = text.upper()
-    key = key.upper()
+    padding = 26 - (len(text) % 26)
+    text += alph[padding - 1] * padding
 
-    if len(text) / 26 >  int(len(text) / 26):
-        rows = int(len(text) / 26) + 1
-    else:
-        rows = int(len(text) / 26)
+    for i in range(len(key)):
+        block += text[indx[i]::len(key)]
 
-    # 1. Build the columns and rows
-    for i in range(rows):
-        block.append(text[26 * i: 26 * i + 26])
-
-    # add padding
-    padding = 26 - len(block[-1])
-    char = chr(65 + padding - 1)
-
-    while len(block[-1]) < 26:
-        block[-1] += char
-
-    # 2. Sort the columns
-    for n in range(65, 91):
-        column = key.index(chr(n))
-
-        for row in range(len(block)):
-            tmp = list(block[row])
-            tmp[n - 65], tmp[column] = tmp[column], tmp[n - 65]
-            block[row] = ''.join(tmp)
-
-            tmp = list(key)
-            tmp[n - 65], tmp[column] = tmp[column], tmp[n - 65]
-            key = ''.join(tmp)
-
-    # 3. Read the columns
-    text = ''
-    for n in range(26):
-        for idx, row in enumerate(block):
-            text += block[idx][n]
-
-    return text
+    return block
 
 def chaocipher(text, left, right):
     ciphertext = ''
