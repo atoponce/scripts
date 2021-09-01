@@ -125,16 +125,6 @@ plaintext = ('I HOPE YOU ARE HAVING LOTS OF FUN IN TRYING TO CATCH ME THAT WASNT
              'I AM NOT AFRAID BECAUSE I KNOW THAT MY NEW LIFE IS LIFE WILL BE AN EASY ONE IN '
              'PARADICE DEATH')
 
-plaintext = (
-            'There are two main things that can affect the result of FtHoF, the current season '
-            'and the golden cookie sound selector. If the season is Valentines or Easter the '
-            'random seed will be increased once, if the golden cookie sound selector is on then '
-            'the seed will also be increased. This means there are 3 possible results for each '
-            'cast of FtHoF depending on the selected season or whether the golden cookie chime is '
-            'on or both. Continuing to switch between seasons or turn the chime on and off will '
-            'not affecting the results, they only affect the result at the time the spell is cast. '
-            )
-
 fractionated = fractionated_morse(plaintext, key1)
 transposed = columnar_transposition(fractionated, key2)
 encrypted = chaocipher(transposed, key1, key2)
