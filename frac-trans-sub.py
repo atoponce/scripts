@@ -12,6 +12,7 @@
 #
 # Public domain
 
+import re
 import random
 
 def fractionated_morse(text, key):
@@ -21,35 +22,40 @@ def fractionated_morse(text, key):
                '×··', '×·−', '×·×', '×−·', '×−−', '×−×', '××·', '××−']
 
     morse_code = { # Letters
-                  'A': '·−',   'B': '−···', 'C': '−·−·', 'D': '−··',  'E': '·',    'F': '··−·',
-                  'G': '−−·',  'H': '····', 'I': '··',   'J': '·−−−', 'K': '−·−',  'L': '·−··',
-                  'M': '−−',   'N': '−·',   'O': '−−−',  'P': '·−−·', 'Q': '−−·−', 'R': '·−·',
-                  'S': '···',  'T': '−',    'U': '··−',  'V': '···−', 'W': '·−−',  'X': '−··−',
-                  'Y': '−·−−', 'Z': '−−··',
+                  'A': '·−×',   'B': '−···×', 'C': '−·−·×', 'D': '−··×',  'E': '·×',    'F': '··−·×',
+                  'G': '−−·×',  'H': '····×', 'I': '··×',   'J': '·−−−×', 'K': '−·−×',  'L': '·−··×',
+                  'M': '−−×',   'N': '−·×',   'O': '−−−×',  'P': '·−−·×', 'Q': '−−·−×', 'R': '·−·×',
+                  'S': '···×',  'T': '−×',    'U': '··−×',  'V': '···−×', 'W': '·−−×',  'X': '−··−×',
+                  'Y': '−·−−×', 'Z': '−−··×',
                   # Numbers
-                  '1': '·−−−−', '2': '··−−−', '3': '···−−', '4': '····−', '5': '·····',
-                  '6': '−····', '7': '−−···', '8': '−−−··', '9': '−−−−·', '0': '−−−−−',
+                  '1': '·−−−−×', '2': '··−−−×', '3': '···−−×', '4': '····−×', '5': '·····×',
+                  '6': '−····×', '7': '−−···×', '8': '−−−··×', '9': '−−−−·×', '0': '−−−−−×',
                   # Punctuation
-                  '.': '·−·−·−', ',': '−−··−−',  '?': '··−−··', "'": '·−−−−·', '!': '−·−·−−',
-                  '/': '−··−·',  '(': '−·−−·',   ')': '−·−−·−', '&': '·−···',  ':': '−−−···',
-                  ';': '−·−·−·', '=': '−···−',   '+': '·−·−·',  '-': '−····−', '_': '··−−·−',
-                  '"': '·−··−·', '$': '···−··−', '@': '·−−·−·',
+                  '.': '·−·−·−×', ',': '−−··−−×',  '?': '··−−··×', "'": '·−−−−·×', '!': '−·−·−−×',
+                  '/': '−··−·×',  '(': '−·−−·×',   ')': '−·−−·−×', '&': '·−···×',  ':': '−−−···×',
+                  ';': '−·−·−·×', '=': '−···−×',   '+': '·−·−·×',  '-': '−····−×', '_': '··−−·−×',
+                  '"': '·−··−·×', '$': '···−··−×', '@': '·−−·−·×',
                   # Non-Latin (without the Ch digraph)
-                  'À': '·−−·−', 'Ä': '·−·−',  'Å': '·−−·−',   'Ą': '·−·−',   'Æ': '·−·−',
-                  'Ć': '−·−··', 'Ĉ': '−·−··', 'Ç': '−·−··',   'Đ': '··−··',  'Ð': '··−−·',
-                  'É': '··−··', 'È': '·−··−', 'Ę': '··−··',   'Ĝ': '−−·−·',  'Ĥ': '−−−−',
-                  'Ĵ': '·−−−·', 'Ł': '·−··−', 'Ń': '−−·−−',   'Ñ': '−−·−−',  'Ó': '−−−·',
-                  'Ö': '−−−·',  'Ø': '−−−·',  'Ś': '···−···', 'Ŝ': '···−·',  'Š': '−−−−',
-                  'Þ': '·−−··', 'Ü': '··−−',  'Ŭ': '··−−',    'Ź': '−−··−·', 'Ż': '−−··−',
+                  'À': '·−−·−×', 'Ä': '·−·−×',  'Å': '·−−·−×',   'Ą': '·−·−×',   'Æ': '·−·−×',
+                  'Ć': '−·−··×', 'Ĉ': '−·−··×', 'Ç': '−·−··×',   'Đ': '··−··×',  'Ð': '··−−·×',
+                  'É': '··−··×', 'È': '·−··−×', 'Ę': '··−··×',   'Ĝ': '−−·−·×',  'Ĥ': '−−−−×',
+                  'Ĵ': '·−−−·×', 'Ł': '·−··−×', 'Ń': '−−·−−×',   'Ñ': '−−·−−×',  'Ó': '−−−·×',
+                  'Ö': '−−−·×',  'Ø': '−−−·×',  'Ś': '···−···×', 'Ŝ': '···−·×',  'Š': '−−−−×',
+                  'Þ': '·−−··×', 'Ü': '··−−×',  'Ŭ': '··−−×',    'Ź': '−−··−·×', 'Ż': '−−··−×',
+                  # Space (last word character is already '×')
+                  ' ': '×',
                  }
 
     text = text.upper()
     key = key.upper()
 
-    for m in morse_code:
-        text = text.replace(m, morse_code[m] + '×')
+    # Whitelisted characters
+    text = re.sub('[^ A-Z0-9.,?\'!/()&:;=+\-_"$@ÀÄÅĄÆĆĈÇĐÐÉÈĘĜĤĴŁŃÑÓÖØŚŜŠÞÜŬŹŻ]', '', text)
 
-    text = text.replace(' ', '×')
+    for m in morse_code:
+        text = text.replace(m, morse_code[m])
+
+    # Remove trailing '×'
     text = text.rstrip(text[-1])
 
     if len(text) % 3 == 1:
@@ -118,6 +124,16 @@ plaintext = ('I HOPE YOU ARE HAVING LOTS OF FUN IN TRYING TO CATCH ME THAT WASNT
              'WHERE EVERYONE ELSE HAS NOTHING WHEN THEY REACH PARADICE SO THEY ARE AFRAID OF DEATH '
              'I AM NOT AFRAID BECAUSE I KNOW THAT MY NEW LIFE IS LIFE WILL BE AN EASY ONE IN '
              'PARADICE DEATH')
+
+plaintext = (
+            'There are two main things that can affect the result of FtHoF, the current season '
+            'and the golden cookie sound selector. If the season is Valentines or Easter the '
+            'random seed will be increased once, if the golden cookie sound selector is on then '
+            'the seed will also be increased. This means there are 3 possible results for each '
+            'cast of FtHoF depending on the selected season or whether the golden cookie chime is '
+            'on or both. Continuing to switch between seasons or turn the chime on and off will '
+            'not affecting the results, they only affect the result at the time the spell is cast. '
+            )
 
 fractionated = fractionated_morse(plaintext, key1)
 transposed = columnar_transposition(fractionated, key2)
