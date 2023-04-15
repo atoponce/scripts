@@ -10,7 +10,8 @@
         text-align: center;
       }
       #randogram {
-        cursor: crosshair;
+        cursor: url('data:image/gif;base64,R0lGODlhFAAUAPABAKoAAP///yH5BAUKAAEALAAAAAAUABQAQAIsRI6pCe2+1Is0PFPl3Vj3zGzgwU2UOFpfqrJh46rmWNLl6t3nPSOXC4nhUgUAOw=='), crosshair;
+        margin: 0 calc((100% - 512px)/2);
         touch-action: none;
       }
       #container {
@@ -18,23 +19,14 @@
         pointer-events: auto;
         width: 512px;
       }
-      #progress {
-        background: #dddddd;
-        width: 512px;
-      }
-      #progressBar {
-        background: #0088FF;
-        color: #ffffff;
+      .collected {
+        color: black;
+        font-family: monospace;
         font-weight: bold;
         height: 40px;
         line-height: 40px;
         max-width: 512px;
         text-align: center;
-        width: 0%;
-      }
-      #entropyResult {
-        font-family: monospace;
-        height: 40px;
         width: 512px;
       }
     </style>
@@ -42,19 +34,38 @@
   <body>
     <div id='container'>
       <h1>JavaScript Mouse Entropy</h1>
-      <p>Download this page to your computer, and run it offline.<br/>Move your mouse over the randogram below until the progress meter is 100%.</p>
+      <p>Download this page to your computer, and run it offline.<br/>Move your mouse over the randogram below until a 256-bit hex returns.</p>
       <canvas id='randogram' width='512' height='512'></canvas>
-      <div id='progress'>
-        <div id='progressBar'></div>
-      </div>
-      <p id='entropyResult'></p>
+      <button onclick="reset()">New entropy</button>
+      <p class='collected'><span class='collected' id='hexString'></span></p>
     </div>
     <script>
+      const LENGTH = 512
+      const CANVAS = document.getElementById('randogram')
+      const CTX = CANVAS.getContext('2d')
+      const ENTROPYRESULT = document.getElementById('entropyResult')
+      const HEXSTRING = document.getElementById('hexString')
+
+      let ENTROPY = []
+      let BITS = []
+      let NEUMANN = []
+      let DOANIMATION = true
+
+      function reset() {
+        ENTROPY = []
+        localStorage.removeItem('entropy')
+        DOANIMATION = true
+        HEXSTRING.innerText = ""
+        drawRandogram()
+      }
+
       // https://exploringjs.com/impatient-js/ch_typed-arrays.html#concatenating-typed-arrays
-      function concatenate(resultConstructor, ...arrays) {
+      function concatenate (resultConstructor, ...arrays) {
         let totalLength = 0
 
-        for (const arr of arrays) totalLength += arr.length
+        for (const arr of arrays) {
+          totalLength += arr.length
+        }
 
         const result = new resultConstructor(totalLength)
         let offset = 0
@@ -67,97 +78,78 @@
         return result
       }
 
-      function randogram() {
-        return crypto.getRandomValues(new Uint8Array(65536)) // max ArrayBufferView byte length
+      function randogram () {
+        return crypto.getRandomValues(new Uint8Array(65536))
       }
 
-      // https://stackoverflow.com/a/41550641
-      function bin2hex(b) {
-        return b.match(/.{4}/g).reduce(function(acc, i) {
-          return acc + parseInt(i, 2).toString(16)
-        }, '')
-      }
-
-      function sleep(ms) {
-        const date = Date.now()
-        let currentDate = null
-        do currentDate = Date.now()
-        while (currentDate - date < ms)
-      }
-
-      function genPixels() {
+      function genPixels () {
         return concatenate(Uint8Array, randogram(), randogram(), randogram(), randogram())
       }
 
-      function drawRandogram() {
-        const canvas = document.getElementById('randogram')
-        const ctx = canvas.getContext('2d', {alpha: false})
-        const imgData = ctx.getImageData(0, 0, 512, 512)
+      function drawRandogram () {
+        const imgData = CTX.createImageData(LENGTH, LENGTH)
         const pixels = genPixels()
 
-        for (let i = 0; i < imgData.data.length; i += 4) {
-          if (pixels[i / 4] % 2 === 0) {
-            imgData.data[i] = 0
-            imgData.data[i + 1] = 136
-            imgData.data[i + 2] = 255
-          } else {
-            imgData.data[i] = 255
-            imgData.data[i + 1] = 255
-            imgData.data[i + 2] = 255
-          }
+        if (localStorage.hasOwnProperty('entropy')) {
+          ENTROPY = JSON.parse(localStorage.entropy)
         }
 
-        ctx.putImageData(imgData, 0, 0)
-        requestAnimationFrame(drawRandogram)
+        for (let i = 0; i < imgData.data.length; i += 4) {
+          if (pixels[i >> 2] < 128) {
+            imgData.data[i]     = 255 // red
+            imgData.data[i + 1] = 255 // green
+            imgData.data[i + 2] = 255 // blue
+          }
 
-        return pixels
-      }
+          imgData.data[i + 3] = 255   // alpha
+        }
 
-      function getEntropy() {
-        const progressBar = document.getElementById('progressBar')
-        const entropyResult = document.getElementById('entropyResult')
-        const pixels = drawRandogram()
+        CTX.putImageData(imgData, 0, 0)
+        if (DOANIMATION) {
+          requestAnimationFrame(drawRandogram)
+        }
 
-        let entropy = ""
-        let neumann = []
+        document.getElementById('randogram').onpointermove = function (e) {
+          const x = Math.floor(e.offsetX)
+          const y = Math.floor(e.offsetY)
 
-        document.getElementById('randogram').onpointermove = function(e) {
-          e.preventDefault()
+          if (0 <= x && x < LENGTH && 0 <= y && y < LENGTH) {
+            const index = LENGTH * y + x
 
-          if (entropy.length < 256) {
-            const x = Math.floor(e.offsetX)
-            const y = Math.floor(e.offsetY)
+            NEUMANN.push(pixels[index] & 1)
 
-            if (0 <= x && x < 512 && 0 <= y && y < 512) {
-              const p = 512 * y + x
-              let progress = 0
+            // john von neumann randomness extractor
+            if (NEUMANN.length === 2) {
+              if (NEUMANN[0] !== NEUMANN[1]) {
+                BITS.push(NEUMANN[0])
 
-              neumann.push(pixels[p] % 2)
-
-              // john von neumann randomness extractor
-              if (neumann.length === 2) {
-                if (neumann[0] !== neumann[1]) entropy += neumann[0]
-
-                neumann = []
+                if (BITS.length === 16) {
+                  ENTROPY.push(parseInt(BITS.join(''), 2))
+                  BITS = []
+                }
               }
 
-              progress = Math.floor(entropy.length/256 * 100)
+              NEUMANN = []
+            }
+          } // if 0 <= x < LENGTH && 0 <= y < LENGTH
 
-              if (progress > 100) progress = 100
-              else {
-                progressBar.style.width = progress + "%"
-                progressBar.innerText = progress + "%"
-              } // if progress > 100
-            } // if 0 <= x < 512 && 0 <= y < 512
-          } else {
-            entropyResult.innerText = bin2hex(entropy)
-          } // if entropy.length < 256
+          localStorage.entropy = JSON.stringify(ENTROPY)
+
+          if (JSON.parse(localStorage.entropy).length === 16) {
+            DOANIMATION = false
+            document.getElementById('randogram').onpointermove = false
+            HEXSTRING.innerText = buffer2Hex(JSON.parse(localStorage.entropy))
+          }
         } // onpointermove
+      }
 
-        requestAnimationFrame(drawRandogram)
-      } // getEntropy()
+      function buffer2Hex(byteArray) {
+        return Array.prototype.map.call(byteArray, function(byte) {
+          return (byte).toString(16).padStart(4, '0')
+        }).join('')
+      }
 
-      getEntropy()
+      drawRandogram()
     </script>
   </body>
 </html>
