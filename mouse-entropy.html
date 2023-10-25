@@ -53,7 +53,7 @@
 
       function reset() {
         ENTROPY = []
-        localStorage.removeItem('entropy')
+        sessionStorage.removeItem('mouseEntropy')
         DOANIMATION = true
         HEXSTRING.innerText = ""
         drawRandogram()
@@ -90,8 +90,8 @@
         const imgData = CTX.createImageData(LENGTH, LENGTH)
         const pixels = genPixels()
 
-        if (localStorage.hasOwnProperty('entropy')) {
-          ENTROPY = JSON.parse(localStorage.entropy)
+        if (sessionStorage.hasOwnProperty('mouseEntropy')) {
+          ENTROPY = JSON.parse(sessionStorage.mouseEntropy)
         }
 
         for (let i = 0; i < imgData.data.length; i += 4) {
@@ -133,12 +133,14 @@
             }
           } // if 0 <= x < LENGTH && 0 <= y < LENGTH
 
-          localStorage.entropy = JSON.stringify(ENTROPY)
+          sessionStorage.mouseEntropy = JSON.stringify(ENTROPY)
 
-          if (JSON.parse(localStorage.entropy).length === 16) {
+          if (JSON.parse(sessionStorage.mouseEntropy).length === 16) {
             DOANIMATION = false
             document.getElementById('randogram').onpointermove = false
-            HEXSTRING.innerText = buffer2Hex(JSON.parse(localStorage.entropy))
+            HEXSTRING.innerText = buffer2Hex(JSON.parse(sessionStorage.mouseEntropy))
+            ENTROPY = []
+            sessionStorage.removeItem('mouseEntropy')
           }
         } // onpointermove
       }
