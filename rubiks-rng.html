@@ -1,12 +1,17 @@
 <!doctype html>
 <html>
   <head>
+    <link rel="shortcut icon" href="data:image/x-icon;base64,AAABAAEAICAQAAEABABxAwAAFgAAAIlQTkcNChoKAAAADUlIRFIAAAAgAAAAIAgGAAAAc3p69AAAAzhJREFUWIWtll9IU1Ecx79XlhvBoNiLDyJIoANfZuSDES0xdUo4mGxBIoFEgoURBAlKD8KFwodR0IMRQvS4vKxN1pWhWA8pElsUQiN0ukR6icyLKyM4PbR7du/uPffP7AuD3XPv73w/53t/53K4fWkPslrdHOyqoX+CFBI8szArEcO5a2w7lkxLf0khwcPhSxHDAgPZBnD4UqSQ4AGAmv553wcApBoQuwCkZKYrGUSR0NEBeoZ6Sf1YkECxYjMVEjxKNabijJqwfixIXjf+otfNz27BKAEAcPhSyF19SK/9eReSfJxjNSEToNJcOeHXNyMaEIcvhbrzM9Crket2Hr3UUKgAgoOTpJDguY1oj2l8pQllWKZxpU7dXlBBUIDx0T6yfrLW8kQAMJqpQUf7R4QPWyzX+PMutHz/jYXnrzhA3YRcko9jrv66JWNpdxUP6t4ikJcg7a5iNGO+oWLOdSxFlzE8liubygmkRYF0BUL0RloUMLDzREM/71w2NLl0eEGToj/vwlK0XJfNeLjLbZsAKhJQFnUFQti/JsKfdwEApN1VU3MAmHcuY3aJo8bvzn1WmZdEe8yhN6hUko8jODiJGOEQ9q6YAgBA2LsCt9ONUFQyfZaZgFK+YxfBJ0Xc24ybTig2upGLeNDYVmsJVglguvUScx3wTf9A7FO77v1cxIPQiITW09/MpqKLtZRApfikqALJRTw4fh9WjGXRxVKAxcRT8uJKr9UJKEgu4rFjDGHGjQ9TTfRalUDYuwJu6gTSomALxKpx0Q0E7kgIL5abWbcHuteG/xtINuOhxgpZ64HutWHYfS1KFceBZr/u69H2ABi7wOreVyouzGJ7axp4rH8/1lneRVXtApaEGTcOinvoCoSg/KxXSrcHzuyRqg+W2YwHB8U99Ax9oWMm/WPjO8CIUdb21jSavBuacaMEYp3tuj2gD3HDGIAlVgKl96+bgD6ESQKsleqMc4ofFesUwfXnbv77Z5KAxW8Fs8GNjjGUOLXxk/kQK4G0KODuwFlDczMAFYzDl2IaMcY0cR8FQDmh5uRUjXE1ACoYOZG0KCAtCggOTsrmtlQtAABwDf0TsqmtVSv1F8/mOjuIKqw/AAAAAElFTkSuQmCC" />
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>CubeRiNG: A Hardware RNG using Rubik's Cubes</title>
     <style>
       :root {
         /* Global variables. Tweak here as needed. */
         --facelet-border: 1px;
         --facelet-width: 25px;
-        --face-margin: 10px;
+        --face-margin: 5px;
+        --grid-margin: 25px;
       }
       .face {
         display: flex;
@@ -21,6 +26,13 @@
         flex: 0 0 var(--facelet-width);
         height: var(--facelet-width);
         text-align: center;
+      }
+      .grid {
+        float: left;
+        margin: var(--grid-margin);
+      }
+      #container {
+        clear: both;
       }
       #color {
         border: var(--facelet-border) black solid;
@@ -120,7 +132,7 @@
       </div>
 
       <!-- 2x2 -->
-      <div id="mini">
+      <div class="grid" id="mini">
         <div class="face up">
           <div id="mini-1" class="facelet" onclick="setColor(this)"></div>
           <div id="mini-2" class="facelet" onclick="setColor(this)"></div>
@@ -162,7 +174,7 @@
       </div>
 
       <!-- 3x3 -->
-      <div id="rubik">
+      <div class="grid" id="rubik">
         <div class="face up">
           <div id="rubik-1" class="facelet" onclick="setColor(this)"></div>
           <div id="rubik-2" class="facelet" onclick="setColor(this)"></div>
@@ -234,7 +246,7 @@
       </div>
 
       <!-- 4x4 -->
-      <div id="master">
+      <div class="grid" id="master">
         <div class="face up">
           <div id="master-1" class="facelet" onclick="setColor(this)"></div>
           <div id="master-2" class="facelet" onclick="setColor(this)"></div>
@@ -348,7 +360,7 @@
       </div>
 
       <!-- 5x5 -->
-      <div id="professor">
+      <div class="grid" id="professor">
         <div class="face up">
           <div id="professor-1" class="facelet" onclick="setColor(this)"></div>
           <div id="professor-2" class="facelet" onclick="setColor(this)"></div>
@@ -517,6 +529,35 @@
     </div>
 
     <script>
+      function populateCube(size) {
+        // For testing so I don't have to keep populating cubes.
+        const types = ["mini", "rubik", "master", "professor"]
+        const type = types[size - 2]
+
+        for (let i = 1; i <= size ** 2 * 6; i++) {
+          const facelet = document.getElementById(type + "-" + i)
+          facelet.className = "facelet"
+
+          if (i < size ** 2 + 1) facelet.classList.add("white")
+          else if (i < 2 * size ** 2 + 1) facelet.classList.add("orange")
+          else if (i < 3 * size ** 2 + 1) facelet.classList.add("green")
+          else if (i < 4 * size ** 2 + 1) facelet.classList.add("red")
+          else if (i < 5 * size ** 2 + 1) facelet.classList.add("blue")
+          else facelet.classList.add("yellow")
+        }
+      }
+
+      function clearCube(size) {
+        // For testing so I don't have to keep clearing cubes.
+        const types = ["mini", "rubik", "master", "professor"]
+        const type = types[size - 2]
+
+        for (let i = 1; i <= size ** 2 * 6; i++) {
+          const facelet = document.getElementById(type + "-" + i)
+          facelet.className = "facelet"
+        }
+      }
+
       function getColor(element) {
         document.getElementById("color").className = element.className
       }
@@ -551,31 +592,29 @@
       }
 
       function hashCube(size) {
+        let result = ""
         const cube = collectFacelets(size)
+        const types = ["mini-hash", "rubik-hash", "master-hash", "professor-hash"]
+        const id = document.getElementById(types[size - 2])
 
         sha256(cube.join("")).then(function(digest) {
-          let id = ""
-          let result = ""
           const view = new DataView(digest)
 
           if (size === 2) {
             const int = view.getUint8(0) & 0x1f
             result = int.toString(16).padStart(2, "0")
-            id = document.getElementById("mini-hash")
 
             for (let i = 1; i < 3; i++) { // 2x2: ~21 bits (0x1f_ff_ff)
               result += view.getUint8(i).toString(16).padStart(2, "0")
             }
           } else if (size === 3) {
             const int = view.getUint8(0) & 0x1
-            result = int.toString(16).padStart(2, "0")
-            id = document.getElementById("rubik-hash")
+            result = int.toString(16)
 
             for (let i = 1; i < 9; i++) { // 3x3: ~65 bits (0x1_ff_ff_ff_ff_ff_ff_ff_ff)
               result += view.getUint8(i).toString(16).padStart(2, "0")
             }
           } else if (size === 4) {
-            id = document.getElementById("master-hash")
 
             for (let i = 1; i < 19; i++) { // 4x4: ~152 bits (0xff_ff_ff_ff_ff_ff_ff_ff_ff_ff_ff_ff_ff_ff_ff_ff_ff_ff_ff)
               result += view.getUint8(i).toString(16).padStart(2, "0")
@@ -583,14 +622,13 @@
           } else {
             const int = view.getUint8(0) & 0x7f
             result = int.toString(16).padStart(2, "0")
-            id = document.getElementById("professor-hash")
 
             for (let i = 1; i < 31; i++) { // 5x5: ~247 bits (0x7f_ff_ff_ff_ff_ff_ff_ff_ff_ff_ff_ff_ff_ff_ff_ff_ff_ff_ff_ff_ff_ff_ff_ff_ff_ff_ff_ff_ff_ff_ff)
               result += view.getUint8(i).toString(16).padStart(2, "0")
             }
           }
 
-          id.innerText = BigInt(parseInt(result, 16))
+          id.innerText = result
         })
       }
     </script>
