@@ -157,6 +157,8 @@
           <div id="mini-23" class="facelet" onclick="setColor(this)"></div>
           <div id="mini-24" class="facelet" onclick="setColor(this)"></div>
         </div>
+        <button onclick="hashCube(2)" value="Hash">Get random number</button>
+        <p>Here is your 21-bit random number for this cube: <span id="mini-hash"></span></p>
       </div>
 
       <!-- 3x3 -->
@@ -227,6 +229,8 @@
           <div id="rubik-53" class="facelet" onclick="setColor(this)"></div>
           <div id="rubik-54" class="facelet" onclick="setColor(this)"></div>
         </div>
+        <button onclick="hashCube(3)" value="Hash">Get random number</button>
+        <p>Here is your 65-bit random number for this cube: <span id="rubik-hash"></span></p>
       </div>
 
       <!-- 4x4 -->
@@ -339,6 +343,8 @@
           <div id="master-95" class="facelet" onclick="setColor(this)"></div>
           <div id="master-96" class="facelet" onclick="setColor(this)"></div>
         </div>
+        <button onclick="hashCube(4)" value="Hash">Get random number</button>
+        <p>Here is your 152-bit random number for this cube: <span id="master-hash"></span></p>
       </div>
 
       <!-- 5x5 -->
@@ -505,6 +511,8 @@
           <div id="professor-149" class="facelet" onclick="setColor(this)"></div>
           <div id="professor-150" class="facelet" onclick="setColor(this)"></div>
         </div>
+        <button onclick="hashCube(5)" value="Hash">Get random number</button>
+        <p>Here is your 247-bit random number for this cube: <span id="professor-hash"></span></p>
       </div>
     </div>
 
@@ -519,41 +527,72 @@
         element.classList.add(color)
       }
 
-      function permutationIndex(size) {
-        // https://www.geeksforgeeks.org/lexicographic-rank-string-duplicate-characters/
+      function sha256(str) {
+        const buffer = new TextEncoder("utf-8").encode(str)
 
-        let type = ""
-        let faces = 0
-        let cubeString = []
-        let lehmer = []
-        let counter = 0
-        let result = 0n
-
-        if (size === 2) {
-          faces = 4 * 6
-          type = "mini"
-        } else if (size === 3) {
-          faces = 9 * 6
-          type = "rubik"
-        } else if (size === 4) {
-          faces = 16 * 6
-          type = "master"
-        } else {
-          faces = 25 * 6
-          type = "professor"
-        }
-
-        for (let i = 0; i < faces; i++) {
-          let id = document.getElementById(type + "-" + i)
-          cubeString.push(id.childNodes[0].id) // FIXME
-        }
+        return crypto.subtle.digest("SHA-256", buffer).then(function(digest) {
+          return digest
+        })
       }
-      /*
-        - 2x2: ~21 bits (0x1fffff)
-        - 3x3: ~65 bits (0x1ffffffffffffffff)
-        - 4x4: ~152 bits (0xffffffffffffffffffffffffffffffffffffff)
-        - 5x5: ~247 bits (0x7fffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff)
-       */
+
+      function collectFacelets(size) {
+        const cube = []
+        const count = size ** 2 * 6
+        const types = ["mini", "rubik", "master", "professor"]
+        const type = types[size - 2]
+
+        for (let i = 1; i <= count; i++) {
+          const id = document.getElementById(type + "-" + i)
+          const color = id.classList[1] // assumes "facelet white", "facelet orange", etc.
+          cube.push(color[0]) // first character of "white", "orange", etc.
+        }
+
+        return cube
+      }
+
+      function hashCube(size) {
+        const cube = collectFacelets(size)
+
+        sha256(cube.join("")).then(function(digest) {
+          let id = ""
+          let result = ""
+          const view = new DataView(digest)
+
+          if (size === 2) {
+            const int = view.getUint8(0) & 0x1f
+            result = int.toString(16).padStart(2, "0")
+            id = document.getElementById("mini-hash")
+
+            for (let i = 1; i < 3; i++) { // 2x2: ~21 bits (0x1f_ff_ff)
+              result += view.getUint8(i).toString(16).padStart(2, "0")
+            }
+          } else if (size === 3) {
+            const int = view.getUint8(0) & 0x1
+            result = int.toString(16).padStart(2, "0")
+            id = document.getElementById("rubik-hash")
+
+            for (let i = 1; i < 9; i++) { // 3x3: ~65 bits (0x1_ff_ff_ff_ff_ff_ff_ff_ff)
+              result += view.getUint8(i).toString(16).padStart(2, "0")
+            }
+          } else if (size === 4) {
+            id = document.getElementById("master-hash")
+
+            for (let i = 1; i < 19; i++) { // 4x4: ~152 bits (0xff_ff_ff_ff_ff_ff_ff_ff_ff_ff_ff_ff_ff_ff_ff_ff_ff_ff_ff)
+              result += view.getUint8(i).toString(16).padStart(2, "0")
+            }
+          } else {
+            const int = view.getUint8(0) & 0x7f
+            result = int.toString(16).padStart(2, "0")
+            id = document.getElementById("professor-hash")
+
+            for (let i = 1; i < 31; i++) { // 5x5: ~247 bits (0x7f_ff_ff_ff_ff_ff_ff_ff_ff_ff_ff_ff_ff_ff_ff_ff_ff_ff_ff_ff_ff_ff_ff_ff_ff_ff_ff_ff_ff_ff_ff)
+              result += view.getUint8(i).toString(16).padStart(2, "0")
+            }
+          }
+
+          id.innerText = BigInt(parseInt(result, 16))
+        })
+      }
     </script>
   </body>
 </html>
