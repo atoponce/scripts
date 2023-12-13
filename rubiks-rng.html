@@ -1,0 +1,559 @@
+<!doctype html>
+<html>
+  <head>
+    <style>
+      :root {
+        /* Global variables. Tweak here as needed. */
+        --facelet-border: 1px;
+        --facelet-width: 25px;
+        --face-margin: 10px;
+      }
+      .face {
+        display: flex;
+        flex-wrap: wrap;
+        margin-bottom: var(--face-margin);
+        margin-right: var(--face-margin);
+      }
+      .facelet {
+        background-color: #cccccc;
+        background-image: radial-gradient(circle at center, black calc(2 * var(--facelet-border)), transparent 0);
+        border: var(--facelet-border) black solid;
+        flex: 0 0 var(--facelet-width);
+        height: var(--facelet-width);
+        text-align: center;
+      }
+      #color {
+        border: var(--facelet-border) black solid;
+        display: inline-block;
+        height: var(--facelet-width);
+        width: var(--facelet-width);
+      }
+
+      /* 2x2 */
+      #mini .face {
+        /* Grid width is 2 facelets with borders on right and left of each facelet */
+        width: calc(2 * var(--facelet-width) + 4 * var(--facelet-border));
+      }
+      #mini .up, #mini .down {
+        /* Shifted right the face width and face margin */
+        margin-left: calc(2 * var(--facelet-width) + 4 * var(--facelet-border) + var(--face-margin));
+      }
+
+      /* 3x3 */
+      #rubik .face {
+        /* Grid width is 3 facelets with borders on right and left of each facelet */
+        width: calc(3 * var(--facelet-width) + 6 * var(--facelet-border));
+      }
+      #rubik .up, #rubik .down {
+        /* Shifted right the face width and face margin */
+        margin-left: calc(3 * var(--facelet-width) + 6 * var(--facelet-border) + var(--face-margin));
+      }
+
+      /* 4x4 */
+      #master .face {
+        /* Grid width is 4 facelets with borders on right and left of each facelet */
+        width: calc(4 * var(--facelet-width) + 8 * var(--facelet-border));
+      }
+      #master .up, #master .down {
+        /* Shifted right the face width and face margin */
+        margin-left: calc(4 * var(--facelet-width) + 8 * var(--facelet-border) + var(--face-margin));
+      }
+
+      /* 5x5 */
+      #professor .face {
+        /* Grid width is 5 facelets with borders on right and left of each facelet */
+        width: calc(5 * var(--facelet-width) + 10 * var(--facelet-border));
+      }
+      #professor .up, #professor .down {
+        /* Shifted right the face width and face margin */
+        margin-left: calc(5 * var(--facelet-width) + 10 * var(--facelet-border) + var(--face-margin));
+      }
+
+      .left, .front, .right, .back { float: left; }
+      .up, .down { clear: both; }
+
+      /*
+        https://www.speedsolving.com/wiki/index.php/Western_Color_Scheme
+
+        Sorted order is defined as:
+          1. up: white 
+          2. left: orange
+          3. front: green
+          4. right: red
+          5. back: blue
+          6. down: yellow
+      */
+      .white { background-color: #ffffff; background-image: none; }
+      .orange { background-color: #ff5800; background-image: none; }
+      .green { background-color: #009e60; background-image: none; }
+      .red { background-color: #c41e3a; background-image: none; }
+      .blue { background-color: #0051ba; background-image: none; }
+      .yellow { background-color: #ffd500; background-image: none; }
+
+      .color-picker span {
+        border: 1px black solid;
+        display: inline-block;
+        height: var(--facelet-width);
+        width: var(--facelet-width);
+      }
+    </style>
+  </head>
+  <body>
+    <div id="container">
+      <div>
+        <p>Select a facelet color:</p>
+      </div>
+      <div class="color-picker">
+        <span onclick="getColor(this)" class="facelet"></span>
+        <span onclick="getColor(this)" class="white"></span>
+        <span onclick="getColor(this)" class="orange"></span>
+        <span onclick="getColor(this)" class="green"></span>
+        <span onclick="getColor(this)" class="red"></span>
+        <span onclick="getColor(this)" class="blue"></span>
+        <span onclick="getColor(this)" class="yellow"></span>
+      </div>
+      <div>
+        <span>Selected color:</span>
+      </div>
+      <div>
+        <span id="color" class="facelet"></span>
+      </div>
+
+      <!-- 2x2 -->
+      <div id="mini">
+        <div class="face up">
+          <div id="mini-1" class="facelet" onclick="setColor(this)"></div>
+          <div id="mini-2" class="facelet" onclick="setColor(this)"></div>
+          <div id="mini-3" class="facelet" onclick="setColor(this)"></div>
+          <div id="mini-4" class="facelet" onclick="setColor(this)"></div>
+        </div>
+        <div class="face left">
+          <div id="mini-5" class="facelet" onclick="setColor(this)"></div>
+          <div id="mini-6" class="facelet" onclick="setColor(this)"></div>
+          <div id="mini-7" class="facelet" onclick="setColor(this)"></div>
+          <div id="mini-8" class="facelet" onclick="setColor(this)"></div>
+        </div>
+        <div class="face front">
+          <div id="mini-9" class="facelet" onclick="setColor(this)"></div>
+          <div id="mini-10" class="facelet" onclick="setColor(this)"></div>
+          <div id="mini-11" class="facelet" onclick="setColor(this)"></div>
+          <div id="mini-12" class="facelet" onclick="setColor(this)"></div>
+        </div>
+        <div class="face right">
+          <div id="mini-13" class="facelet" onclick="setColor(this)"></div>
+          <div id="mini-14" class="facelet" onclick="setColor(this)"></div>
+          <div id="mini-15" class="facelet" onclick="setColor(this)"></div>
+          <div id="mini-16" class="facelet" onclick="setColor(this)"></div>
+        </div>
+        <div class="face back">
+          <div id="mini-17" class="facelet" onclick="setColor(this)"></div>
+          <div id="mini-18" class="facelet" onclick="setColor(this)"></div>
+          <div id="mini-19" class="facelet" onclick="setColor(this)"></div>
+          <div id="mini-20" class="facelet" onclick="setColor(this)"></div>
+        </div>
+        <div class="face down">
+          <div id="mini-21" class="facelet" onclick="setColor(this)"></div>
+          <div id="mini-22" class="facelet" onclick="setColor(this)"></div>
+          <div id="mini-23" class="facelet" onclick="setColor(this)"></div>
+          <div id="mini-24" class="facelet" onclick="setColor(this)"></div>
+        </div>
+      </div>
+
+      <!-- 3x3 -->
+      <div id="rubik">
+        <div class="face up">
+          <div id="rubik-1" class="facelet" onclick="setColor(this)"></div>
+          <div id="rubik-2" class="facelet" onclick="setColor(this)"></div>
+          <div id="rubik-3" class="facelet" onclick="setColor(this)"></div>
+          <div id="rubik-4" class="facelet" onclick="setColor(this)"></div>
+          <div id="rubik-5" class="facelet" onclick="setColor(this)"></div>
+          <div id="rubik-6" class="facelet" onclick="setColor(this)"></div>
+          <div id="rubik-7" class="facelet" onclick="setColor(this)"></div>
+          <div id="rubik-8" class="facelet" onclick="setColor(this)"></div>
+          <div id="rubik-9" class="facelet" onclick="setColor(this)"></div>
+        </div>
+        <div class="face left">
+          <div id="rubik-10" class="facelet" onclick="setColor(this)"></div>
+          <div id="rubik-11" class="facelet" onclick="setColor(this)"></div>
+          <div id="rubik-12" class="facelet" onclick="setColor(this)"></div>
+          <div id="rubik-13" class="facelet" onclick="setColor(this)"></div>
+          <div id="rubik-14" class="facelet" onclick="setColor(this)"></div>
+          <div id="rubik-15" class="facelet" onclick="setColor(this)"></div>
+          <div id="rubik-16" class="facelet" onclick="setColor(this)"></div>
+          <div id="rubik-17" class="facelet" onclick="setColor(this)"></div>
+          <div id="rubik-18" class="facelet" onclick="setColor(this)"></div>
+        </div>
+        <div class="face front">
+          <div id="rubik-19" class="facelet" onclick="setColor(this)"></div>
+          <div id="rubik-20" class="facelet" onclick="setColor(this)"></div>
+          <div id="rubik-21" class="facelet" onclick="setColor(this)"></div>
+          <div id="rubik-22" class="facelet" onclick="setColor(this)"></div>
+          <div id="rubik-23" class="facelet" onclick="setColor(this)"></div>
+          <div id="rubik-24" class="facelet" onclick="setColor(this)"></div>
+          <div id="rubik-25" class="facelet" onclick="setColor(this)"></div>
+          <div id="rubik-26" class="facelet" onclick="setColor(this)"></div>
+          <div id="rubik-27" class="facelet" onclick="setColor(this)"></div>
+        </div>
+        <div class="face right">
+          <div id="rubik-28" class="facelet" onclick="setColor(this)"></div>
+          <div id="rubik-29" class="facelet" onclick="setColor(this)"></div>
+          <div id="rubik-30" class="facelet" onclick="setColor(this)"></div>
+          <div id="rubik-31" class="facelet" onclick="setColor(this)"></div>
+          <div id="rubik-32" class="facelet" onclick="setColor(this)"></div>
+          <div id="rubik-33" class="facelet" onclick="setColor(this)"></div>
+          <div id="rubik-34" class="facelet" onclick="setColor(this)"></div>
+          <div id="rubik-35" class="facelet" onclick="setColor(this)"></div>
+          <div id="rubik-36" class="facelet" onclick="setColor(this)"></div>
+        </div>
+        <div class="face back">
+          <div id="rubik-37" class="facelet" onclick="setColor(this)"></div>
+          <div id="rubik-38" class="facelet" onclick="setColor(this)"></div>
+          <div id="rubik-39" class="facelet" onclick="setColor(this)"></div>
+          <div id="rubik-40" class="facelet" onclick="setColor(this)"></div>
+          <div id="rubik-41" class="facelet" onclick="setColor(this)"></div>
+          <div id="rubik-42" class="facelet" onclick="setColor(this)"></div>
+          <div id="rubik-43" class="facelet" onclick="setColor(this)"></div>
+          <div id="rubik-44" class="facelet" onclick="setColor(this)"></div>
+          <div id="rubik-45" class="facelet" onclick="setColor(this)"></div>
+        </div>
+        <div class="face down">
+          <div id="rubik-46" class="facelet" onclick="setColor(this)"></div>
+          <div id="rubik-47" class="facelet" onclick="setColor(this)"></div>
+          <div id="rubik-48" class="facelet" onclick="setColor(this)"></div>
+          <div id="rubik-49" class="facelet" onclick="setColor(this)"></div>
+          <div id="rubik-50" class="facelet" onclick="setColor(this)"></div>
+          <div id="rubik-51" class="facelet" onclick="setColor(this)"></div>
+          <div id="rubik-52" class="facelet" onclick="setColor(this)"></div>
+          <div id="rubik-53" class="facelet" onclick="setColor(this)"></div>
+          <div id="rubik-54" class="facelet" onclick="setColor(this)"></div>
+        </div>
+      </div>
+
+      <!-- 4x4 -->
+      <div id="master">
+        <div class="face up">
+          <div id="master-1" class="facelet" onclick="setColor(this)"></div>
+          <div id="master-2" class="facelet" onclick="setColor(this)"></div>
+          <div id="master-3" class="facelet" onclick="setColor(this)"></div>
+          <div id="master-4" class="facelet" onclick="setColor(this)"></div>
+          <div id="master-5" class="facelet" onclick="setColor(this)"></div>
+          <div id="master-6" class="facelet" onclick="setColor(this)"></div>
+          <div id="master-7" class="facelet" onclick="setColor(this)"></div>
+          <div id="master-8" class="facelet" onclick="setColor(this)"></div>
+          <div id="master-9" class="facelet" onclick="setColor(this)"></div>
+          <div id="master-10" class="facelet" onclick="setColor(this)"></div>
+          <div id="master-11" class="facelet" onclick="setColor(this)"></div>
+          <div id="master-12" class="facelet" onclick="setColor(this)"></div>
+          <div id="master-13" class="facelet" onclick="setColor(this)"></div>
+          <div id="master-14" class="facelet" onclick="setColor(this)"></div>
+          <div id="master-15" class="facelet" onclick="setColor(this)"></div>
+          <div id="master-16" class="facelet" onclick="setColor(this)"></div>
+        </div>
+        <div class="face left">
+          <div id="master-17" class="facelet" onclick="setColor(this)"></div>
+          <div id="master-18" class="facelet" onclick="setColor(this)"></div>
+          <div id="master-19" class="facelet" onclick="setColor(this)"></div>
+          <div id="master-20" class="facelet" onclick="setColor(this)"></div>
+          <div id="master-21" class="facelet" onclick="setColor(this)"></div>
+          <div id="master-22" class="facelet" onclick="setColor(this)"></div>
+          <div id="master-23" class="facelet" onclick="setColor(this)"></div>
+          <div id="master-24" class="facelet" onclick="setColor(this)"></div>
+          <div id="master-25" class="facelet" onclick="setColor(this)"></div>
+          <div id="master-26" class="facelet" onclick="setColor(this)"></div>
+          <div id="master-27" class="facelet" onclick="setColor(this)"></div>
+          <div id="master-28" class="facelet" onclick="setColor(this)"></div>
+          <div id="master-29" class="facelet" onclick="setColor(this)"></div>
+          <div id="master-30" class="facelet" onclick="setColor(this)"></div>
+          <div id="master-31" class="facelet" onclick="setColor(this)"></div>
+          <div id="master-32" class="facelet" onclick="setColor(this)"></div>
+        </div>
+        <div class="face front">
+          <div id="master-33" class="facelet" onclick="setColor(this)"></div>
+          <div id="master-34" class="facelet" onclick="setColor(this)"></div>
+          <div id="master-35" class="facelet" onclick="setColor(this)"></div>
+          <div id="master-36" class="facelet" onclick="setColor(this)"></div>
+          <div id="master-37" class="facelet" onclick="setColor(this)"></div>
+          <div id="master-38" class="facelet" onclick="setColor(this)"></div>
+          <div id="master-39" class="facelet" onclick="setColor(this)"></div>
+          <div id="master-40" class="facelet" onclick="setColor(this)"></div>
+          <div id="master-41" class="facelet" onclick="setColor(this)"></div>
+          <div id="master-42" class="facelet" onclick="setColor(this)"></div>
+          <div id="master-43" class="facelet" onclick="setColor(this)"></div>
+          <div id="master-44" class="facelet" onclick="setColor(this)"></div>
+          <div id="master-45" class="facelet" onclick="setColor(this)"></div>
+          <div id="master-46" class="facelet" onclick="setColor(this)"></div>
+          <div id="master-47" class="facelet" onclick="setColor(this)"></div>
+          <div id="master-48" class="facelet" onclick="setColor(this)"></div>
+        </div>
+        <div class="face right">
+          <div id="master-49" class="facelet" onclick="setColor(this)"></div>
+          <div id="master-50" class="facelet" onclick="setColor(this)"></div>
+          <div id="master-51" class="facelet" onclick="setColor(this)"></div>
+          <div id="master-52" class="facelet" onclick="setColor(this)"></div>
+          <div id="master-53" class="facelet" onclick="setColor(this)"></div>
+          <div id="master-54" class="facelet" onclick="setColor(this)"></div>
+          <div id="master-55" class="facelet" onclick="setColor(this)"></div>
+          <div id="master-56" class="facelet" onclick="setColor(this)"></div>
+          <div id="master-57" class="facelet" onclick="setColor(this)"></div>
+          <div id="master-58" class="facelet" onclick="setColor(this)"></div>
+          <div id="master-59" class="facelet" onclick="setColor(this)"></div>
+          <div id="master-60" class="facelet" onclick="setColor(this)"></div>
+          <div id="master-61" class="facelet" onclick="setColor(this)"></div>
+          <div id="master-62" class="facelet" onclick="setColor(this)"></div>
+          <div id="master-63" class="facelet" onclick="setColor(this)"></div>
+          <div id="master-64" class="facelet" onclick="setColor(this)"></div>
+        </div>
+        <div class="face back">
+          <div id="master-65" class="facelet" onclick="setColor(this)"></div>
+          <div id="master-66" class="facelet" onclick="setColor(this)"></div>
+          <div id="master-67" class="facelet" onclick="setColor(this)"></div>
+          <div id="master-68" class="facelet" onclick="setColor(this)"></div>
+          <div id="master-69" class="facelet" onclick="setColor(this)"></div>
+          <div id="master-70" class="facelet" onclick="setColor(this)"></div>
+          <div id="master-71" class="facelet" onclick="setColor(this)"></div>
+          <div id="master-72" class="facelet" onclick="setColor(this)"></div>
+          <div id="master-73" class="facelet" onclick="setColor(this)"></div>
+          <div id="master-74" class="facelet" onclick="setColor(this)"></div>
+          <div id="master-75" class="facelet" onclick="setColor(this)"></div>
+          <div id="master-76" class="facelet" onclick="setColor(this)"></div>
+          <div id="master-77" class="facelet" onclick="setColor(this)"></div>
+          <div id="master-78" class="facelet" onclick="setColor(this)"></div>
+          <div id="master-79" class="facelet" onclick="setColor(this)"></div>
+          <div id="master-80" class="facelet" onclick="setColor(this)"></div>
+        </div>
+        <div class="face down">
+          <div id="master-81" class="facelet" onclick="setColor(this)"></div>
+          <div id="master-82" class="facelet" onclick="setColor(this)"></div>
+          <div id="master-83" class="facelet" onclick="setColor(this)"></div>
+          <div id="master-84" class="facelet" onclick="setColor(this)"></div>
+          <div id="master-85" class="facelet" onclick="setColor(this)"></div>
+          <div id="master-86" class="facelet" onclick="setColor(this)"></div>
+          <div id="master-87" class="facelet" onclick="setColor(this)"></div>
+          <div id="master-88" class="facelet" onclick="setColor(this)"></div>
+          <div id="master-89" class="facelet" onclick="setColor(this)"></div>
+          <div id="master-90" class="facelet" onclick="setColor(this)"></div>
+          <div id="master-91" class="facelet" onclick="setColor(this)"></div>
+          <div id="master-92" class="facelet" onclick="setColor(this)"></div>
+          <div id="master-93" class="facelet" onclick="setColor(this)"></div>
+          <div id="master-94" class="facelet" onclick="setColor(this)"></div>
+          <div id="master-95" class="facelet" onclick="setColor(this)"></div>
+          <div id="master-96" class="facelet" onclick="setColor(this)"></div>
+        </div>
+      </div>
+
+      <!-- 5x5 -->
+      <div id="professor">
+        <div class="face up">
+          <div id="professor-1" class="facelet" onclick="setColor(this)"></div>
+          <div id="professor-2" class="facelet" onclick="setColor(this)"></div>
+          <div id="professor-3" class="facelet" onclick="setColor(this)"></div>
+          <div id="professor-4" class="facelet" onclick="setColor(this)"></div>
+          <div id="professor-5" class="facelet" onclick="setColor(this)"></div>
+          <div id="professor-6" class="facelet" onclick="setColor(this)"></div>
+          <div id="professor-7" class="facelet" onclick="setColor(this)"></div>
+          <div id="professor-8" class="facelet" onclick="setColor(this)"></div>
+          <div id="professor-9" class="facelet" onclick="setColor(this)"></div>
+          <div id="professor-10" class="facelet" onclick="setColor(this)"></div>
+          <div id="professor-11" class="facelet" onclick="setColor(this)"></div>
+          <div id="professor-12" class="facelet" onclick="setColor(this)"></div>
+          <div id="professor-13" class="facelet" onclick="setColor(this)"></div>
+          <div id="professor-14" class="facelet" onclick="setColor(this)"></div>
+          <div id="professor-15" class="facelet" onclick="setColor(this)"></div>
+          <div id="professor-16" class="facelet" onclick="setColor(this)"></div>
+          <div id="professor-17" class="facelet" onclick="setColor(this)"></div>
+          <div id="professor-18" class="facelet" onclick="setColor(this)"></div>
+          <div id="professor-19" class="facelet" onclick="setColor(this)"></div>
+          <div id="professor-20" class="facelet" onclick="setColor(this)"></div>
+          <div id="professor-21" class="facelet" onclick="setColor(this)"></div>
+          <div id="professor-22" class="facelet" onclick="setColor(this)"></div>
+          <div id="professor-23" class="facelet" onclick="setColor(this)"></div>
+          <div id="professor-24" class="facelet" onclick="setColor(this)"></div>
+          <div id="professor-25" class="facelet" onclick="setColor(this)"></div>
+        </div>
+        <div class="face left">
+          <div id="professor-26" class="facelet" onclick="setColor(this)"></div>
+          <div id="professor-27" class="facelet" onclick="setColor(this)"></div>
+          <div id="professor-28" class="facelet" onclick="setColor(this)"></div>
+          <div id="professor-29" class="facelet" onclick="setColor(this)"></div>
+          <div id="professor-30" class="facelet" onclick="setColor(this)"></div>
+          <div id="professor-31" class="facelet" onclick="setColor(this)"></div>
+          <div id="professor-32" class="facelet" onclick="setColor(this)"></div>
+          <div id="professor-33" class="facelet" onclick="setColor(this)"></div>
+          <div id="professor-34" class="facelet" onclick="setColor(this)"></div>
+          <div id="professor-35" class="facelet" onclick="setColor(this)"></div>
+          <div id="professor-36" class="facelet" onclick="setColor(this)"></div>
+          <div id="professor-37" class="facelet" onclick="setColor(this)"></div>
+          <div id="professor-38" class="facelet" onclick="setColor(this)"></div>
+          <div id="professor-39" class="facelet" onclick="setColor(this)"></div>
+          <div id="professor-40" class="facelet" onclick="setColor(this)"></div>
+          <div id="professor-41" class="facelet" onclick="setColor(this)"></div>
+          <div id="professor-42" class="facelet" onclick="setColor(this)"></div>
+          <div id="professor-43" class="facelet" onclick="setColor(this)"></div>
+          <div id="professor-44" class="facelet" onclick="setColor(this)"></div>
+          <div id="professor-45" class="facelet" onclick="setColor(this)"></div>
+          <div id="professor-46" class="facelet" onclick="setColor(this)"></div>
+          <div id="professor-47" class="facelet" onclick="setColor(this)"></div>
+          <div id="professor-48" class="facelet" onclick="setColor(this)"></div>
+          <div id="professor-49" class="facelet" onclick="setColor(this)"></div>
+          <div id="professor-50" class="facelet" onclick="setColor(this)"></div>
+        </div>
+        <div class="face front">
+          <div id="professor-51" class="facelet" onclick="setColor(this)"></div>
+          <div id="professor-52" class="facelet" onclick="setColor(this)"></div>
+          <div id="professor-53" class="facelet" onclick="setColor(this)"></div>
+          <div id="professor-54" class="facelet" onclick="setColor(this)"></div>
+          <div id="professor-55" class="facelet" onclick="setColor(this)"></div>
+          <div id="professor-56" class="facelet" onclick="setColor(this)"></div>
+          <div id="professor-57" class="facelet" onclick="setColor(this)"></div>
+          <div id="professor-58" class="facelet" onclick="setColor(this)"></div>
+          <div id="professor-59" class="facelet" onclick="setColor(this)"></div>
+          <div id="professor-60" class="facelet" onclick="setColor(this)"></div>
+          <div id="professor-61" class="facelet" onclick="setColor(this)"></div>
+          <div id="professor-62" class="facelet" onclick="setColor(this)"></div>
+          <div id="professor-63" class="facelet" onclick="setColor(this)"></div>
+          <div id="professor-64" class="facelet" onclick="setColor(this)"></div>
+          <div id="professor-65" class="facelet" onclick="setColor(this)"></div>
+          <div id="professor-66" class="facelet" onclick="setColor(this)"></div>
+          <div id="professor-67" class="facelet" onclick="setColor(this)"></div>
+          <div id="professor-68" class="facelet" onclick="setColor(this)"></div>
+          <div id="professor-69" class="facelet" onclick="setColor(this)"></div>
+          <div id="professor-70" class="facelet" onclick="setColor(this)"></div>
+          <div id="professor-71" class="facelet" onclick="setColor(this)"></div>
+          <div id="professor-72" class="facelet" onclick="setColor(this)"></div>
+          <div id="professor-73" class="facelet" onclick="setColor(this)"></div>
+          <div id="professor-74" class="facelet" onclick="setColor(this)"></div>
+          <div id="professor-75" class="facelet" onclick="setColor(this)"></div>
+        </div>
+        <div class="face right">
+          <div id="professor-76" class="facelet" onclick="setColor(this)"></div>
+          <div id="professor-77" class="facelet" onclick="setColor(this)"></div>
+          <div id="professor-78" class="facelet" onclick="setColor(this)"></div>
+          <div id="professor-79" class="facelet" onclick="setColor(this)"></div>
+          <div id="professor-80" class="facelet" onclick="setColor(this)"></div>
+          <div id="professor-81" class="facelet" onclick="setColor(this)"></div>
+          <div id="professor-82" class="facelet" onclick="setColor(this)"></div>
+          <div id="professor-83" class="facelet" onclick="setColor(this)"></div>
+          <div id="professor-84" class="facelet" onclick="setColor(this)"></div>
+          <div id="professor-85" class="facelet" onclick="setColor(this)"></div>
+          <div id="professor-86" class="facelet" onclick="setColor(this)"></div>
+          <div id="professor-87" class="facelet" onclick="setColor(this)"></div>
+          <div id="professor-88" class="facelet" onclick="setColor(this)"></div>
+          <div id="professor-89" class="facelet" onclick="setColor(this)"></div>
+          <div id="professor-90" class="facelet" onclick="setColor(this)"></div>
+          <div id="professor-91" class="facelet" onclick="setColor(this)"></div>
+          <div id="professor-92" class="facelet" onclick="setColor(this)"></div>
+          <div id="professor-93" class="facelet" onclick="setColor(this)"></div>
+          <div id="professor-94" class="facelet" onclick="setColor(this)"></div>
+          <div id="professor-95" class="facelet" onclick="setColor(this)"></div>
+          <div id="professor-96" class="facelet" onclick="setColor(this)"></div>
+          <div id="professor-97" class="facelet" onclick="setColor(this)"></div>
+          <div id="professor-98" class="facelet" onclick="setColor(this)"></div>
+          <div id="professor-99" class="facelet" onclick="setColor(this)"></div>
+          <div id="professor-100" class="facelet" onclick="setColor(this)"></div>
+        </div>
+        <div class="face back">
+          <div id="professor-101" class="facelet" onclick="setColor(this)"></div>
+          <div id="professor-102" class="facelet" onclick="setColor(this)"></div>
+          <div id="professor-103" class="facelet" onclick="setColor(this)"></div>
+          <div id="professor-104" class="facelet" onclick="setColor(this)"></div>
+          <div id="professor-105" class="facelet" onclick="setColor(this)"></div>
+          <div id="professor-106" class="facelet" onclick="setColor(this)"></div>
+          <div id="professor-107" class="facelet" onclick="setColor(this)"></div>
+          <div id="professor-108" class="facelet" onclick="setColor(this)"></div>
+          <div id="professor-109" class="facelet" onclick="setColor(this)"></div>
+          <div id="professor-110" class="facelet" onclick="setColor(this)"></div>
+          <div id="professor-111" class="facelet" onclick="setColor(this)"></div>
+          <div id="professor-112" class="facelet" onclick="setColor(this)"></div>
+          <div id="professor-113" class="facelet" onclick="setColor(this)"></div>
+          <div id="professor-114" class="facelet" onclick="setColor(this)"></div>
+          <div id="professor-115" class="facelet" onclick="setColor(this)"></div>
+          <div id="professor-116" class="facelet" onclick="setColor(this)"></div>
+          <div id="professor-117" class="facelet" onclick="setColor(this)"></div>
+          <div id="professor-118" class="facelet" onclick="setColor(this)"></div>
+          <div id="professor-119" class="facelet" onclick="setColor(this)"></div>
+          <div id="professor-120" class="facelet" onclick="setColor(this)"></div>
+          <div id="professor-121" class="facelet" onclick="setColor(this)"></div>
+          <div id="professor-122" class="facelet" onclick="setColor(this)"></div>
+          <div id="professor-123" class="facelet" onclick="setColor(this)"></div>
+          <div id="professor-124" class="facelet" onclick="setColor(this)"></div>
+          <div id="professor-125" class="facelet" onclick="setColor(this)"></div>
+        </div>
+        <div class="face down">
+          <div id="professor-126" class="facelet" onclick="setColor(this)"></div>
+          <div id="professor-127" class="facelet" onclick="setColor(this)"></div>
+          <div id="professor-128" class="facelet" onclick="setColor(this)"></div>
+          <div id="professor-129" class="facelet" onclick="setColor(this)"></div>
+          <div id="professor-130" class="facelet" onclick="setColor(this)"></div>
+          <div id="professor-131" class="facelet" onclick="setColor(this)"></div>
+          <div id="professor-132" class="facelet" onclick="setColor(this)"></div>
+          <div id="professor-133" class="facelet" onclick="setColor(this)"></div>
+          <div id="professor-134" class="facelet" onclick="setColor(this)"></div>
+          <div id="professor-135" class="facelet" onclick="setColor(this)"></div>
+          <div id="professor-136" class="facelet" onclick="setColor(this)"></div>
+          <div id="professor-137" class="facelet" onclick="setColor(this)"></div>
+          <div id="professor-138" class="facelet" onclick="setColor(this)"></div>
+          <div id="professor-139" class="facelet" onclick="setColor(this)"></div>
+          <div id="professor-140" class="facelet" onclick="setColor(this)"></div>
+          <div id="professor-141" class="facelet" onclick="setColor(this)"></div>
+          <div id="professor-142" class="facelet" onclick="setColor(this)"></div>
+          <div id="professor-143" class="facelet" onclick="setColor(this)"></div>
+          <div id="professor-144" class="facelet" onclick="setColor(this)"></div>
+          <div id="professor-145" class="facelet" onclick="setColor(this)"></div>
+          <div id="professor-146" class="facelet" onclick="setColor(this)"></div>
+          <div id="professor-147" class="facelet" onclick="setColor(this)"></div>
+          <div id="professor-148" class="facelet" onclick="setColor(this)"></div>
+          <div id="professor-149" class="facelet" onclick="setColor(this)"></div>
+          <div id="professor-150" class="facelet" onclick="setColor(this)"></div>
+        </div>
+      </div>
+    </div>
+
+    <script>
+      function getColor(element) {
+        document.getElementById("color").className = element.className
+      }
+
+      function setColor(element) {
+        const color = document.getElementById("color").className
+        element.className = "facelet"
+        element.classList.add(color)
+      }
+
+      function permutationIndex(size) {
+        // https://www.geeksforgeeks.org/lexicographic-rank-string-duplicate-characters/
+
+        let type = ""
+        let faces = 0
+        let cubeString = []
+        let lehmer = []
+        let counter = 0
+        let result = 0n
+
+        if (size === 2) {
+          faces = 4 * 6
+          type = "mini"
+        } else if (size === 3) {
+          faces = 9 * 6
+          type = "rubik"
+        } else if (size === 4) {
+          faces = 16 * 6
+          type = "master"
+        } else {
+          faces = 25 * 6
+          type = "professor"
+        }
+
+        for (let i = 0; i < faces; i++) {
+          let id = document.getElementById(type + "-" + i)
+          cubeString.push(id.childNodes[0].id) // FIXME
+        }
+      }
+      /*
+        - 2x2: ~21 bits (0x1fffff)
+        - 3x3: ~65 bits (0x1ffffffffffffffff)
+        - 4x4: ~152 bits (0xffffffffffffffffffffffffffffffffffffff)
+        - 5x5: ~247 bits (0x7fffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff)
+       */
+    </script>
+  </body>
+</html>
