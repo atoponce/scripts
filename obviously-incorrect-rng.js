@@ -33,17 +33,13 @@ function flip_coin() {
   return coin
 }
 
-function hash(s) {
-  return crypto.createHash("sha256").update(s).digest("hex")
-}
-
 function get_random_hex() {
   let count = 256
   let bits = ""
 
   while(count--) bits += flip_coin()
 
-  return hash(bits)
+  return crypto.createHash("sha256").update(bits).digest("hex")
 }
 
 if (require.main === module) {
