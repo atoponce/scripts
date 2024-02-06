@@ -34,12 +34,25 @@ function flip_coin() {
 }
 
 function get_random_hex() {
-  let count = 256
-  let bits = ""
+  let count = 32
+  const results = new Uint8Array(count)
 
-  while(count--) bits += flip_coin()
+  while(count--) {
+    results[count] = 
+      flip_coin() << 7 | 
+      flip_coin() << 6 | 
+      flip_coin() << 5 | 
+      flip_coin() << 4 | 
+      flip_coin() << 3 | 
+      flip_coin() << 2 | 
+      flip_coin() << 1 | 
+      flip_coin()
+  }
 
-  return crypto.createHash("sha256").update(bits).digest("hex")
+  // For debugging/validation.
+  //console.log(results)
+
+  return crypto.createHash("sha256").update(results).digest("hex")
 }
 
 if (require.main === module) {
