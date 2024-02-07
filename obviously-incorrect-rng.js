@@ -60,7 +60,7 @@ if (require.main === module) {
   
   if (process.argv.length > 2) {
     if (process.argv.indexOf('-h') > -1) {
-      console.log("Usage: oi-rng [n]")
+      console.log("Usage: " + process.argv[1] + " [n]")
       process.exit(0)
     }
   
