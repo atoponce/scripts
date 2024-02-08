@@ -26,28 +26,43 @@ const crypto = require("crypto")
 
 function flip_coin() {
   let coin = 0
-  const then = Date.now() + 1
+  const then = performance.now() + 0.1
 
-  while(Date.now() <= then) coin ^= 1
+  while(performance.now() <= then) coin ^= 1
 
   return coin
+}
+
+function flip_coin_cycles() {
+  let coin = 0
+  let cycles = 0
+  const then = performance.now() + 0.1
+
+  while(performance.now() <= then) {
+    coin ^= 1
+    cycles++
+  }
+
+  return [coin, cycles]
+}
+
+function get_random_byte() {
+  let n = 0
+  let bits = 8
+
+  while(bits--) {
+    n <<= 1
+    n |= flip_coin()
+  }
+
+  return n
 }
 
 function get_random_hex() {
   let count = 32
   const results = new Uint8Array(count)
 
-  while(count--) {
-    results[count] = 
-      flip_coin() << 7 | 
-      flip_coin() << 6 | 
-      flip_coin() << 5 | 
-      flip_coin() << 4 | 
-      flip_coin() << 3 | 
-      flip_coin() << 2 | 
-      flip_coin() << 1 | 
-      flip_coin()
-  }
+  while(count--) results[count] = get_random_byte()
 
   // For debugging/validation.
   //console.log(results)
@@ -67,5 +82,9 @@ if (require.main === module) {
     count = process.argv[2]
   }
   
-  while(count--) console.log(get_random_hex())
+  while(count--) {
+    //const result = flip_coin_cycles(); console.log(result[0] + ", " + result[1])
+    //console.log(get_random_byte())
+    console.log(get_random_hex())
+  }
 }
