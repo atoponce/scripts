@@ -46,6 +46,13 @@ function flip_coin_cycles() {
   return [coin, cycles]
 }
 
+function get_fair_bit() {
+  while(1) {
+    const a = flip_coin()
+    if(a != flip_coin()) return(a)
+  }
+}
+
 function get_random_byte() {
   let n = 0
   let bits = 8
@@ -53,6 +60,7 @@ function get_random_byte() {
   while(bits--) {
     n <<= 1
     n |= flip_coin()
+    //n |= get_fair_bit()
   }
 
   return n
