@@ -13,50 +13,43 @@
 
 const crypto = require("crypto")
 
+/**
+ * Prints the options supported by the script. Grouped by concept.
+ */
 function print_usage() {
   console.log("Usage: " + process.argv[1] + " [OPTION [ARG]]")
   console.log("")
   console.log("  -h,   --help      Print this help and exit.")
   console.log("")
-  console.log("  -b,   --byte      Get raw bytes.")
   console.log("  -c,   --coin      Get raw coin flips.")
-  console.log("")
+  console.log("  -s,   --spins     Get raw coin flips and spins per flip.")
   console.log("  -f,   --fair      Get fair coin flips (von Neumann extracted).")
-  console.log("  -s,   --spins     Get number of spins per coin flip.")
+  console.log("")
+  console.log("  -b,   --byte      Get raw bytes.")
   console.log("  -v,   --neumann   Get fair bytes (von Neumann extracted).")
   console.log("")
-  console.log("  -2,   --sha256    Get 256 bits in hex (SHA-256 hashed).")
+  console.log("  -2,   --sha256    Get 256 bits in hex (SHA-256 hashed). Default.")
   console.log("  -x,   --hex       Get 256 bits in hex (von Neumann extracted).")
   console.log("")
-  console.log("  -n #, --num #     Print requested data specific number of times.")
+  console.log("  -n #, --num #     Print requested data a specific number of times.")
+
+  process.exit(0)
 }
 
 /**
- * Returns a high resolution timestamp with sub-millisecond accuracy.
- * @returns {number}
+ * Returns a high resolution timestamp with sub-millisecond accuracy since script execution.
+ * @returns {number} Floating point milliseconds.
  */
 function now() {
   return performance.now()
 }
 
 /**
- * Sets a timer in the future and flips a bit between 0/1 until the timer expires.
- * @returns {number}
+ * Sets a timer 100 microseconds in the future, flips a bit between 0/1 until the timer expires
+ * while also counting bit flips.
+ * @returns {Array} Result of the coin flip and number of cycles per flip.
  */
 function flip_coin() {
-  let coin = 0
-  const later = now() + 0.1
-
-  while(now() <= later) coin ^= 1
-
-  return coin
-}
-
-/**
- * Counts the number of bit flips before the timer expires.
- * @returns {Array}
- */
-function coin_spins() {
   let coin = 0
   let cycles = 0
   const later = performance.now() + 0.1
@@ -70,42 +63,46 @@ function coin_spins() {
 }
 
 /**
- * John von Neumann randomness extractor.
- * @returns {number}
+ * John von Neumann randomness extractor. If two consecutive non-overlapping bits are different,
+ * return the first bit.
+ * @returns {number} 0 or 1.
  */
 function fair_bit() {
   while(1) {
-    const a = flip_coin()
-    if(a != flip_coin()) return(a)
+    const bit = flip_coin()[0]
+    if(bit != flip_coin()[0]) return(bit)
   }
 }
 
 /**
- * Builds a full byte, either raw (for SHA-256) or after von Neumann randomness extraction.
- * @param {string} extractor 
- * @returns {number}
+ * Builds an 8-bit byte, either raw for SHA-256 hashing, or unbiased via von Neumann randomness
+ * extraction.
+ * @param {string} extractor Either "sha256" or "neumann".
+ * @returns {number} Decimal number 0-255.
  */
 function get_byte(extractor) {
-  let n = 0
+  let byte = 0
   let bits = 8
 
   while(bits--) {
-    n <<= 1
+    byte <<= 1
 
     if(extractor === "sha256")
-      n |= flip_coin()
+      // Raw bits are okay for SHA-256 hashing *after* the fact.
+      byte |= flip_coin()[0]
     else if (extractor === "neumann")
-      n |= fair_bit()
+      // Unbiased bits are required *before* returning to the user.
+      byte |= fair_bit()
     else
       process.exit(1)
   }
 
-  return n
+  return byte
 }
 
 /**
  * Generates a 256-bit hexadecimal string from von Neumann debiased bits.
- * @returns {string}
+ * @returns {string} 64 hexadecimal characters, zero-padded.
  */
 function fair_bytes() {
   let count = 32
@@ -118,7 +115,7 @@ function fair_bytes() {
 
 /**
  * Generates a 256-bit hexadecimal string from SHA-256 hashing.
- * @returns {string}
+ * @returns {string} 64 hexadecimal characters, zero-padded.
  */
 function hash_bytes() {
   let count = 32
@@ -139,27 +136,14 @@ if (require.main === module) {
   }
   
   while(count--) {
-    if (args.includes("-h") || args.includes("--help")) {
-      print_usage()
-      process.exit(0)
-    }
-    else if (args.includes("-2") || args.includes("--sha256"))
-      console.log(hash_bytes())
-    else if (args.includes("-b") || args.includes("--bytes"))
-      console.log(get_byte("sha256"))
-    else if (args.includes("-c") || args.includes("--coin"))
-      console.log(flip_coin())
-    else if (args.includes("-f") || args.includes("--fair"))
-      console.log(fair_bit())
-    else if (args.includes("-s") || args.includes("--spins")) {
-      const result = coin_spins()
-      console.log(result[0] + ", " + result[1])
-    }
-    else if (args.includes("-v") || args.includes("--neumann"))
-      console.log(get_byte("neumann"))
-    else if (args.includes("-x") || args.includes("--hex"))
-      console.log(fair_bytes())
-    else
-      console.log(hash_bytes())
+         if (args.includes("-h") || args.includes("--help"))    print_usage()
+    else if (args.includes("-c") || args.includes("--coin"))    console.log(flip_coin()[0])
+    else if (args.includes("-s") || args.includes("--spins"))   console.log(flip_coin()[1])
+    else if (args.includes("-f") || args.includes("--fair"))    console.log(fair_bit())
+    else if (args.includes("-b") || args.includes("--bytes"))   console.log(get_byte("sha256"))
+    else if (args.includes("-v") || args.includes("--neumann")) console.log(get_byte("neumann"))
+    else if (args.includes("-2") || args.includes("--sha256"))  console.log(hash_bytes())
+    else if (args.includes("-x") || args.includes("--hex"))     console.log(fair_bytes())
+    else                                                        console.log(hash_bytes())
   }
 }
