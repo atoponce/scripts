@@ -68,7 +68,7 @@ function flip_coin() {
  * @returns {number} 0 or 1.
  */
 function fair_bit() {
-  while(1) {
+  while(true) {
     const bit = flip_coin()[0]
     if(bit != flip_coin()[0]) return(bit)
   }
