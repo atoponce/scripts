@@ -22,14 +22,14 @@ function print_usage() {
   console.log("  -h,   --help      Print this help and exit.")
   console.log("")
   console.log("  -c,   --coin      Get raw coin flips.")
-  console.log("  -s,   --spins     Get raw coin flips and spins per flip.")
+  console.log("  -s,   --spins     Get raw coin spins.")
   console.log("  -f,   --fair      Get fair coin flips (von Neumann extracted).")
   console.log("")
   console.log("  -b,   --byte      Get raw bytes.")
   console.log("  -v,   --neumann   Get fair bytes (von Neumann extracted).")
   console.log("")
-  console.log("  -2,   --sha256    Get 256 bits in hex (SHA-256 hashed). Default.")
-  console.log("  -x,   --hex       Get 256 bits in hex (von Neumann extracted).")
+  console.log("  -2,   --sha256    Get 256 SHA-256 hashed bits in hex (Default).")
+  console.log("  -x,   --hex       Get 256 von Neumann extracted bits in hex.")
   console.log("")
   console.log("  -n #, --num #     Print requested data a specific number of times.")
 
@@ -40,7 +40,7 @@ function print_usage() {
  * Returns a high resolution timestamp with sub-millisecond accuracy since script execution.
  * @returns {number} Floating point milliseconds.
  */
-function now() {
+function get_now() {
   return performance.now()
 }
 
@@ -52,9 +52,9 @@ function now() {
 function flip_coin() {
   let coin = 0
   let cycles = 0
-  const later = now() + 0.1
+  const later = get_now() + 0.1
 
-  while(now() <= later) {
+  while (get_now() <= later) {
     coin ^= 1
     cycles++
   }
@@ -67,10 +67,10 @@ function flip_coin() {
  * return the first bit.
  * @returns {number} 0 or 1.
  */
-function fair_bit() {
-  while(true) {
+function get_fair_bit() {
+  while (true) {
     const bit = flip_coin()[0]
-    if(bit != flip_coin()[0]) return(bit)
+    if (bit != flip_coin()[0]) return(bit)
   }
 }
 
@@ -84,15 +84,13 @@ function get_byte(extractor) {
   let byte = 0
   let bits = 8
 
-  while(bits--) {
+  while (bits--) {
     byte <<= 1
 
-    if(extractor === "raw")
-      // Raw bits are okay for SHA-256 hashing *after* the fact.
+    if (extractor === "raw")
       byte |= flip_coin()[0]
     else if (extractor === "neumann")
-      // Unbiased bits are required *before* returning to the user.
-      byte |= fair_bit()
+      byte |= get_fair_bit()
     else
       process.exit(1)
   }
@@ -101,29 +99,21 @@ function get_byte(extractor) {
 }
 
 /**
- * Generates a 256-bit hexadecimal string from von Neumann debiased bits.
+ * Generates a 256-bit hexadecimal string from either von Neumann debiased bits or SHA-256 hashed.
+ * @param {string} extractor Either "raw" or "neumann".
  * @returns {string} 64 hexadecimal characters, zero-padded.
  */
-function fair_bytes() {
+function get_hex(extractor) {
   let count = 32
   const results = new Uint8Array(count)
 
-  while(count--) results[count] = get_byte("neumann")
-
-  return Buffer.from(results).toString("hex");
-}
-
-/**
- * Generates a 256-bit hexadecimal string from SHA-256 hashing.
- * @returns {string} 64 hexadecimal characters, zero-padded.
- */
-function hash_bytes() {
-  let count = 32
-  const results = new Uint8Array(count)
-
-  while(count--) results[count] = get_byte("raw")
-
-  return crypto.createHash("sha256").update(results).digest("hex")
+  if (extractor === "raw") {
+    while (count--) results[count] = get_byte("raw")
+    return crypto.createHash("sha256").update(results).digest("hex")
+  } else if (extractor === "neumann") {
+    while (count--) results[count] = get_byte("neumann")
+    return Buffer.from(results).toString("hex");
+  }
 }
 
 if (require.main === module) {
@@ -135,15 +125,15 @@ if (require.main === module) {
     count = args[option + 1]
   }
   
-  while(count--) {
+  while (count--) {
          if (args.includes("-h") || args.includes("--help"))    print_usage()
     else if (args.includes("-c") || args.includes("--coin"))    console.log(flip_coin()[0])
     else if (args.includes("-s") || args.includes("--spins"))   console.log(flip_coin()[1])
-    else if (args.includes("-f") || args.includes("--fair"))    console.log(fair_bit())
-    else if (args.includes("-b") || args.includes("--bytes"))   console.log(get_byte("raw"))
+    else if (args.includes("-f") || args.includes("--fair"))    console.log(get_fair_bit())
+    else if (args.includes("-b") || args.includes("--byte"))    console.log(get_byte("raw"))
     else if (args.includes("-v") || args.includes("--neumann")) console.log(get_byte("neumann"))
-    else if (args.includes("-2") || args.includes("--sha256"))  console.log(hash_bytes())
-    else if (args.includes("-x") || args.includes("--hex"))     console.log(fair_bytes())
-    else                                                        console.log(hash_bytes())
+    else if (args.includes("-2") || args.includes("--sha256"))  console.log(get_hex("raw"))
+    else if (args.includes("-x") || args.includes("--hex"))     console.log(get_hex("neumann"))
+    else                                                        console.log(get_hex("raw"))
   }
 }
