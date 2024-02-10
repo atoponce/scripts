@@ -47,19 +47,19 @@ function get_now() {
 /**
  * Sets a timer 100 microseconds in the future, flips a bit between 0/1 until the timer expires
  * while also counting bit flips.
- * @returns {Array} Result of the coin flip and number of cycles per flip.
+ * @returns {Array} Result of the coin flip and number of spins per flip.
  */
 function flip_coin() {
   let coin = 0
-  let cycles = 0
+  let spins = 0
   const later = get_now() + 0.1
 
   while (get_now() <= later) {
     coin ^= 1
-    cycles++
+    spins++
   }
 
-  return [coin, cycles]
+  return [coin, spins]
 }
 
 /**
