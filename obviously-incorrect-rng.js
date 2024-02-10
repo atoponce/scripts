@@ -77,22 +77,16 @@ function get_fair_bit() {
 /**
  * Builds an 8-bit byte, either raw for SHA-256 hashing, or unbiased via von Neumann randomness
  * extraction.
- * @param {string} extractor Either "raw" or "neumann".
+ * @param {boolean} debias Either true or false
  * @returns {number} Decimal number 0-255.
  */
-function get_byte(extractor) {
+function unbiased_byte(debias) {
   let byte = 0
   let bits = 8
 
   while (bits--) {
     byte <<= 1
-
-    if (extractor === "raw")
-      byte |= flip_coin()[0]
-    else if (extractor === "neumann")
-      byte |= get_fair_bit()
-    else
-      process.exit(1)
+    debias ? byte |= get_fair_bit() : byte |= flip_coin()[0]
   }
 
   return byte
@@ -100,19 +94,19 @@ function get_byte(extractor) {
 
 /**
  * Generates a 256-bit hexadecimal string from either von Neumann debiased bits or SHA-256 hashed.
- * @param {string} extractor Either "raw" or "neumann".
+ * @param {string} type Either "sha256" or "neumann"
  * @returns {string} 64 hexadecimal characters, zero-padded.
  */
-function get_hex(extractor) {
+function get_hex(type) {
   let count = 32
   const results = new Uint8Array(count)
 
-  if (extractor === "raw") {
-    while (count--) results[count] = get_byte("raw")
-    return crypto.createHash("sha256").update(results).digest("hex")
-  } else if (extractor === "neumann") {
-    while (count--) results[count] = get_byte("neumann")
+  if (type === "neumann") {
+    while (count--) results[count] = unbiased_byte(true)
     return Buffer.from(results).toString("hex");
+  } else if (type === "sha256") {
+    while (count--) results[count] = unbiased_byte(false)
+    return crypto.createHash("sha256").update(results).digest("hex")
   }
 }
 
@@ -130,10 +124,10 @@ if (require.main === module) {
     else if (args.includes("-c") || args.includes("--coin"))    console.log(flip_coin()[0])
     else if (args.includes("-s") || args.includes("--spins"))   console.log(flip_coin()[1])
     else if (args.includes("-f") || args.includes("--fair"))    console.log(get_fair_bit())
-    else if (args.includes("-b") || args.includes("--byte"))    console.log(get_byte("raw"))
-    else if (args.includes("-v") || args.includes("--neumann")) console.log(get_byte("neumann"))
-    else if (args.includes("-2") || args.includes("--sha256"))  console.log(get_hex("raw"))
+    else if (args.includes("-b") || args.includes("--byte"))    console.log(unbiased_byte(false))
+    else if (args.includes("-v") || args.includes("--neumann")) console.log(unbiased_byte(true))
+    else if (args.includes("-2") || args.includes("--sha256"))  console.log(get_hex("sha256"))
     else if (args.includes("-x") || args.includes("--hex"))     console.log(get_hex("neumann"))
-    else                                                        console.log(get_hex("raw"))
+    else                                                        console.log(get_hex("sha256"))
   }
 }
