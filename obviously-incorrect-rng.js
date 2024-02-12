@@ -103,7 +103,7 @@ function get_hex(type) {
 
   if (type === "neumann") {
     while (count--) results[count] = unbiased_byte(true)
-    return Buffer.from(results).toString("hex");
+    return Buffer.from(results).toString("hex")
   } else if (type === "sha256") {
     while (count--) results[count] = unbiased_byte(false)
     return crypto.createHash("sha256").update(results).digest("hex")
