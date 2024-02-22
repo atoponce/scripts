@@ -45,14 +45,24 @@ function get_now() {
 }
 
 /**
- * Sets a timer 100 microseconds in the future, flips a bit between 0/1 until the timer expires
- * while also counting bit flips.
+ * Sets an expiration timer in the future, flips a bit between 0/1 until the timer expires while
+ * also counting bit flips.
+ *
+ * Be careful when setting the expiration time!
+ *
+ * dieharder(1) results on my laptop after collecting ~150 MB of raw bytes:
+ *    - 1.00 milliseconds passes all.
+ *    - 0.50 milleseconds passes most, with only a couple weaknesses.
+ *    - 0.25 milleseconds passes most, with more weaknesses and a few failures.
+ *    - 0.10 milleseconds passes < 1/2, many weaknesses, and fails > 1/2.
+ *
+ * Note: diharder(1) needs ~235 GB of data for 100% confidence in the test results.
  * @returns {Array} Result of the coin flip and number of spins per flip.
  */
 function flip_coin() {
+  const later = get_now() + 0.5
   let coin = 0
   let spins = 0
-  const later = get_now() + 0.1
 
   while (get_now() <= later) {
     coin ^= 1
