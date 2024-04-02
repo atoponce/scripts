@@ -15,6 +15,14 @@ class ChaCha {
    * @throws {Error}
    */
   constructor(key, nonce, counter, rounds) {
+    if (typeof key === "undefined") {
+      // RFC 8439 test vector key
+      key = new Uint32Array([
+        0x03020100, 0x07060504, 0x0b0a0908, 0x0f0e0d0c,
+        0x13121110, 0x17161514, 0x1b1a1918, 0x1f1e1d1c
+      ])
+    }
+
     if (typeof counter === "undefined") {
       // RFC 8439 test vector counter
       counter = 1
@@ -27,7 +35,7 @@ class ChaCha {
 
     if (typeof rounds === "undefined") {
       // https://eprint.iacr.org/2019/1492
-      this.#rounds = 8
+      rounds = 20
     }
 
     if (!(key instanceof Uint32Array)) {
@@ -42,14 +50,7 @@ class ChaCha {
       throw new Error("Rounds must be an even number no smaller than 8.")
     }
 
-    if (typeof key === "undefined") {
-      // RFC 8439 test vector key
-      key = new Uint32Array([
-        0x03020100, 0x07060504, 0x0b0a0908, 0x0f0e0d0c,
-        0x13121110, 0x17161514, 0x1b1a1918, 0x1f1e1d1c
-      ])
-    }
-
+    this.#rounds = rounds
     this.#keypos = 0
     this.#keystream = Array.from(Array(64), (_, i) => 0)
     this.#state = [
@@ -145,8 +146,6 @@ class ChaCha {
       this.#keystream[b++] = (s[i] >>> 16) & 0xff
       this.#keystream[b++] = (s[i] >>> 24) & 0xff
     }
-
-    return this.#keystream
   }
 
   /**
