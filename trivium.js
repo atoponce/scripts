@@ -13,29 +13,43 @@ module.exports = class Trivium {
    */
   constructor(key, iv) {
     if (typeof key === "undefined") {
-      key = new Uint8Array([0, 0, 0, 0, 0, 0, 0, 0])
+      key = new Uint8Array([
+        0x53, 0x65, 0x74, 0x20, 0x54, 0x72, 0x69, 0x76, 0x69, 0x75 // "Set Triviu"
+      ])
     }
 
     if (typeof iv === "undefined") {
-      iv = new Uint8Array([0, 0, 0, 0, 0, 0, 0, 0])
+      iv = new Uint8Array([
+        0x6d, 0x20, 0x6b, 0x65, 0x79, 0x20, 0x26, 0x20, 0x49, 0x56 // "m key & IV"
+      ])
     }
 
     if (!(key instanceof Uint8Array) || key.length !== 10) {
-      "Key should be a 10-element Uint8Array."
+      throw new Error("Key should be a 10-element Uint8Array.")
     }
 
     if (!(iv instanceof Uint8Array) || iv.length !== 10) {
-      "IV should be a 10-element Uint8Array."
+      throw new Error("IV should be a 10-element Uint8Array.")
     }
 
-    this.#state = Array.from(Array(288), (_, i) => 0)
+    this.#state = new Array(288).fill(0)
 
     const keyBits = []
     const ivBits = []
 
     for (let i = 0; i < 10; i++) {
-      keyBits.push(this.#byteToBits(key[i]))
-      ivBits.push(this.#byteToBits(iv[i]))
+      let tmpBits = this.#byteToBits(key[i])
+
+      for (let j = 0; j < 8; j++) {
+        keyBits.push(tmpBits[j])
+      }
+
+      tmpBits = this.#byteToBits(iv[i])
+
+      for (let j = 0; j < 8; j++) {
+        ivBits.push(tmpBits[j])
+      }
+
     }
 
     for (let i = 0; i < 80; i++) {
