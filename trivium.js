@@ -39,18 +39,22 @@ module.exports = class Trivium {
 
     for (let i = 0; i < 10; i++) {
       let tmpBits = this.#byteToBits(key[i])
+      tmpBits.reverse()
 
       for (let j = 0; j < 8; j++) {
         keyBits.push(tmpBits[j])
       }
 
       tmpBits = this.#byteToBits(iv[i])
+      tmpBits.reverse()
 
       for (let j = 0; j < 8; j++) {
         ivBits.push(tmpBits[j])
       }
-
     }
+
+    keyBits.reverse()
+    ivBits.reverse()
 
     for (let i = 0; i < 80; i++) {
       this.#state[i] = keyBits[i]
