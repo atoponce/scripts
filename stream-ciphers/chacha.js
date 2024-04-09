@@ -24,18 +24,15 @@ class ChaCha {
     }
 
     if (typeof counter === "undefined") {
-      // RFC 8439 test vector counter
-      counter = 1
+      counter = 1 // RFC 8439 test vector counter
     }
 
     if (typeof nonce === "undefined") {
-      // RFC 8439 test vector nonce
-      nonce = new Uint32Array([0x00000000, 0x4a000000, 0x00000000])
+      nonce = new Uint32Array([0x00000000, 0x4a000000, 0x00000000]) // RFC 8439 test vector nonce
     }
 
     if (typeof rounds === "undefined") {
-      // https://eprint.iacr.org/2019/1492
-      rounds = 20
+      rounds = 8 // https://eprint.iacr.org/2019/1492
     }
 
     if (!(key instanceof Uint32Array)) {
@@ -59,14 +56,6 @@ class ChaCha {
       key[4],     key[5],     key[6],     key[7],
       counter,    nonce[0],   nonce[1],   nonce[2]
     ]
-  }
-
-  /**
-   * Return the ChaCha state.
-   * @return {Array} - A 16 element array of 32 bytes.
-   */
-  get state() {
-    return this.#state
   }
 
   /**
