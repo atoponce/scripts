@@ -2,9 +2,25 @@ class Chaocipher {
     #left
     #right
 
-    constructor() {
-        this.#left = "ABCDEFGHIJKLMNOPQRSTUVWXYZ"
-        this.#right = "ABCDEFGHIJKLMNOPQRSTUVWXYZ"
+    constructor(l,  r) {
+        if (typeof l === "undefined") {
+            throw new Error("Left disk is not defined.")
+        }
+
+        if (typeof r === "undefined") {
+            throw new Error("Right disk is not defined.")
+        }
+
+        if ((/^[^A-Z]{26}$/).test(l)) {
+            throw new Error("Left disk must contain all 26 uppercase characters.")
+        }
+
+        if ((/^[^A-Z]{26}$/).test(r)) {
+            throw new Error("Right disk must contain all 26 uppercase characters.")
+        }
+
+        this.#left = l
+        this.#right = r
     }
 
     #rotate(n) {
@@ -36,7 +52,9 @@ class Chaocipher {
     }
 }
 
-const chaocipher = new Chaocipher()
-const ct = "IEYKKGGOTDGVABYJWROJVLMCPFFDMXXZGOEBPTCCXCOTRCGHDFNJQQNSLXFNEIYXIQMIONOMLVMDIRVKZCVHAHRTHVRKBPTLMCSJKHQSNXOHNBLPYJFZVAZPXSBLFVCYUKNXLRMWTCJSVFRLLCQDTX"
-const pt = chaocipher.output(ct, 0)
-console.log(pt)
+const left = "HXUCZVAMDSLKPEFJRIGTWOBNYQ"
+const right = "PTLNBQDEOYSFAVZKGJRIHWXUMC"
+const chaocipher = new Chaocipher(left, right)
+const pt = "WELLDONEISBETTERTHANWELLSAID"
+const ct = chaocipher.output(pt, 1)
+console.log(ct)
