@@ -1,0 +1,678 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>👟</text></svg>">
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <meta name="viewport" contetn="width=device-width, initial-scale=1.0" />
+    <script>
+      "use strict"
+
+      function getMonday(d) {
+        const day = d.getDay()
+        const diff = d.getDate() - day + (day === 0 ? -6 : 1)
+
+        return new Date(d.setDate(diff))
+      }
+
+      function pickDate(d) { // HTML element object, not Date() object
+        typeof(d) === "object" ? d = new Date(d.value + " MDT") : null
+        d = new Date(d + " MDT")
+
+        const year = d.getFullYear()
+        const month = (d.getMonth() + 1).toString().padStart(2, "0")
+        const day = (d.getDate()).toString().padStart(2, "0")
+
+        localStorage.setItem("marathonTrainingPlanDate", year + "-" + month + "-" + day)
+        
+        const monday = getMonday(d)
+        const weekCount = Math.floor((new Date() - monday) / (86400000 * 7)) + 1
+
+        for (let i = 1; i < 18; i++) document.getElementById(i).innerText = i
+
+        const youAreHere = document.getElementById(weekCount)
+
+        youAreHere.innerText = weekCount + " 📌"
+      }
+
+      function calculateWatts(n) {
+        let cp
+        typeof n === "number" ? cp = n : cp = n.value
+
+        localStorage.setItem("marathonTrainingPlanCP", cp)
+
+        const zone1A = document.getElementById("zone1A")
+        const zone1B = document.getElementById("zone1B")
+        const zone1C = document.getElementById("zone1C")
+        const  zone2 = document.getElementById("zone2")
+        const zone3A = document.getElementById("zone3A")
+        const zone3B = document.getElementById("zone3B")
+        const  zone4 = document.getElementById("zone4")
+        const  zone5 = document.getElementById("zone5")
+        const  zone6 = document.getElementById("zone6")
+        const  zone7 = document.getElementById("zone7")
+
+        zone1A.innerText = Math.round(cp * 0.50) + "-" + Math.round(cp * 0.65) // + " W"
+        zone1B.innerText = Math.round(cp * 0.65) + "-" + Math.round(cp * 0.75) // + " W"
+        zone1C.innerText = Math.round(cp * 0.75) + "-" + Math.round(cp * 0.80) // + " W"
+         zone2.innerText = Math.round(cp * 0.80) + "-" + Math.round(cp * 0.87) // + " W"
+        zone3A.innerText = Math.round(cp * 0.87) + "-" + Math.round(cp * 0.94) // + " W"
+        zone3B.innerText = Math.round(cp * 0.94) + "-" + Math.round(cp * 1.01) // + " W"
+         zone4.innerText = Math.round(cp * 1.01) + "-" + Math.round(cp * 1.05) // + " W"
+         zone5.innerText = Math.round(cp * 1.05) + "-" + Math.round(cp * 1.16) // + " W"
+         zone6.innerText = Math.round(cp * 1.16) + "-" + Math.round(cp * 1.50) // + " W"
+         zone7.innerText = Math.round(cp * 1.50) // + "+ W"
+
+        const       recovery = document.querySelectorAll('.recovery')
+        const           easy = document.querySelectorAll('.easy')
+        const       mpTempo1 = document.querySelectorAll('.mp-tempo-1')
+        const       mpTempo2 = document.querySelectorAll('.mp-tempo-2')
+        const        hmTempo = document.querySelectorAll('.hm-tempo')
+        const  nearThreshold = document.querySelectorAll('.near-threshold')
+        const supraThreshold = document.querySelectorAll('.supra-threshold')
+        const         vo2Max = document.querySelectorAll('.vo2-max')
+        const        strides = document.querySelectorAll('.strides')
+        const        opener1 = document.querySelectorAll('.opener1')
+        const        opener2 = document.querySelectorAll('.opener2')
+
+        for (let i = 0; i <       recovery.length; i++)       recovery[i].innerText = Math.round(cp * 0.00) + "-" + Math.round(cp * 0.50) // + " W"
+        for (let i = 0; i <           easy.length; i++)           easy[i].innerText = Math.round(cp * 0.70) + "-" + Math.round(cp * 0.80) // + " W"
+        for (let i = 0; i <       mpTempo1.length; i++)       mpTempo1[i].innerText = Math.round(cp * 0.80) + "-" + Math.round(cp * 0.83) // + " W"
+        for (let i = 0; i <       mpTempo2.length; i++)       mpTempo2[i].innerText = Math.round(cp * 0.90) + "-" + Math.round(cp * 0.93) // + " W"
+        for (let i = 0; i <        hmTempo.length; i++)        hmTempo[i].innerText = Math.round(cp * 0.95) + "-" + Math.round(cp * 0.98) // + " W"
+        for (let i = 0; i <  nearThreshold.length; i++)  nearThreshold[i].innerText = Math.round(cp * 0.99) + "-" + Math.round(cp * 1.01) // + " W"
+        for (let i = 0; i < supraThreshold.length; i++) supraThreshold[i].innerText = Math.round(cp * 1.02) + "-" + Math.round(cp * 1.05) // + " W"
+        for (let i = 0; i <         vo2Max.length; i++)         vo2Max[i].innerText = Math.round(cp * 1.05) + "-" + Math.round(cp * 1.08) // + " W"
+        for (let i = 0; i <        strides.length; i++)        strides[i].innerText = Math.round(cp * 1.00) + "-" + Math.round(cp * 2.00) // + " W"
+        for (let i = 0; i <        opener1.length; i++)        opener1[i].innerText = Math.round(cp * 1.01) // + " W"
+        for (let i = 0; i <        opener2.length; i++)        opener2[i].innerText = Math.round(cp * 1.08) // + " W"
+      }
+    </script>
+    <style>
+      .center {
+        text-align: center;
+      }
+      .flex-container {
+        display: flex;
+        justify-content: left;
+        margin: 20px;
+      }
+      .flex-container table, .flex-container div {
+        margin: 0px 5px;
+      }
+      .table {
+        border: 1px solid black;
+        border-collapse: collapse;
+        margin: 10px 0px;
+        padding: 5px;
+        white-space: nowrap;
+      }
+      code {
+        background-color:#ddd;
+        border: 1px solid #ccc;
+        padding: 5px;
+      }
+      td ol {
+        margin: 0px;
+        padding-left: 15px;
+      }
+      th {
+        background-color: #ffedaa;
+      }
+      th, td {
+        border: 1px solid #ccc;
+        padding: 8px;
+        text-align: left;
+      }
+      tr:nth-child(odd) {
+        background-color: #c9d9fe;
+      }
+    </style>
+    <title>Marathon Training Plan</title>
+  </head>
+  <body>
+  <h1>Steve Palladino Marathon Plan, Level 6</h1>
+    <div class="flex-container" id="info">
+      <table class="table">
+        <thead>
+          <tr>
+            <th colspan="3">Steve Palladino Power Zones</th>
+          </tr>
+          <tr>
+            <th>Zone</th>
+            <th>Type</th>
+            <th>Watts</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>1A</td>
+            <td>Post Interval Recovery</td>
+            <td><span id="zone1A"></span></td>
+          </tr>
+          <tr>
+            <td>1B</td>
+            <td>Easy Warm-up</td>
+            <td><span id="zone1B"></span></td>
+          </tr>
+          <tr>
+            <td>1C</td>
+            <td>Easy Aerobic Running</td>
+            <td><span id="zone1C"></span></td>
+          </tr>
+          <tr>
+            <td>2</td>
+            <td>Endurance / Long Run</td>
+            <td><span id="zone2"></span></td>
+          </tr>
+          <tr>
+            <td>3A</td>
+            <td>Extensive Threshold Stimulus</td>
+            <td><span id="zone3A"></span></td>
+          </tr>
+          <tr>
+            <td>3B</td>
+            <td>Intensive Threshold Stimulus</td>
+            <td><span id="zone3B"></span></td>
+          </tr>
+          <tr>
+            <td>4</td>
+            <td>Supra Threshold</td>
+            <td><span id="zone4"></span></td>
+          </tr>
+          <tr>
+            <td>5</td>
+            <td>Maximal Aerobic Power / VO₂ Max</td>
+            <td><span id="zone5"></span></td>
+          </tr>
+          <tr>
+            <td>6</td>
+            <td>Anaerobic Power Stimulus</td>
+            <td><span id="zone6"></span></td>
+          </tr>
+          <tr>
+            <td>7</td>
+            <td>Sprint / Maximal Power</td>
+            <td><span id="zone7"></span>+</td>
+          </tr>
+        </tbody>
+      </table>
+      <div id="notes">
+        <label for="cp"><b>Enter CP (W):</b></label>
+        <input id="cp" type="number" min="0" max="500" step="1" value="100" onchange="calculateWatts(this)" />
+        <label for="date"><b>Training Start Date:</b></label>
+        <input id="date" type="date" onchange="pickDate(this)" />
+        <h2>Notes</h2>
+        <p>All workouts assume a poper warm-up and cool-down (10-15 minutes, or as appropriate).</p>
+        <h3>Doubles</h3>
+        <p>Tuesday and Thursday are doubles. Try to separate them by at least 12 hours.</p>
+        <h3>Opener</h3>
+        <p>First doubles workout, CP tests, races, and time trails should open with:</p>
+        <ul>
+          <li>2×1' @ <span class="opener1"></span> off 2'</li>
+          <li>30" @ <span class="opener2"></span> off 1:30</li>
+        </ul>
+        <h3>Critical Power Test</h3>
+        <ul>
+          <li>3' max effort</li>
+          <li>30' full recovery @ <span class="recovery"></span></li>
+          <li>12' max effort</li>
+          <li>5' full recovery @ <span class="recovery"></span></li>
+        </ul>
+        <p>To calculate CP from the 3'/12' test: <code>CP = (12'AP×12 - 3'AP×3)/9</code>, where <code>AP</code> is the average power for that part of the test.</p>
+      </div>
+    </div>
+    <div id="plan">
+      <table class="table">
+        <thead>
+          <tr>
+            <th colspan="10">Details showing wattage targets for every run. Doubles on Tuesday and Thursday.</th>
+          </tr>
+          <tr>
+            <th>Week</th>
+            <th>Monday</th>
+            <th>Tuesday</th>
+            <th>Wednesday</th>
+            <th>Thursday</th>
+            <th>Friday</th>
+            <th>Saturday</th>
+            <th>Sunday</th>
+            <th>RSS</th>
+            <th>Total Time</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td id="1">1</td>
+            <td>50' @ <span class="easy"></span> w/<br/>4×10" @ <span class="strides"></span></td>
+            <td><ol><li>3×8:30 @ <span class="near-threshold"></span> off 3'</li><li>10' @ <span class="hm-tempo"></span></li></ol></td>
+            <td>50' @ <span class="easy"></span></td>
+            <td><ol><li>4×5' @ <span class="supra-threshold"></span> off 2:25</li><li>10' @ <span class="hm-tempo"></span></li></ol></td>
+            <td>50' @ <span class="easy"></span></td>
+            <td>50' @ <span class="mp-tempo-1"></span> +<br/>30' @ <span class="mp-tempo-2"></span></td>
+            <td>Rest</td>
+            <td>437</td>
+            <td>7h 0m</td>
+          </tr>
+          <tr>
+            <td id="2">2</td>
+            <td>50' @ <span class="easy"></span> w/<br/>4×10" @ <span class="strides"></span></td>
+            <td><ol><li>4×3' @ <span class="vo2-max"></span> off 2:30</li><li>10' @ <span class="hm-tempo"></span></li></ol></td>
+            <td>50' @ <span class="easy"></span></td>
+            <td><ol><li>2×15' @ <span class="hm-tempo"></span> off 3'</li><li>10' @ <span class="hm-tempo"></span></li></ol></td>
+            <td>50' @ <span class="easy"></span></td>
+            <td>60' @ <span class="mp-tempo-1"></span> +<br/>30' @ <span class="mp-tempo-2"></span></td>
+            <td>Rest</td>
+            <td>442</td>
+            <td>7h 20m</td>
+          </tr>
+          <tr>
+            <td id="3">3</td>
+            <td>50' @ <span class="easy"></span> w/<br/>4×10" @ <span class="strides"></span></td>
+            <td><ol><li>3×9:15 @ <span class="near-threshold"></span> off 3'</li><li>10' @ <span class="hm-tempo"></span></li></ol></td>
+            <td>50' @ <span class="easy"></span></td>
+            <td><ol><li>4×5:30 @ <span class="supra-threshold"></span> off 2:25</li><li>10' @ <span class="hm-tempo"></span></li></ol></td>
+            <td>50' @ <span class="easy"></span></td>
+            <td>65' @ <span class="mp-tempo-1"></span> +<br/>35' @ <span class="mp-tempo-2"></span></td>
+            <td>Rest</td>
+            <td>442</td>
+            <td>7h 40m</td>
+          </tr>
+          <tr>
+            <td id="4">4</td>
+            <td>50' @ <span class="easy"></span> w/<br/>4×10" @ <span class="strides"></span></td>
+            <td>8×1' @ <span class="near-threshold"></span> off 2'</td>
+            <td>50' @ <span class="easy"></span></td>
+            <td>8×1' @ <span class="near-threshold"></span> off 2'</td>
+            <td>50' @ <span class="easy"></span></td>
+            <td><b>CP Test</b></td>
+            <td>Rest</td>
+            <td>281</td>
+            <td>6h 0m</td>
+          </tr>
+          <tr>
+            <td id="5">5</td>
+            <td>55' @ <span class="easy"></span> w/<br/>4×10" @ <span class="strides"></span></td>
+            <td><ol><li>3×10' @ <span class="near-threshold"></span> off 3'</li><li>15' @ <span class="hm-tempo"></span></li></ol></td>
+            <td>50' @ <span class="easy"></span></td>
+            <td><ol><li>5×5' @ <span class="supra-threshold"></span> off 2:25</li><li>10' @ <span class="hm-tempo"></span></li></ol></td>
+            <td>55' @ <span class="easy"></span></td>
+            <td>75' @ <span class="mp-tempo-1"></span> +<br/>35' @ <span class="mp-tempo-2"></span></td>
+            <td>Rest</td>
+            <td>513</td>
+            <td>8h 5m</td>
+          </tr>
+          <tr>
+            <td id="6">6</td>
+            <td>55' @ <span class="easy"></span> w/<br/>4×10" @ <span class="strides"></span></td>
+            <td><ol><li>5×3' @ <span class="vo2-max"></span> off 2:30</li><li>15' @ <span class="hm-tempo"></span></li></ol></td>
+            <td>50' @ <span class="easy"></span></td>
+            <td><ol><li>2×17:30 @ <span class="hm-tempo"></span> off 3'</li><li>15' @ <span class="hm-tempo"></span></li></ol></td>
+            <td>55' @ <span class="easy"></span></td>
+            <td>80' @ <span class="mp-tempo-1"></span> +<br/>40' @ <span class="mp-tempo-2"></span></td>
+            <td>Rest</td>
+            <td>525</td>
+            <td>8h 30m</td>
+          </tr>
+          <tr>
+            <td id="7">7</td>
+            <td>55' @ <span class="easy"></span> w/<br/>4×10" @ <span class="strides"></span></td>
+            <td><ol><li>3×10' @ <span class="near-threshold"></span> off 3'</li><li>15' @ <span class="hm-tempo"></span></li></ol></td>
+            <td>55' @ <span class="easy"></span></td>
+            <td><ol><li>5×5:30 @ <span class="supra-threshold"></span> off 2:25</li><li>10' @ <span class="hm-tempo"></span></li></ol></td>
+            <td>55' @ <span class="easy"></span></td>
+            <td>90' @ <span class="mp-tempo-1"></span> +<br/>40' @ <span class="mp-tempo-2"></span></td>
+            <td>Rest</td>
+            <td>552</td>
+            <td>8h 55m</td>
+          </tr>
+          <tr>
+            <td id="8">8</td>
+            <td>50' @ <span class="easy"></span> w/<br/>4×10" @ <span class="strides"></span></td>
+            <td>8×1' @ <span class="near-threshold"></span> off 2'</td>
+            <td>50' @ <span class="easy"></span></td>
+            <td>8×1' @ <span class="near-threshold"></span> off 2'</td>
+            <td>50' @ <span class="easy"></span></td>
+            <td><b>5K race or<br/>20' TT</b></td>
+            <td>Rest</td>
+            <td>292</td>
+            <td>5h 40m</td>
+          </tr>
+          <tr>
+            <td id="9">9</td>
+            <td>60' @ <span class="easy"></span> w/<br/>4×10" @ <span class="strides"></span></td>
+            <td><ol><li>4×8:15 @ <span class="near-threshold"></span> off 3'</li><li>15' @ <span class="hm-tempo"></span></li></ol></td>
+            <td>60' @ <span class="easy"></span></td>
+            <td><ol><li>6×5' @ <span class="supra-threshold"></span> off 2:25</li><li>15' @ <span class="hm-tempo"></span></li></ol></td>
+            <td>60' @ <span class="easy"></span></td>
+            <td>95' @ <span class="mp-tempo-1"></span> +<br/>45' @ <span class="mp-tempo-2"></span></td>
+            <td>Rest</td>
+            <td>579</td>
+            <td>9h 15m</td>
+          </tr>
+          <tr>
+            <td id="10">10</td>
+            <td>60' @ <span class="easy"></span> w/<br/>4×10" @ <span class="strides"></span></td>
+            <td><ol><li>6×3' @ <span class="vo2-max"></span> off 2:30</li><li>15' @ <span class="hm-tempo"></span></li></ol></td>
+            <td>60' @ <span class="easy"></span></td>
+            <td><ol><li>2×20' @ <span class="hm-tempo"></span> off 3'</li><li>15' @ <span class="hm-tempo"></span></li></ol></td>
+            <td>60' @ <span class="easy"></span></td>
+            <td>95' @ <span class="mp-tempo-1"></span> +<br/>45' @ <span class="mp-tempo-2"></span></td>
+            <td>Rest</td>
+            <td>587</td>
+            <td>9h 30m</td>
+          </tr>
+          <tr>
+            <td id="11">11</td>
+            <td>60' @ <span class="easy"></span> w/<br/>4×10" @ <span class="strides"></span></td>
+            <td><ol><li>4×9' @ <span class="near-threshold"></span> off 3'</li><li>20' @ <span class="hm-tempo"></span></li></ol></td>
+            <td>60' @ <span class="easy"></span></td>
+            <td><ol><li>6×5:30 @ <span class="supra-threshold"></span> off 2:25</li><li>20' @ <span class="hm-tempo"></span></li></ol></td>
+            <td>60' @ <span class="easy"></span></td>
+            <td>95' @ <span class="mp-tempo-1"></span> +<br/>50' @ <span class="mp-tempo-2"></span></td>
+            <td>Rest</td>
+            <td>622</td>
+            <td>9h 45m</td>
+          </tr>
+          <tr>
+            <td id="12">12</td>
+            <td>55' @ <span class="easy"></span> w/<br/>4×10" @ <span class="strides"></span></td>
+            <td>8×1' @ <span class="near-threshold"></span> off 2'</td>
+            <td>50' @ <span class="easy"></span></td>
+            <td>8×1' @ <span class="near-threshold"></span> off 2'</td>
+            <td>50' @ <span class="easy"></span></td>
+            <td><b>CP Test</b></td>
+            <td>Rest</td>
+            <td>285</td>
+            <td>6h 0m</td>
+          </tr>
+          <tr>
+            <td id="13">13</td>
+            <td>65' @ <span class="easy"></span> w/<br/>4×10" @ <span class="strides"></span></td>
+            <td><ol><li>4×9:30 @ <span class="near-threshold"></span> off 3'</li><li>20' @ <span class="hm-tempo"></span></li></ol></td>
+            <td>65' @ <span class="easy"></span></td>
+            <td><ol><li>7×5' @ <span class="supra-threshold"></span> off 2:25</li><li>20' @ <span class="hm-tempo"></span></li></ol></td>
+            <td>65' @ <span class="easy"></span></td>
+            <td>95' @ <span class="mp-tempo-1"></span> +<br/>55' @ <span class="mp-tempo-2"></span></td>
+            <td>Rest</td>
+            <td>637</td>
+            <td>10h 0m</td>
+          </tr>
+          <tr>
+            <td id="14">14</td>
+            <td>65' @ <span class="easy"></span> w/<br/>4×10" @ <span class="strides"></span></td>
+            <td><ol><li>6×3' @ <span class="vo2-max"></span> off 2:30</li><li>20' @ <span class="hm-tempo"></span></li></ol></td>
+            <td>65' @ <span class="easy"></span></td>
+            <td><ol><li>3×15' @ <span class="hm-tempo"></span> off 3'</li><li>20' @ <span class="hm-tempo"></span></li></ol></td>
+            <td>65' @ <span class="easy"></span></td>
+            <td>95' @ <span class="mp-tempo-1"></span> +<br/>55' @ <span class="mp-tempo-2"></span></td>
+            <td>Rest</td>
+            <td>616</td>
+            <td>10h 10m</td>
+          </tr>
+          <tr>
+            <td id="15">15</td>
+            <td>65' @ <span class="easy"></span> w/<br/>4×10" @ <span class="strides"></span></td>
+            <td><ol><li>4×10' @ <span class="near-threshold"></span> off 3'</li><li>20' @ <span class="hm-tempo"></span></li></ol></td>
+            <td>65' @ <span class="easy"></span></td>
+            <td><ol><li>7×5:30 @ <span class="supra-threshold"></span> off 2:25</li><li>20' @ <span class="hm-tempo"></span></li></ol></td>
+            <td>65' @ <span class="easy"></span></td>
+            <td>90' @ <span class="mp-tempo-1"></span> +<br/>60' @ <span class="mp-tempo-2"></span></td>
+            <td>Rest</td>
+            <td>672</td>
+            <td>10h 15m</td>
+          </tr>
+          <tr>
+            <td id="16">16</td>
+            <td>35' @ <span class="easy"></span> w/<br/>opener</td>
+            <td><b>CP Test</b></td>
+            <td>40' @ <span class="easy"></span></td>
+            <td><ol><li>5×5:30 @ <span class="supra-threshold"></span> off 2:25</li><li>10' @ <span class="hm-tempo"></span></li></ol></td>
+            <td>40' @ <span class="easy"></span></td>
+            <td>60' @ <span class="mp-tempo-1"></span> +<br/>25' @ <span class="mp-tempo-2"></span></td>
+            <td>Rest</td>
+            <td>383</td>
+            <td>6h 40m</td>
+          </tr>
+          <tr>
+            <td id="17">17</td>
+            <td>30' @ <span class="easy"></span></td>
+            <td>15' @ <span class="mp-tempo-2"></span> off 3'<br/>4×1' @ <span class="near-threshold"></span> off 2'</td>
+            <td>30' @ <span class="easy"></span></td>
+            <td>15' @ <span class="mp-tempo-2"></span> off 3'<br/>3×1' @ <span class="near-threshold"></span> off 2'</td>
+            <td>30' @ <span class="easy"></span></td>
+            <td>30' @ <span class="easy"></span></td>
+            <td><b>Marathon<br/>Race</b></td>
+            <td>216</td>
+            <td>3h 0m</td>
+          </tr>
+        </tbody>
+      </table>
+      <table class="table">
+        <thead>
+          <tr>
+            <th colspan="8">Descriptions outlining general efforts.</th>
+          </tr>
+          <tr>
+            <th>Week</th>
+            <th>Monday</th>
+            <th>Tuesday</th>
+            <th>Wednesday</th>
+            <th>Thursday</th>
+            <th>Friday</th>
+            <th>Saturday</th>
+            <th>Sunday</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>1</td>
+            <td>Easy</td>
+            <td><ol><li>Near-threshold</li><li>HMP Tempo</li></ol></td>
+            <td>Easy</td>
+            <td><ol><li>Supra-threshold</li><li>HMP Tempo</li></ol></td>
+            <td>Easy</td>
+            <td>MP Tempo</td>
+            <td>Rest</td>
+          </tr>
+          <tr>
+            <td>2</td>
+            <td>Easy</td>
+            <td><ol><li>VO₂ Max</li><li>HMP Tempo</li></ol></td>
+            <td>Easy</td>
+            <td><ol><li>HMP Tempo</li><li>HMP Tempo</li></ol></td>
+            <td>Easy</td>
+            <td>MP Tempo</td>
+            <td>Rest</td>
+          </tr>
+          <tr>
+            <td>3</td>
+            <td>Easy</td>
+            <td><ol><li>Near-threshold</li><li>HMP Tempo</li></ol></td>
+            <td>Easy</td>
+            <td><ol><li>Supra-threshold</li><li>HMP Tempo</li></ol></td>
+            <td>Easy</td>
+            <td>MP Tempo</td>
+            <td>Rest</td>
+          </tr>
+          <tr>
+            <td>4</td>
+            <td>Easy</td>
+            <td>Fartlek</td>
+            <td>Easy</td>
+            <td>Fartlek</td>
+            <td>Easy</td>
+            <td><b>CP Test</b></td>
+            <td>Rest</td>
+          </tr>
+          <tr>
+            <td>5</td>
+            <td>Easy</td>
+            <td><ol><li>Near-threshold</li><li>HMP Tempo</li></ol></td>
+            <td>Easy</td>
+            <td><ol><li>Supra-threshold</li><li>HMP Tempo</li></ol></td>
+            <td>Easy</td>
+            <td>MP Tempo</td>
+            <td>Rest</td>
+          </tr>
+          <tr>
+            <td>6</td>
+            <td>Easy</td>
+            <td><ol><li>VO₂ Max</li><li>HMP Tempo</li></ol></td>
+            <td>Easy</td>
+            <td><ol><li>HMP Tempo</li><li>HMP Tempo</li></ol></td>
+            <td>Easy</td>
+            <td>MP Tempo</td>
+            <td>Rest</td>
+          </tr>
+          <tr>
+            <td>7</td>
+            <td>Easy</td>
+            <td><ol><li>Near-threshold</li><li>HMP Tempo</li></ol></td>
+            <td>Easy</td>
+            <td><ol><li>Supra-threshold</li><li>HMP Tempo</li></ol></td>
+            <td>Easy</td>
+            <td>MP Tempo</td>
+            <td>Rest</td>
+          </tr>
+          <tr>
+            <td>8</td>
+            <td>Easy</td>
+            <td>Fartlek</td>
+            <td>Easy</td>
+            <td>Fartlek</td>
+            <td>Easy</td>
+            <td><b>5K race or<br/>20' TT</b></td>
+            <td>Rest</td>
+          </tr>
+          <tr>
+            <td>9</td>
+            <td>Easy</td>
+            <td><ol><li>Near-threshold</li><li>HMP Tempo</li></ol></td>
+            <td>Easy</td>
+            <td><ol><li>Supra-threshold</li><li>HMP Tempo</li></ol></td>
+            <td>Easy</td>
+            <td>MP Tempo</td>
+            <td>Rest</td>
+          </tr>
+          <tr>
+            <td>10</td>
+            <td>Easy</td>
+            <td><ol><li>VO₂ Max</li><li>HMP Tempo</li></ol></td>
+            <td>Easy</td>
+            <td><ol><li>HMP Tempo</li><li>HMP Tempo</li></ol></td>
+            <td>Easy</td>
+            <td>MP Tempo</td>
+            <td>Rest</td>
+          </tr>
+          <tr>
+            <td>11</td>
+            <td>Easy</td>
+            <td><ol><li>Near-threshold</li><li>HMP Tempo</li></ol></td>
+            <td>Easy</td>
+            <td><ol><li>Supra-threshold</li><li>HMP Tempo</li></ol></td>
+            <td>Easy</td>
+            <td>MP Tempo</td>
+            <td>Rest</td>
+          </tr>
+          <tr>
+            <td>12</td>
+            <td>Easy</td>
+            <td>Fartlek</td>
+            <td>Easy</td>
+            <td>Fartlek</td>
+            <td>Easy</td>
+            <td><b>CP Test</b></td>
+            <td>Rest</td>
+          </tr>
+          <tr>
+            <td>13</td>
+            <td>Easy</td>
+            <td><ol><li>Near-threshold</li><li>HMP Tempo</li></ol></td>
+            <td>Easy</td>
+            <td><ol><li>Supra-threshold</li><li>HMP Tempo</li></ol></td>
+            <td>Easy</td>
+            <td>MP Tempo</td>
+            <td>Rest</td>
+          </tr>
+          <tr>
+            <td>14</td>
+            <td>Easy</td>
+            <td><ol><li>VO₂ Max</li><li>HMP Tempo</li></ol></td>
+            <td>Easy</td>
+            <td><ol><li>HMP Tempo</li><li>HMP Tempo</li></ol></td>
+            <td>Easy</td>
+            <td>MP Tempo</td>
+            <td>Rest</td>
+          </tr>
+          <tr>
+            <td>15</td>
+            <td>Easy</td>
+            <td><ol><li>Near-threshold</li><li>HMP Tempo</li></ol></td>
+            <td>Easy</td>
+            <td><ol><li>Supra-threshold</li><li>HMP Tempo</li></ol></td>
+            <td>Easy</td>
+            <td>MP Tempo</td>
+            <td>Rest</td>
+          </tr>
+          <tr>
+            <td>16</td>
+            <td>Priming</td>
+            <td><b>CP Test</b></td>
+            <td>Easy</td>
+            <td><ol><li>Supra-threshold</li><li>HMP Tempo</li></ol></td>
+            <td>Easy</td>
+            <td>MP Tempo</td>
+            <td>Rest</td>
+          </tr>
+          <tr>
+            <td>17</td>
+            <td>Easy</td>
+            <td>Priming</td>
+            <td>Easy</td>
+            <td>Priming</td>
+            <td>Easy</td>
+            <td>Easy</td>
+            <td><b>Marathon<br/>Race</b></td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+    <script>
+      "use strict"
+
+      window.onload = function() {
+        let cp
+        let setDate
+
+        if (localStorage.getItem("marathonTrainingPlanCP") !== null) {
+          cp = localStorage.getItem("marathonTrainingPlanCP")
+          document.getElementById("cp").value = cp
+        } else (
+          cp = document.getElementById("cp").value
+        )
+
+        if (localStorage.getItem("marathonTrainingPlanDate") !== null) {
+          setDate = localStorage.getItem("marathonTrainingPlanDate")
+        } else {
+          const d = new Date()
+          setDate = d.getFullYear() + "-" + (d.getMonth() + 1) + "-" + d.getDate()
+        }
+
+        console.log(setDate)
+
+        document.getElementById("date").value = setDate
+        
+        const d = new Date()
+        const dateID = document.getElementById("date")
+        const seventeenWeeksAgo = new Date(Date.now() - 16 * 7 * 86400000)
+
+        dateID.min = getMonday(seventeenWeeksAgo).toISOString().split("T")[0]
+        dateID.max = d.toISOString().split("T")[0]
+        dateID.value = setDate
+
+        pickDate(setDate)
+        calculateWatts(parseInt(cp))
+      }
+    </script>
+  </body>
+</html>
