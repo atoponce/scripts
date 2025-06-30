@@ -19,7 +19,16 @@
         pointer-events: auto;
         width: 512px;
       }
-      .collected {
+      #progressBar {
+        background-color: black;
+        display: block;
+        height: 100%;
+        width: 0%;
+      }
+      .data {
+        background-color: white;
+        border: 1px solid black;
+        display: block;
         color: black;
         font-family: monospace;
         font-weight: bold;
@@ -34,10 +43,12 @@
   <body>
     <div id='container'>
       <h1>JavaScript Mouse Entropy</h1>
-      <p>Download this page to your computer, and run it offline.<br/>Move your mouse over the randogram below until a 256-bit hex returns.</p>
+      <p>Move your mouse over the randogram below until the<br/>
+        progress bar reaches 100% and a 256-bit hex returns.</p>
       <canvas id='randogram' width='512' height='512'></canvas>
       <button onclick="reset()">New entropy</button>
-      <p class='collected'><span class='collected' id='hexString'></span></p>
+      <p class='data' id="hexString"><span id='progressBar'></span></p>
+      <p>Download this page to your computer, and run it offline.<br/><br/></p>
     </div>
     <script>
       const LENGTH = 512
@@ -55,7 +66,7 @@
         ENTROPY = []
         sessionStorage.removeItem('mouseEntropy')
         DOANIMATION = true
-        HEXSTRING.innerText = ""
+        HEXSTRING.innerHTML = "<span id='progressBar'></span>"
         drawRandogram()
       }
 
@@ -87,6 +98,8 @@
       }
 
       function drawRandogram () {
+        const progressBar = document.getElementById('progressBar')
+        const progress = (ENTROPY.length / 16) * 100
         const imgData = CTX.createImageData(LENGTH, LENGTH)
         const pixels = genPixels()
 
@@ -141,6 +154,10 @@
             HEXSTRING.innerText = buffer2Hex(JSON.parse(sessionStorage.mouseEntropy))
             ENTROPY = []
             sessionStorage.removeItem('mouseEntropy')
+            progressBar.style.width = "100%"
+          } else {
+            const width = `${progress}%`
+            progressBar.style.width = width
           }
         } // onpointermove
       }
