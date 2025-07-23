@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta name='viewport' content='width=device-width, initial-scale=1.0' />
+    <meta http-equiv='Content-Type' content='text/html; charset=utf-8' />
+    <title>True RandomJavaScript entropy</title>
+    <link rel='shortcut icon' href='data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAACAAAAAgCAYAAABzenr0AAAABHNCSVQICAgIfAhkiAAAAjlJREFUWIXtl11IFFEUx3/rx1quEiJ9ImwwGeumaZaFYRj1UlBPhShEL0UESmESPhhpIdVLn5hCDxEZFSFIFGwh2RKVvoQW9L3LJpFYIUJqre7E7eEW13GH1GV0X+bA4f7Px733z8y5Z+44RAhBHCUhnpvbBGwCNgGbgE3AJgCQFOvEntcQ6JN4zSpY4TbGP36Cx13wYwSWLoRtpZCZYbKQCCFi0cq9CJB6qUH59QDiQAXC4VBxQKQ4EZdPRq9j+StobIIrt0BMumWMjUPlcbjbYfRbTqDlhsLnjsGrB1B7UNrlO6G40Jgfcw2YSUSHb4MSz58H1fskPlMLu7ZD0eroOZY+geQkyFoi8a8wnLgI4xFpm21uOQGAsh0KN1wAz1ZoboXw2BwRqD8MJeuUHfosi08rhdv35oBAugse3YTGGshYoPz9X6HiEJxunmUCAM5kqKuCvmdwtg4WZapY/Xn4ELKAwORzbibpLjiyH4JPoDBX+iI6+PwzJPCvor8MKN/gkMJpqXLUdWi6DpvLYeSnMb6pSNnDowpP2Qeev4A91bKYfH44dVSe9fudKsebLceyKmh/KHHJbtmANDf0voGrd1R+jjZhg6l6fsCPcKUa+/pEzc9B/A7K3O52RNp/cgHh0RDh9zP4Fmhu6GiF5VnRMW82tLVAwt9VNhTA0zZYn2++1sa14LsGKU7lc0z351TXobML3gUlzvPAlmJITDTPf/lW6sB3WLYYcldCgTc6b9oEZkvifiP6A8DZCim3QidkAAAAAElFTkSuQmCC' />
+    <script>
+        let choice;
+        let intervalId;
+
+        function getNow() { return performance.now(); }
+        function flipCoin() { let coin = 0; const later = getNow() + 1; while (getNow() <= later) coin ^= 1; return coin; }
+        function fairBit() { while (true) { const bit = flipCoin(); if (bit !== flipCoin()) return bit; } }
+        function genByte() { let byte = 0; let bits = 8; while (bits--) { byte <<= 1; byte |= fairBit(); } return byte; }
+
+        function toBinary() { return genByte().toString(2).padStart(8, '0'); }
+        function toHex() { return genByte().toString(16).padStart(2, '0'); }
+        function toColors() { return `rgb(${genByte()}, ${genByte()}, ${genByte()})`; }
+
+        function streamHex() { document.getElementById('trueRandom').insertAdjacentHTML('afterbegin', toHex()); }
+        function streamColors() { document.getElementById('trueRandom').insertAdjacentHTML('afterbegin', "<span style='background-color:" + toColors() + "'>&nbsp;</span>"); }
+        function streamBinary() { document.getElementById('trueRandom').insertAdjacentHTML('afterbegin', toBinary()); }
+
+        function startStream() {
+            const option = document.getElementById('streamChoice');
+            const selected = option.options[option.selectedIndex].text;
+            if (selected === 'Binary') choice = streamBinary;
+            else if (selected === 'Colors') choice = streamColors;
+            else if (selected === 'Hexadecimal') choice = streamHex;
+            clearStream();
+            intervalId = setInterval(choice);
+        }
+        function stopStream() { clearInterval(intervalId); }
+        function clearStream() { document.getElementById('trueRandom').innerHTML = ''; }
+    </script>
+    <style>
+        #container {
+            margin: 0 auto;
+            width: 40%;
+        }
+        #trueRandom {
+            border: 1px solid black;
+            font-family: monospace;
+            height: 400px;
+            overflow-y: scroll;
+            word-wrap: break-word;
+        }
+    </style>
+  </head>
+  <body>
+    <div id="container">
+        <h1>JavaScript TRNG</h1>
+        <p>This is a true random number generator in pure JavaScript. No, this is not a joke. It models coin flips by pitting a slow clock (the RTC) against a fast clock (the CPU). The RTC models the coin's flight in the air and the CPU models the spin of the coin.</p>
+        <p>A timer is set 1 millisecond into the future and a bit is flipped as fast as possible before the timer expires. Due to the operating system's kernel interrupt handling, the bit flips are dependent on the stress of the system, which is chaotic and unpredictable. Finally, two successive bits are debiased using John von Neumann's randomness extractor to ensure fairness.</p>
+        <p>This was first investigated by cryptographers Matt Blaze and D.P. Mitchell in 1995 then <a href="https://dankaminsky.com/2012/08/15/dakarand/">later in 2012 by security researcher Dan Kaminsky</a>. This page was designed to behave similarly to the Live Streams by the <a href="https://qrng.anu.edu.au/">Australian National University QRNG</a>.</p>
+        <p>This page is entirely self-contained and does not require any external resources. Download this page to your computer, and run it offline.</p>
+        <select id="streamChoice">
+            <option>Binary</option>
+            <option>Colors</option>
+            <option selected>Hexadecimal</option>
+        </select>
+        <button onclick="startStream()">Start</button>
+        <button onclick="stopStream()">Stop</button>
+        <button onclick="clearStream()">Clear</button>
+        <div id="trueRandom"></div textarea>
+    </div>
+    <script>
+        //startStream()
+    </script>
+  </body>
+</html>
