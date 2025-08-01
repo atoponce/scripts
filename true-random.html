@@ -8,10 +8,13 @@
     <script>
         let intervalId;
 
+        // Redundancy: O(1)
+        // Time complexity: O(n log n)
+        // Space complexity: O(1)
         function peres(bits, extracted) {
-          const u = [];
-          const v = [];
-          const l = bits.length - (bits.length & 1);
+          const u = []; // discarded bits to be iterated again
+          const v = []; // discarded bits to be iterated again
+          const l = bits.length - (bits.length & 1); // force an even length
 
           if (l === 0) {
             return;
@@ -23,8 +26,8 @@
             else v.push(bits[i]);
           }
 
-          peres(u, extracted);
-          peres(v, extracted);
+          peres(u, extracted); // recursively extract discarded u-bits
+          peres(v, extracted); // recursively extract discarded v-bits
 
           return extracted;
         }
@@ -35,10 +38,10 @@
 
         function flipCoin() {
           let coin = 0;
-          const later = getNow() + 1;
+          const later = getNow() + 1; // The coin's flight in the air.
 
           while (getNow() <= later) {
-            coin ^= 1;
+            coin ^= 1; // The coin spinning while in flight.
           }
 
           return coin;
@@ -46,7 +49,14 @@
 
         function fairBits() {
           let bits = [];
-          const block = 50; // too high, the animation is jerky. too low, the extraction is less efficient.
+
+          // Number of bits to generate before returning. Because we're waiting at least 1ms for each bit,
+          // this is the total number of ms before returning. If this value is high, while the extraction
+          // will be efficient, the animation will be jerky. If this value is low, the animation will run
+          // buttery smooth, but the extraction much less efficient and the animation slower.
+          // Do not set below 50, or the colors animation will struggle to execute.
+          // 75 is a good compromise. It produces an even 6 bytes most of the time, perfect for colors.
+          const block = 75;
 
           for (let i = 0; i < block; i++) {
             bits.push(flipCoin());
