@@ -42,7 +42,7 @@ class UUID {
    * Generate the nil RFC 9562 UUID.
    * @returns {String} Returns the RFC 9562 nil UUID string.
    */
-  nill() {
+  nil() {
     return "00000000-0000-0000-0000-000000000000";
   }
 
