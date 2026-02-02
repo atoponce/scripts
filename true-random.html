@@ -108,14 +108,16 @@
         }
 
         function streamColors() {
-          let coloredSpaces = "";
+          const coloredSpaces = [];
           const colors = toColors();
+          const l = colors.length;
+          const id = document.getElementById("trueRandom");
 
-          for (let i = 0; i < colors.length; i++) {
-            coloredSpaces += `<span style='background-color: ${colors[i]}'>&nbsp;</span>`
+          for (let i = 0; i < l; i++) {
+            coloredSpaces.push(`<span style='background-color: ${colors[i]}'>&nbsp;</span>`);
           }
 
-          document.getElementById('trueRandom').insertAdjacentHTML('afterbegin', coloredSpaces);
+          id.insertAdjacentHTML('afterbegin', coloredSpaces.join(''));
         }
 
         function startStream() {
@@ -160,7 +162,16 @@
     <div id="container">
         <h1>JavaScript TRNG</h1>
         <p>This is a true random number generator in pure JavaScript. No, this is not a joke. It models coin flips by pitting a slow clock (the RTC) against a fast clock (the CPU). The RTC models the coin's flight in the air and the CPU models the spin of the coin. This idea was first <a href="https://www.cs.miami.edu/home/burt/learning/Math609.0/CryptoLib/cryptolib_1.1/cryptolib/src/unix_truerand.c">investigated by cryptographer Matt Blaze 1995</a> then <a href="https://dankaminsky.com/2012/08/15/dakarand/">later by security researcher Dan Kaminsky in 2012</a>. It was also included in <a href="https://www.schneier.com/books/applied-cryptography-source/">Applied Cryptography by Bruce Schneier</a>.</p>
-        <p>A timer is set 1 millisecond into the future and a bit is flipped as fast as possible before the timer expires. Due to the operating system kernel's interrupt handling, the bit flips are dependent on the stress of the system, which is chaotic and unpredictable. Finally, the bits are debiased using <a href="http://dx.doi.org/10.1214/aos/1176348543">Peres's randomness extractor</a> to ensure uniformity, which is an iterative and more efficient improvement of <a href="https://en.wikipedia.org/wiki/Randomness_extractor#Von_Neumann_extractor">John von Neumann's randomness extractor</a>.</p>
+        <p>A timer is set 1 millisecond into the future and a bit is flipped as fast as possible before the timer expires. Due to the operating system kernel's interrupt handling, the bit flips are dependent on the stress of the system, which could be chaotic and unpredictable. Finally, the bits are debiased using <a href="http://dx.doi.org/10.1214/aos/1176348543">Peres's randomness extractor</a> to ensure uniformity, which is an iterative and more efficient improvement of <a href="https://en.wikipedia.org/wiki/Randomness_extractor#Von_Neumann_extractor">John von Neumann's randomness extractor</a>.</p>
+        <p>There are very real security risks with this RNG that you should be aware of however, some of which include:</p>
+        <ul>
+          <li><strong>System state</strong>: If the system state can be externally manipulated in any way, output from the RNG might be predictable.</li>
+          <li><strong>Side-channels</strong>: Monitoring timing differences could potentially expose patterns to predict output.</li>
+          <li><strong>Inadequate whitening</strong>: If entropy is structurally weak, Peres's extractor is inadequate at reducing bias.</li>
+          <li><strong>Hardware reliability</strong>: The CPU and RTC must not be subject to tampering. If either can be manipulated, the RNG is compromised.</li>
+          <li><strong>Limited entropy</strong>: The entropy of the kernel scheduler is <i>assumed</i> to be sufficiently chaotic, but might not provide full security, making it a poor choice for randomness, especially in high-demand scenarios.</li>
+        </ul>
+        <p>The best practice is to use HWRNGs and TPMs which do not have these concerns; they are thoroughly analyzed and audited for high-quality randomness. Software-only TRNGs such as this are generally considered less secure due problematic assumptions with higher risks. In fact, <a href="http://sockpuppet.org/blog/2014/02/25/safely-generate-random-numbers/">do not use <i>any</i> userspace RNG for security</a>!</li>
         <p>This page is entirely self-contained and does not require any external resources. Download this page to your computer, and run it offline. It's designed to behave similarly to the live streams feature provided by the <a href="https://qrng.anu.edu.au/">Australian National University QRNG</a>. Due to the 1 millisecond timer however, it is slower than most modern RNGs.</p>
         <select id="streamChoice">
             <option>Binary</option>
