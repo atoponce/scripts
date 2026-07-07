@@ -139,7 +139,7 @@
           sessionStorage.mouseEntropy = JSON.stringify(ENTROPY)
 
           if (ENTROPY.length === 16) {
-            document.getElementById('randogram').onpointermove = false
+            document.getElementById('randogram').onpointermove = null
             DOANIMATION = false
             HEXSTRING.innerText = await sha256(JSON.parse(sessionStorage.mouseEntropy));
             sessionStorage.removeItem('mouseEntropy')
