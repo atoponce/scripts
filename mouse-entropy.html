@@ -1,16 +1,15 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
   <head>
-    <meta name='viewport' content='width=device-width, initial-scale=1.0' />
-    <meta http-equiv='Content-Type' content='text/html; charset=utf-8' />
-    <title>Mouse entropy</title>
-    <link rel='shortcut icon' href='data:image/x-icon;base64,AAABAAEAFB8QAAEABAA8AgAAFgAAAIlQTkcNChoKAAAADUlIRFIAAAAUAAAAHwgGAAAA507tzgAAAgNJREFUSImtlr9PwkAUx781jqSbSHTQyKC7pn/AheimEBKNJgwMrCxE7FA3hgbTxDDiwMAICZtsXTUNTsw31IQEBw0pJLLhYO68/gAK9Zs0udd3/eR7L/fuKu0f7M3wJwkemabJx4QQX+zVhiee+WasKA7M5/P/AuXAXC6HYrEYGepacjqdhqZpkaDeGoIQgupDFbIsrwX1AQHg5PgE2r0GWZZBCFkJGghkUMMwVobOBQJAMpmEYRhIbCcYdCl4IZBBH2uPSGwnojtkim/FUX+qc6eLShAKCACxWAz1pzqODo+iOxSh1YcqFEURa+pyuxKQQXVdh6Io0R2K0nUdp6dnLORO1wYCgKreiVBEBjKoeFJthv2QUop+v4/xeIzPry9Mv6d4t22MRiMMP4Z8Xmigbduo1WrLpklzl0wphaqqPCaEeLtFCniCa0gpRalUgmVZ6L31+PvLq8tlDv3A3lsPhUIBjuMAANqtNs+lUil2ToYDmqaJ8m3ZNcGyLFBKAfxu6mw2y1KB/cyBzWYTlUpFzPErtSW4zGQy4Rw2Go0gmAQAr68vmEwm3OX5xcVCoHi5Swi47B3HQafT4fHNzTUb+pbNHAaCRHWfu3wc34p7+9gHXCQJAIYfQ9dvyO7ujivPFLpTgN8tNBgM0H3uiu02E6HS/sFeWJ63XoElWve0mVvvH79Op6Tbn+HjAAAAAElFTkSuQmCC' />
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'unsafe-inline'; style-src 'unsafe-inline';">
+    <title>Mouse Entropy</title>
     <style>
       body {
         text-align: center;
       }
       #randogram {
-        cursor: url('data:image/gif;base64,R0lGODlhFAAUAPABAKoAAP///yH5BAUKAAEALAAAAAAUABQAQAIsRI6pCe2+1Is0PFPl3Vj3zGzgwU2UOFpfqrJh46rmWNLl6t3nPSOXC4nhUgUAOw=='), crosshair;
         margin: 0 calc((100% - 512px)/2);
         touch-action: none;
       }
@@ -27,7 +26,6 @@
       }
       .data {
         background-color: white;
-        border: 1px solid black;
         display: block;
         color: black;
         font-family: monospace;
@@ -41,25 +39,26 @@
     </style>
   </head>
   <body>
-    <div id='container'>
+    <div id="container">
       <h1>JavaScript Mouse Entropy</h1>
       <p>Move your mouse over the randogram below until the<br/>
-        progress bar reaches 100% and a 256-bit hex returns.</p>
+      progress bar reaches 100% and a 256-bit hex returns.</p>
+      <p>The randogram is generated with the browser CSPRNG.<br/>
+      256 pixels are recorded, then hashed with SHA-256.</p>
       <canvas id='randogram' width='512' height='512'></canvas>
       <button onclick="reset()">New entropy</button>
       <p class='data' id="hexString"><span id='progressBar'></span></p>
-      <p>Download this page to your computer, and run it offline.<br/><br/></p>
+      <p>Download this page to your computer, and run it offline.</p>
+      <p>Inspired by KeePass.</p>
     </div>
     <script>
       const LENGTH = 512
       const CANVAS = document.getElementById('randogram')
       const CTX = CANVAS.getContext('2d')
-      const ENTROPYRESULT = document.getElementById('entropyResult')
       const HEXSTRING = document.getElementById('hexString')
 
       let ENTROPY = []
       let BITS = []
-      let NEUMANN = []
       let DOANIMATION = true
 
       function reset() {
@@ -122,39 +121,28 @@
           requestAnimationFrame(drawRandogram)
         }
 
-        document.getElementById('randogram').onpointermove = function (e) {
-          const x = Math.floor(e.offsetX)
-          const y = Math.floor(e.offsetY)
+        document.getElementById('randogram').onpointermove = async function (e) {
+          const x = e.offsetX | 0;
+          const y = e.offsetY | 0;
+          const index = LENGTH * y + x
+          const bit = pixels[index] & 1; // get pixel color under (x, y)
 
-          if (0 <= x && x < LENGTH && 0 <= y && y < LENGTH) {
-            const index = LENGTH * y + x
+          if (0 <= x < LENGTH && 0 <= y < LENGTH) {
+            BITS.push(bit);
 
-            NEUMANN.push(pixels[index] & 1)
-
-            // john von neumann randomness extractor
-            if (NEUMANN.length === 2) {
-              if (NEUMANN[0] !== NEUMANN[1]) {
-                BITS.push(NEUMANN[0])
-
-                if (BITS.length === 16) {
-                  ENTROPY.push(parseInt(BITS.join(''), 2))
-                  BITS = []
-                }
-              }
-
-              NEUMANN = []
+            if (BITS.length === 16) {
+              ENTROPY.push(parseInt(BITS.join(''),2));
+              BITS = [];
             }
-          } // if 0 <= x < LENGTH && 0 <= y < LENGTH
+          }
 
           sessionStorage.mouseEntropy = JSON.stringify(ENTROPY)
 
-          if (JSON.parse(sessionStorage.mouseEntropy).length === 16) {
-            DOANIMATION = false
+          if (ENTROPY.length === 16) {
             document.getElementById('randogram').onpointermove = false
-            HEXSTRING.innerText = buffer2Hex(JSON.parse(sessionStorage.mouseEntropy))
-            ENTROPY = []
+            DOANIMATION = false
+            HEXSTRING.innerText = await sha256(JSON.parse(sessionStorage.mouseEntropy));
             sessionStorage.removeItem('mouseEntropy')
-            progressBar.style.width = "100%"
           } else {
             const width = `${progress}%`
             progressBar.style.width = width
@@ -162,10 +150,12 @@
         } // onpointermove
       }
 
-      function buffer2Hex(byteArray) {
-        return Array.prototype.map.call(byteArray, function(byte) {
-          return (byte).toString(16).padStart(4, '0')
-        }).join('')
+      async function sha256(byteArray) {
+        const encoder = new TextEncoder();
+        const data = encoder.encode(sessionStorage.mouseEntropy);
+        const hashBuffer = await crypto.subtle.digest('SHA-256', data);
+
+        return Array.from(new Uint8Array(hashBuffer)).map(b => b.toString(16).padStart(2, 101)).join('');
       }
 
       drawRandogram()
