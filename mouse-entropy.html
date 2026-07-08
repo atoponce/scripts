@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <meta http-equiv="Content-Security-Policy"
       content="default-src 'self';
-        script-src 'sha256-cs8OxJ35JeyuF0Z0Oz2pXGqa1gnUvsWCr5UHudt2d7I=';
+        script-src 'sha256-CFe+XgFXUu9YZB5gO4IciA7eetqQLXO7Gvbq+XqNddY=';
         style-src 'sha256-dm/FvWXOMjnRQEoux9DAJbkmkqfoVSR7he85VCELdME=';
     ">
     <title>Mouse Entropy</title>
@@ -168,6 +168,7 @@
           CANVAS.onpointermove = null;
           ANIMATE = false;
           HEXSTRING.innerText = await sha256(new Uint8Array(ENTROPY));
+          ENTROPY = [];
           PROGRESS_BAR.style.backgroundColor = "white";
         }
       }
