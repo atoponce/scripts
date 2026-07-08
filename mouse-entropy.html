@@ -3,8 +3,13 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'unsafe-inline'; style-src 'unsafe-inline';">
+    <meta http-equiv="Content-Security-Policy"
+      content="default-src 'self';
+        script-src 'sha256-cs8OxJ35JeyuF0Z0Oz2pXGqa1gnUvsWCr5UHudt2d7I=';
+        style-src 'sha256-dm/FvWXOMjnRQEoux9DAJbkmkqfoVSR7he85VCELdME=';
+    ">
     <title>Mouse Entropy</title>
+    <!-- Any style changes will change the SHA-256 hash above. Use the developer console to get the new value. -->
     <style>
       body {
         text-align: center;
@@ -20,9 +25,17 @@
       }
       #progressBar {
         background-color: black;
-        display: block;
-        height: 100%;
+        bottom: 0;
+        left: 0;
+        margin-top: 10px;
+        position: absolute;
+        top: 0;
         width: 0%;
+        z-index: 0;
+      }
+      #hexString {
+        position: relative;
+        z-index: 1;
       }
       .data {
         background-color: white;
@@ -33,6 +46,8 @@
         height: 40px;
         line-height: 40px;
         max-width: 512px;
+        overflow: hidden;
+        position: relative;
         text-align: center;
         width: 512px;
       }
@@ -41,32 +56,44 @@
   <body>
     <div id="container">
       <h1>JavaScript Mouse Entropy</h1>
-      <p>Move your mouse over the randogram below until the<br/>
-      progress bar reaches 100% and a 256-bit hex returns.</p>
-      <p>The randogram is generated with the browser CSPRNG.<br/>
-      256 pixels are recorded, then hashed with SHA-256.</p>
+      <p>Move your mouse over the randogram below until the progress bar reaches 100% and a 256-bit hex returns.</p>
+      <p>The randogram is generated with the browser CSPRNG. 256 pixels are recorded, then hashed with SHA-256.</p>
       <canvas id='randogram' width='512' height='512'></canvas>
-      <button onclick="reset()">New entropy</button>
-      <p class='data' id="hexString"><span id='progressBar'></span></p>
+      <button>New entropy</button>
+      <div class='data'>
+        <div id='progressBar'></div>
+        <span id='hexString'></span>
+      </div>
       <p>Download this page to your computer, and run it offline.</p>
       <p>Inspired by KeePass.</p>
     </div>
+    <!-- Any script changes will change the SHA-256 hash above. Use the developer console to get the new value. -->
     <script>
-      const LENGTH = 512
-      const CANVAS = document.getElementById('randogram')
-      const CTX = CANVAS.getContext('2d')
-      const HEXSTRING = document.getElementById('hexString')
+      const CANVAS = document.getElementById('randogram');
+      const CTX = CANVAS.getContext('2d');
+      const HEXSTRING = document.getElementById('hexString');
+      const PROGRESS_BAR = document.getElementById('progressBar');
 
-      let ENTROPY = []
-      let BITS = []
-      let DOANIMATION = true
+      let PIXELS = null; // cache for event handler
+      let ENTROPY = [];
+      let BITS = [];
+      let ANIMATE = true;
+      let FRAME_ID = null;
+
+      document.querySelector('button').addEventListener('click', reset);
 
       function reset() {
-        ENTROPY = []
-        sessionStorage.removeItem('mouseEntropy')
-        DOANIMATION = true
-        HEXSTRING.innerHTML = "<span id='progressBar'></span>"
-        drawRandogram()
+        if (FRAME_ID) cancelAnimationFrame(FRAME_ID);
+
+        ENTROPY = [];
+        BITS = [];
+        ANIMATE = true;
+        HEXSTRING.innerText = "";
+        PROGRESS_BAR.style.width = "0%";
+        PROGRESS_BAR.style.backgroundColor = "#000";
+        PIXELS = genPixels();
+        drawRandogram();
+        CANVAS.onpointermove = handleMove;
       }
 
       // https://exploringjs.com/impatient-js/ch_typed-arrays.html#concatenating-typed-arrays
@@ -97,68 +124,60 @@
       }
 
       function drawRandogram () {
-        const progressBar = document.getElementById('progressBar')
-        const progress = (ENTROPY.length / 16) * 100
-        const imgData = CTX.createImageData(LENGTH, LENGTH)
-        const pixels = genPixels()
+        const imgData = CTX.createImageData(512, 512);
 
-        if (sessionStorage.hasOwnProperty('mouseEntropy')) {
-          ENTROPY = JSON.parse(sessionStorage.mouseEntropy)
-        }
+        PIXELS = genPixels();
 
         for (let i = 0; i < imgData.data.length; i += 4) {
-          if (pixels[i >> 2] < 128) {
-            imgData.data[i]     = 255 // red
-            imgData.data[i + 1] = 255 // green
-            imgData.data[i + 2] = 255 // blue
-          }
+          const rgb = PIXELS[i >> 2] < 128 ? 0 : 255;
 
-          imgData.data[i + 3] = 255   // alpha
+          imgData.data[i]     = rgb; // r
+          imgData.data[i + 1] = rgb; // g
+          imgData.data[i + 2] = rgb; // b
+          imgData.data[i + 3] = 255; // a
         }
 
         CTX.putImageData(imgData, 0, 0)
-        if (DOANIMATION) {
-          requestAnimationFrame(drawRandogram)
+
+        if (ANIMATE) FRAME_ID = requestAnimationFrame(drawRandogram);
+      }
+
+      async function handleMove (e) {
+        if (!ANIMATE) return;
+
+        const x = e.offsetX | 0;
+        const y = e.offsetY | 0;
+        const t = e.timeStamp & 0xff;
+        const progress = (ENTROPY.length / 64) * 100;
+
+        if (x < 0 || x >= 512 || y < 0 || y >= 512) return;
+
+        const index = 512 * y + x
+        const bit = PIXELS[index] & 1;
+
+        BITS.push(bit);
+        PROGRESS_BAR.style.width = `${progress}%`;
+
+        if (BITS.length === 8) {
+          ENTROPY.push(parseInt(BITS.join(''), 2));
+          ENTROPY.push(t);
+          BITS = [];
         }
 
-        document.getElementById('randogram').onpointermove = async function (e) {
-          const x = e.offsetX | 0;
-          const y = e.offsetY | 0;
-          const index = LENGTH * y + x
-          const bit = pixels[index] & 1; // get pixel color under (x, y)
-
-          if (0 <= x < LENGTH && 0 <= y < LENGTH) {
-            BITS.push(bit);
-
-            if (BITS.length === 16) {
-              ENTROPY.push(parseInt(BITS.join(''),2));
-              BITS = [];
-            }
-          }
-
-          sessionStorage.mouseEntropy = JSON.stringify(ENTROPY)
-
-          if (ENTROPY.length === 16) {
-            document.getElementById('randogram').onpointermove = null
-            DOANIMATION = false
-            HEXSTRING.innerText = await sha256(JSON.parse(sessionStorage.mouseEntropy));
-            sessionStorage.removeItem('mouseEntropy')
-          } else {
-            const width = `${progress}%`
-            progressBar.style.width = width
-          }
-        } // onpointermove
+        if (ENTROPY.length === 64) {
+          CANVAS.onpointermove = null;
+          ANIMATE = false;
+          HEXSTRING.innerText = await sha256(new Uint8Array(ENTROPY));
+          PROGRESS_BAR.style.backgroundColor = "white";
+        }
       }
 
       async function sha256(byteArray) {
-        const encoder = new TextEncoder();
-        const data = encoder.encode(sessionStorage.mouseEntropy);
-        const hashBuffer = await crypto.subtle.digest('SHA-256', data);
-
+        const hashBuffer = await crypto.subtle.digest('SHA-256', byteArray);
         return Array.from(new Uint8Array(hashBuffer)).map(b => b.toString(16).padStart(2, '0')).join('');
       }
 
-      drawRandogram()
+      reset();
     </script>
   </body>
 </html>
