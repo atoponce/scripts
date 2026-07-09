@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <meta http-equiv="Content-Security-Policy"
       content="default-src 'self';
-        script-src 'sha256-/ASrMbKaJ0KDDf6SKVoGOqERRPhFZR0NZVG41xGp5xY=';
+        script-src 'sha256-Z2Qkh6vyrFNYolV748+bGgIze3I6ScnH37eXn6Vl6mU=';
         style-src 'sha256-dm/FvWXOMjnRQEoux9DAJbkmkqfoVSR7he85VCELdME=';
     ">
     <title>Mouse Entropy</title>
@@ -75,17 +75,19 @@
       const PROGRESS_BAR = document.getElementById('progressBar');
 
       let PIXELS = null; // cache for event handler
-      let ENTROPY = [];
+      let ENTROPY = new Uint32Array(128);
       let BITS = [];
       let ANIMATE = true;
       let FRAME_ID = null;
+      let IDX = 0;
 
       document.querySelector('button').addEventListener('click', reset);
 
       function reset() {
         if (FRAME_ID) cancelAnimationFrame(FRAME_ID);
 
-        ENTROPY = [];
+        IDX = 0;
+        ENTROPY = new Uint32Array(128);
         BITS = [];
         ANIMATE = true;
         HEXSTRING.innerText = "";
@@ -98,29 +100,27 @@
 
       // https://exploringjs.com/impatient-js/ch_typed-arrays.html#concatenating-typed-arrays
       function concatenate (resultConstructor, ...arrays) {
-        let totalLength = 0
+        let totalLength = 0;
+
+        for (const arr of arrays) totalLength += arr.length;
+
+        const result = new resultConstructor(totalLength);
+        let offset = 0;
 
         for (const arr of arrays) {
-          totalLength += arr.length
+          result.set(arr, offset);
+          offset += arr.length;
         }
 
-        const result = new resultConstructor(totalLength)
-        let offset = 0
-
-        for (const arr of arrays) {
-          result.set(arr, offset)
-          offset += arr.length
-        }
-
-        return result
+        return result;
       }
 
       function randogram () {
-        return crypto.getRandomValues(new Uint8Array(65536))
+        return crypto.getRandomValues(new Uint8Array(65536));
       }
 
       function genPixels () {
-        return concatenate(Uint8Array, randogram(), randogram(), randogram(), randogram())
+        return concatenate(Uint8Array, randogram(), randogram(), randogram(), randogram());
       }
 
       function drawRandogram () {
@@ -137,7 +137,7 @@
           imgData.data[i + 3] = 255; // a
         }
 
-        CTX.putImageData(imgData, 0, 0)
+        CTX.putImageData(imgData, 0, 0);
 
         if (ANIMATE) FRAME_ID = requestAnimationFrame(drawRandogram);
       }
@@ -145,29 +145,30 @@
       async function handleMove (e) {
         if (!ANIMATE) return;
 
-        const x = e.offsetX | 0;
-        const y = e.offsetY | 0;
-        const progress = (ENTROPY.length / 64) * 100;
+        const x = e.offsetX;
+        const y = e.offsetY;
+        const progress = (IDX / 128) * 100;
 
         if (x < 0 || x >= 512 || y < 0 || y >= 512) return;
 
-        const index = 512 * y + x
-        const bit = PIXELS[index] & 1;
-
-        BITS.push(bit);
+        // reduce correlated mouse events
+        if (FRAME_ID % 3 === 0) BITS.push(PIXELS[512 * x + y] & 1);
         PROGRESS_BAR.style.width = `${progress}%`;
 
+        // 8 successive least significant bits collected
         if (BITS.length === 8) {
-          ENTROPY.push(parseInt(BITS.join(''), 2));
-          ENTROPY.push(e.timeStamp & 0xff);
+          ENTROPY[IDX++] = performance.now(); // current timestamp
+          ENTROPY[IDX++] = parseInt(BITS.join(''), 2); // 8 pixel lsb assembled
+          ENTROPY[IDX++] = Math.sqrt(x ** 2 + y ** 2); // vector distance from (0, 0)
+          ENTROPY[IDX++] = Math.atan(y / x) * 180 / Math.PI; // vector degrees from (0, 0)
           BITS = [];
         }
 
-        if (ENTROPY.length === 64) {
+        if (IDX === 128) {
           CANVAS.onpointermove = null;
           ANIMATE = false;
-          HEXSTRING.innerText = await sha256(new Uint8Array(ENTROPY));
-          ENTROPY = [];
+          HEXSTRING.innerText = await sha256(ENTROPY);
+          ENTROPY = new Uint32Array(128);
           PROGRESS_BAR.style.backgroundColor = "white";
         }
       }
