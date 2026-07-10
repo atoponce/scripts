@@ -1,12 +1,13 @@
 <!DOCTYPE html>
 <html lang="en">
   <head>
+    <script>const DEBUG = false;</script>
     <link rel='shortcut icon' href='data:image/x-icon;base64,AAABAAEAFB8QAAEABAA8AgAAFgAAAIlQTkcNChoKAAAADUlIRFIAAAAUAAAAHwgGAAAA507tzgAAAgNJREFUSImtlr9PwkAUx781jqSbSHTQyKC7pn/AheimEBKNJgwMrCxE7FA3hgbTxDDiwMAICZtsXTUNTsw31IQEBw0pJLLhYO68/gAK9Zs0udd3/eR7L/fuKu0f7M3wJwkemabJx4QQX+zVhiee+WasKA7M5/P/AuXAXC6HYrEYGepacjqdhqZpkaDeGoIQgupDFbIsrwX1AQHg5PgE2r0GWZZBCFkJGghkUMMwVobOBQJAMpmEYRhIbCcYdCl4IZBBH2uPSGwnojtkim/FUX+qc6eLShAKCACxWAz1pzqODo+iOxSh1YcqFEURa+pyuxKQQXVdh6Io0R2K0nUdp6dnLORO1wYCgKreiVBEBjKoeFJthv2QUop+v4/xeIzPry9Mv6d4t22MRiMMP4Z8Xmigbduo1WrLpklzl0wphaqqPCaEeLtFCniCa0gpRalUgmVZ6L31+PvLq8tlDv3A3lsPhUIBjuMAANqtNs+lUil2ToYDmqaJ8m3ZNcGyLFBKAfxu6mw2y1KB/cyBzWYTlUpFzPErtSW4zGQy4Rw2Go0gmAQAr68vmEwm3OX5xcVCoHi5Swi47B3HQafT4fHNzTUb+pbNHAaCRHWfu3wc34p7+9gHXCQJAIYfQ9dvyO7ujivPFLpTgN8tNBgM0H3uiu02E6HS/sFeWJ63XoElWve0mVvvH79Op6Tbn+HjAAAAAElFTkSuQmCC' />
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <meta http-equiv="Content-Security-Policy"
       content="default-src 'self';
-        script-src 'sha256-Z2Qkh6vyrFNYolV748+bGgIze3I6ScnH37eXn6Vl6mU=';
+        script-src 'sha256-QifoloWxtB3iXEP3cY2CtWGqhQh5citpo6UbLdQLEJU=';
         style-src 'sha256-dm/FvWXOMjnRQEoux9DAJbkmkqfoVSR7he85VCELdME=';
     ">
     <title>Mouse Entropy</title>
@@ -66,10 +67,11 @@
         <span id='hexString'></span>
       </div>
       <p>Download this page to your computer, and run it offline.</p>
-      <p>Inspired by KeePass, PuTTY, and VeraCrypt.</p>
+      <p>Inspired by <a href="https://gist.github.com/atoponce/aab1532438dd047d73567edccc3ecf93">KeePass, PuTTY, and VeraCrypt</a>.</p>
     </div>
     <!-- Any script changes will change the SHA-256 hash above. Use the developer console to get the new value. -->
     <script>
+      // Globals are all capitalized for easy identification
       const CANVAS = document.getElementById('randogram');
       const CTX = CANVAS.getContext('2d');
       const HEXSTRING = document.getElementById('hexString');
@@ -84,8 +86,12 @@
 
       document.querySelector('button').addEventListener('click', reset);
 
+      /**
+       * Reset the entropy generator and start over.
+       */
       function reset() {
         if (FRAME_ID) cancelAnimationFrame(FRAME_ID);
+        if (DEBUG) console.clear();
 
         IDX = 0;
         ENTROPY = new Uint32Array(128);
@@ -95,11 +101,16 @@
         PROGRESS_BAR.style.width = "0%";
         PROGRESS_BAR.style.backgroundColor = "#000";
         PIXELS = genPixels();
+
         drawRandogram();
         CANVAS.onpointermove = handleMove;
       }
 
-      // https://exploringjs.com/impatient-js/ch_typed-arrays.html#concatenating-typed-arrays
+      /**
+       * Concatenate typed arrays.
+       * @see https://exploringjs.com/impatient-js/ch_typed-arrays.html
+       * @return {TypedArray}
+       */
       function concatenate (resultConstructor, ...arrays) {
         let totalLength = 0;
 
@@ -116,14 +127,25 @@
         return result;
       }
 
+      /**
+       * Get 65536 cryptographically secure random bytes.
+       * @return {Uint8Array}
+       */
       function randogram () {
         return crypto.getRandomValues(new Uint8Array(65536));
       }
 
+      /**
+       * Generate a 512x512 randogram.
+       * @return {Uint8Array}
+       */
       function genPixels () {
         return concatenate(Uint8Array, randogram(), randogram(), randogram(), randogram());
       }
 
+      /**
+       * Draw an animated randogram 512x512 black and white pixels.
+       */
       function drawRandogram () {
         const imgData = CTX.createImageData(512, 512);
 
@@ -143,6 +165,42 @@
         if (ANIMATE) FRAME_ID = requestAnimationFrame(drawRandogram);
       }
 
+      /**
+       * Handle mouse movement over the randogram.
+       *
+       * This is the main entropy collecting function. It collects the least
+       * significant bit of the pixel color under the mouse cursor, and stores
+       * it in the BITS array. Once 8 bits are collected, it converts them to a
+       * byte and stores it in the ENTROPY array. It also collects the
+       * timestamp, distance, and angle of the cursor location, and stores them
+       * in the ENTROPY array. Once 128 bytes are collected (32 bytes each of
+       * timestamp, pixel bytes, distance, and angle), it stops collecting
+       * entropy and hashes the ENTROPY array with SHA-256 to produce a 256-bit
+       * hex string.
+       *
+       * This is provably secure as the randogram is generated with a CSPRNG. As
+       * such, the least significant bit of the pixel color is unpredictable and
+       * forward secure. An attacker cannot predict the next bit of the
+       * randogram even if they know where the mouse will be. Nor can the
+       * attacker reproduce prior states. As such, 256 bits of entropy are
+       * guaranteed just from collecting the pixels alone. The rest of the mouse
+       * state (timestamps, distance, angle) is additional entropy that is mixed
+       * in.
+       *
+       * Further, an attempt at reducing mouse correlation is made. Bits are
+       * only stored every third frame and only one bit per frame is captured.
+       * This will require more work from the user and slow down the entropy
+       * collection by at least a factor of 3, but it's still fast enough that it
+       * shouldn't be a problem.
+       *
+       * I probably don't need to hash the entropy pool with SHA-256 as the
+       * pixels in the randogram are already whitened. Reading those directly
+       * would be sufficient. On the flip, hashing the data with SHA-256 ensures
+       * that any correlated data is removed and the output is uniformly
+       * distributed. It doesn't cost us anything.
+       *
+       * @param {PointerEvent} e
+       */
       async function handleMove (e) {
         if (!ANIMATE) return;
 
@@ -152,8 +210,14 @@
 
         if (x < 0 || x >= 512 || y < 0 || y >= 512) return;
 
+        let lastFrameID = -1;
+
         // reduce correlated mouse events
-        if (FRAME_ID % 3 === 0) BITS.push(PIXELS[512 * x + y] & 1);
+        if (FRAME_ID % 3 === 0 && FRAME_ID !== lastFrameID) {
+          BITS.push(PIXELS[(512 * x + y) | 0] & 1);
+          lastFrameID = FRAME_ID;
+        }
+
         PROGRESS_BAR.style.width = `${progress}%`;
 
         // 8 successive least significant bits collected
@@ -162,6 +226,10 @@
           ENTROPY[IDX++] = parseInt(BITS.join(''), 2); // 8 pixel lsb assembled
           ENTROPY[IDX++] = Math.sqrt(x ** 2 + y ** 2); // vector distance from (0, 0)
           ENTROPY[IDX++] = Math.atan(y / x) * 180 / Math.PI; // vector degrees from (0, 0)
+
+          if (DEBUG)
+            console.log(`Index: ${IDX - 4}, Frame: ${FRAME_ID}, Bits: ${BITS.join('')}, [Timestamp: ${ENTROPY[IDX - 4]}, Byte: ${ENTROPY[IDX - 3]}, Distance: ${ENTROPY[IDX - 2]}, Angle: ${ENTROPY[IDX - 1]}]`);
+
           BITS = [];
         }
 
@@ -174,6 +242,11 @@
         }
       }
 
+      /**
+       * Hash a byte array with SHA-256 and return a hex string.
+       * @param {Uint8Array} byteArray
+       * @return {Promise<string>}
+       */
       async function sha256(byteArray) {
         const hashBuffer = await crypto.subtle.digest('SHA-256', byteArray);
         return Array.from(new Uint8Array(hashBuffer)).map(b => b.toString(16).padStart(2, '0')).join('');
