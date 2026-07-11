@@ -7,7 +7,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <meta http-equiv="Content-Security-Policy"
       content="default-src 'self';
-        script-src 'sha256-QifoloWxtB3iXEP3cY2CtWGqhQh5citpo6UbLdQLEJU=';
+        script-src 'sha256-QddpOhDitacJyN4dieqsvds1M4C+16VvEZ7AFez1J4w=';
         style-src 'sha256-dm/FvWXOMjnRQEoux9DAJbkmkqfoVSR7he85VCELdME=';
     ">
     <title>Mouse Entropy</title>
@@ -225,10 +225,10 @@
           ENTROPY[IDX++] = performance.now(); // current timestamp
           ENTROPY[IDX++] = parseInt(BITS.join(''), 2); // 8 pixel lsb assembled
           ENTROPY[IDX++] = Math.sqrt(x ** 2 + y ** 2); // vector distance from (0, 0)
-          ENTROPY[IDX++] = Math.atan(y / x) * 180 / Math.PI; // vector degrees from (0, 0)
+          ENTROPY[IDX++] = Math.atan(y / x) * 180 / Math.PI * 3600; // vector arcseconds from (0, 0)
 
           if (DEBUG)
-            console.log(`Index: ${IDX - 4}, Frame: ${FRAME_ID}, Bits: ${BITS.join('')}, [Timestamp: ${ENTROPY[IDX - 4]}, Byte: ${ENTROPY[IDX - 3]}, Distance: ${ENTROPY[IDX - 2]}, Angle: ${ENTROPY[IDX - 1]}]`);
+            console.log(`Index: ${IDX - 4}, X: ${x|0}, Y: ${y|0}, Frame: ${FRAME_ID}, Bits: ${BITS.join('')}, [Timestamp: ${ENTROPY[IDX - 4]}, Byte: ${ENTROPY[IDX - 3]}, Distance: ${ENTROPY[IDX - 2]}, Arcseconds: ${ENTROPY[IDX - 1]}]`);
 
           BITS = [];
         }
