@@ -7,7 +7,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <meta http-equiv="Content-Security-Policy"
       content="default-src 'self';
-        script-src 'sha256-QddpOhDitacJyN4dieqsvds1M4C+16VvEZ7AFez1J4w=';
+        script-src 'sha256-nmZXUq+NXfTeTPj63RF5JiNpk7yzNX9jwn9niG6lz/k=';
         style-src 'sha256-dm/FvWXOMjnRQEoux9DAJbkmkqfoVSR7he85VCELdME=';
     ">
     <title>Mouse Entropy</title>
@@ -152,11 +152,9 @@
         PIXELS = genPixels();
 
         for (let i = 0; i < imgData.data.length; i += 4) {
-          const rgb = PIXELS[i >> 2] < 128 ? 0 : 255;
-
-          imgData.data[i]     = rgb; // r
-          imgData.data[i + 1] = rgb; // g
-          imgData.data[i + 2] = rgb; // b
+          imgData.data[i + 0] = PIXELS[i >> 2]; // r
+          imgData.data[i + 1] = PIXELS[i >> 2]; // g
+          imgData.data[i + 2] = PIXELS[i >> 2]; // b
           imgData.data[i + 3] = 255; // a
         }
 
@@ -225,7 +223,7 @@
           ENTROPY[IDX++] = performance.now(); // current timestamp
           ENTROPY[IDX++] = parseInt(BITS.join(''), 2); // 8 pixel lsb assembled
           ENTROPY[IDX++] = Math.sqrt(x ** 2 + y ** 2); // vector distance from (0, 0)
-          ENTROPY[IDX++] = Math.atan(y / x) * 180 / Math.PI * 3600; // vector arcseconds from (0, 0)
+          ENTROPY[IDX++] = Math.atan2(y, x) * 180 / Math.PI * 3600; // vector arcseconds from (0, 0)
 
           if (DEBUG)
             console.log(`Index: ${IDX - 4}, X: ${x|0}, Y: ${y|0}, Frame: ${FRAME_ID}, Bits: ${BITS.join('')}, [Timestamp: ${ENTROPY[IDX - 4]}, Byte: ${ENTROPY[IDX - 3]}, Distance: ${ENTROPY[IDX - 2]}, Arcseconds: ${ENTROPY[IDX - 1]}]`);
