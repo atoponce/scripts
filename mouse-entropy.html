@@ -1,13 +1,15 @@
 <!DOCTYPE html>
 <html lang="en">
   <head>
-    <script>let DEBUG = false;</script>
     <link rel='shortcut icon' href='data:image/x-icon;base64,AAABAAEAFB8QAAEABAA8AgAAFgAAAIlQTkcNChoKAAAADUlIRFIAAAAUAAAAHwgGAAAA507tzgAAAgNJREFUSImtlr9PwkAUx781jqSbSHTQyKC7pn/AheimEBKNJgwMrCxE7FA3hgbTxDDiwMAICZtsXTUNTsw31IQEBw0pJLLhYO68/gAK9Zs0udd3/eR7L/fuKu0f7M3wJwkemabJx4QQX+zVhiee+WasKA7M5/P/AuXAXC6HYrEYGepacjqdhqZpkaDeGoIQgupDFbIsrwX1AQHg5PgE2r0GWZZBCFkJGghkUMMwVobOBQJAMpmEYRhIbCcYdCl4IZBBH2uPSGwnojtkim/FUX+qc6eLShAKCACxWAz1pzqODo+iOxSh1YcqFEURa+pyuxKQQXVdh6Io0R2K0nUdp6dnLORO1wYCgKreiVBEBjKoeFJthv2QUop+v4/xeIzPry9Mv6d4t22MRiMMP4Z8Xmigbduo1WrLpklzl0wphaqqPCaEeLtFCniCa0gpRalUgmVZ6L31+PvLq8tlDv3A3lsPhUIBjuMAANqtNs+lUil2ToYDmqaJ8m3ZNcGyLFBKAfxu6mw2y1KB/cyBzWYTlUpFzPErtSW4zGQy4Rw2Go0gmAQAr68vmEwm3OX5xcVCoHi5Swi47B3HQafT4fHNzTUb+pbNHAaCRHWfu3wc34p7+9gHXCQJAIYfQ9dvyO7ujivPFLpTgN8tNBgM0H3uiu02E6HS/sFeWJ63XoElWve0mVvvH79Op6Tbn+HjAAAAAElFTkSuQmCC' />
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <meta http-equiv="Content-Security-Policy"
       content="default-src 'self';
-        script-src 'sha256-6isw2nXY5MCq+AHzxrvUPXuNpotcgKqGnHpyaqBH89w=';
+        base-uri 'none';
+        frame-ancestors 'none';
+        object-src 'none';
+        script-src 'sha256-S3s0o38p4XuRoarx4zwlS/Z6XPK04hXU4/hj73kcvoY=';
         style-src 'sha256-dm/FvWXOMjnRQEoux9DAJbkmkqfoVSR7he85VCELdME=';
     ">
     <title>Mouse Entropy</title>
@@ -77,14 +79,48 @@
       const HEXSTRING = document.getElementById('hexString');
       const PROGRESS_BAR = document.getElementById('progressBar');
 
+      const BYTES32 = [];
+      const TIME32 = [];
+      const DIST32 = [];
+      const ANGLE32 = [];
+
+      let DEBUG = false;
       let PIXELS = null; // cache for event handler
-      let ENTROPY = new Uint32Array(128);
+      let ENTROPY = new Int32Array(128);
       let BITS = [];
       let ANIMATE = true;
       let FRAME_ID = null;
       let IDX = 0;
+      let LAST_TIMESTAMP = null;
+      let LAST_X = null;
+      let LAST_Y = null;
 
       document.querySelector('button').addEventListener('click', reset);
+
+      /**
+       * Lag-1 autocorrelation: Pearson correlation between a series
+       * and itself shifted by one sample.
+       * @param {number[]} series
+       * @return {number} value in [-1, 1]; near +/-1 = highly predictable
+       *                   from the previous sample, near 0 = uncorrelated
+       */
+      function lag1Autocorr(series) {
+        const a = series.slice(0, -1);   // x[0..n-2]
+        const b = series.slice(1);       // x[1..n-1]
+
+        const mean = arr => arr.reduce((s, v) => s + v, 0) / arr.length;
+        const meanA = mean(a);
+        const meanB = mean(b);
+
+        const aC = a.map(v => v - meanA);
+        const bC = b.map(v => v - meanB);
+
+        const numerator = aC.reduce((s, v, i) => s + v * bC[i], 0);
+        const denomA = Math.sqrt(aC.reduce((s, v) => s + v * v, 0));
+        const denomB = Math.sqrt(bC.reduce((s, v) => s + v * v, 0));
+
+        return (denomA > 0 && denomB > 0) ? numerator / (denomA * denomB) : NaN;
+      }
 
       /**
        * Reset the entropy generator and start over.
@@ -94,14 +130,24 @@
         if (DEBUG) console.clear();
 
         IDX = 0;
-        ENTROPY = new Uint32Array(128);
+        ENTROPY = new Int32Array(128);
         BITS = [];
         ANIMATE = true;
+
+        BYTES32.length = 0;
+        TIME32.length = 0;
+        DIST32.length = 0;
+        ANGLE32.length = 0;
+
+        LAST_TIMESTAMP = performance.now();
+        LAST_X = 0;
+        LAST_Y = 0;
+
         HEXSTRING.innerText = "";
         PROGRESS_BAR.style.width = "0%";
         PROGRESS_BAR.style.backgroundColor = "#000";
-        PIXELS = genPixels();
 
+        PIXELS = genPixels();
         drawRandogram();
         CANVAS.onpointermove = handleMove;
       }
@@ -208,35 +254,64 @@
 
         if (x < 0 || x >= 512 || y < 0 || y >= 512) return;
 
-        let lastFrameID = -1;
-
-        // reduce correlated mouse events
-        if (FRAME_ID % 3 === 0 && FRAME_ID !== lastFrameID) {
-          BITS.push(PIXELS[(512 * x + y) | 0] & 1);
-          lastFrameID = FRAME_ID;
-        }
-
+        BITS.push(PIXELS[(512 * y + x) | 0] & 1);
         PROGRESS_BAR.style.width = `${progress}%`;
 
         // 8 successive least significant bits collected
         if (BITS.length === 8) {
-          ENTROPY[IDX++] = performance.now(); // current timestamp
-          ENTROPY[IDX++] = parseInt(BITS.join(''), 2); // 8 pixel lsb assembled
-          ENTROPY[IDX++] = Math.sqrt(x ** 2 + y ** 2); // vector distance from (0, 0)
-          ENTROPY[IDX++] = Math.atan2(y, x) * 180 / Math.PI * 3600; // vector arcseconds from (0, 0)
+          const now = performance.now();
+          ENTROPY[IDX++] = now - LAST_TIMESTAMP; // delta from previous sample in milliseconds
+          LAST_TIMESTAMP = now;
 
-          if (DEBUG)
-            console.log(`Index: ${IDX - 4}, X: ${x|0}, Y: ${y|0}, Frame: ${FRAME_ID}, Bits: ${BITS.join('')}, [Timestamp: ${ENTROPY[IDX - 4]}, Byte: ${ENTROPY[IDX - 3]}, Distance: ${ENTROPY[IDX - 2]}, Arcseconds: ${ENTROPY[IDX - 1]}]`);
+          ENTROPY[IDX++] = parseInt(BITS.join(''), 2); // 8 pixel lsb assembled
+          ENTROPY[IDX++] = Math.sqrt((x - LAST_X) ** 2 + (y - LAST_Y) ** 2); // vector distance from (0, 0)
+          ENTROPY[IDX++] = Math.atan2((y - LAST_Y), (x - LAST_X)) * 180 / Math.PI * 3600; // vector arcseconds from (0, 0)
+          LAST_X = x;
+          LAST_Y = y;
+
+          TIME32.push(ENTROPY[IDX - 4]);
+          BYTES32.push(ENTROPY[IDX - 3]);
+          DIST32.push(ENTROPY[IDX - 2]);
+          ANGLE32.push(ENTROPY[IDX - 1]);
+
+          if (DEBUG) {
+            console.log('Index: ' + (IDX - 4) + ', ' +
+                        'X: ' + (x | 0) + ', ' +
+                        'Y: ' + (y | 0) + ', ' +
+                        'Frame: ' + FRAME_ID + ', ' +
+                        'Bits: ' + BITS.join('') + ', ' +
+                        'Δt: ' + ENTROPY[IDX - 4] + ', ' +
+                        'Byte: ' + ENTROPY[IDX - 3] + ', ' +
+                        'Δ-Distance: ' + ENTROPY[IDX - 2] + ', ' +
+                        'Δ-Arcseconds: ' + ENTROPY[IDX - 1] + ']');
+          }
 
           BITS = [];
         }
 
         if (IDX === 128) {
+          if (DEBUG) {
+            console.log('Lag-1 autocorrelations: ' + 
+                        'Bytes: ' + lag1Autocorr(BYTES32) + ', ' +
+                        'Timestamps: ' + lag1Autocorr(TIME32) + ', ' +
+                        'Distances: ' + lag1Autocorr(DIST32) + ', ' +
+                        'Angles: ' + lag1Autocorr(ANGLE32));
+          }
+
+          // Hash the entropy pool with SHA-256 and display the result
+          PROGRESS_BAR.style.backgroundColor = "white";
+          HEXSTRING.innerText = await sha256(ENTROPY);
+
+          // Stop collecting entropy
           CANVAS.onpointermove = null;
           ANIMATE = false;
-          HEXSTRING.innerText = await sha256(ENTROPY);
-          ENTROPY = new Uint32Array(128);
-          PROGRESS_BAR.style.backgroundColor = "white";
+
+          // Erase state
+          BYTES32.length = 0;
+          TIME32.length = 0;
+          DIST32.length = 0;
+          ANGLE32.length = 0;
+          ENTROPY = new Int32Array(128);
         }
       }
 
