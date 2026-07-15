@@ -9,7 +9,7 @@
         base-uri 'none';
         frame-ancestors 'none';
         object-src 'none';
-        script-src 'sha256-S3s0o38p4XuRoarx4zwlS/Z6XPK04hXU4/hj73kcvoY=';
+        script-src 'sha256-whRNjSsrF+uichnGpjwgtV+SI5OI5zoi3kUC37o/uUg=';
         style-src 'sha256-dm/FvWXOMjnRQEoux9DAJbkmkqfoVSR7he85VCELdME=';
     ">
     <title>Mouse Entropy</title>
@@ -61,8 +61,8 @@
     <div id="container">
       <h1>JavaScript Mouse Entropy</h1>
       <p>Move your mouse over the animated randogram below until the progress bar reaches 100% and a 256-bit hex returns.</p>
-      <p>The randogram is generated with the browser CSPRNG. 256 pixels are recorded including their timestamps, then hashed with SHA-256.</p>
-      <canvas id='randogram' width='512' height='512'></canvas>
+      <p>The randogram is generated with the browser CSPRNG. 256 pixels are recorded including deltas of their timestamps, distances, and angles; then hashed with SHA-256.</p>
+      <canvas id='randogram' width='512' height='512' role='img' aria-label='Random bitimage for mouse entropy collection.'></canvas>
       <button>New entropy</button>
       <div class='data'>
         <div id='progressBar'></div>
@@ -84,7 +84,7 @@
       const DIST32 = [];
       const ANGLE32 = [];
 
-      let DEBUG = false;
+      let LOG = false;
       let PIXELS = null; // cache for event handler
       let ENTROPY = new Int32Array(128);
       let BITS = [];
@@ -127,7 +127,7 @@
        */
       function reset() {
         if (FRAME_ID) cancelAnimationFrame(FRAME_ID);
-        if (DEBUG) console.clear();
+        if (LOG) console.clear();
 
         IDX = 0;
         ENTROPY = new Int32Array(128);
@@ -139,7 +139,7 @@
         DIST32.length = 0;
         ANGLE32.length = 0;
 
-        LAST_TIMESTAMP = performance.now();
+        LAST_TIMESTAMP = null;
         LAST_X = 0;
         LAST_Y = 0;
 
@@ -217,25 +217,24 @@
        * it in the BITS array. Once 8 bits are collected, it converts them to a
        * byte and stores it in the ENTROPY array. It also collects the
        * timestamp, distance, and angle of the cursor location, and stores them
-       * in the ENTROPY array. Once 128 bytes are collected (32 bytes each of
-       * timestamp, pixel bytes, distance, and angle), it stops collecting
-       * entropy and hashes the ENTROPY array with SHA-256 to produce a 256-bit
-       * hex string.
+       * in the ENTROPY array. Once 32 events each of timestamp, pixel bytes,
+       * distance, and angle are collected, it stops collecting entropy and
+       * hashes the ENTROPY array with SHA-256 to produce a 256-bit hex string.
        *
-       * This is provably secure as the randogram is generated with a CSPRNG. As
-       * such, the least significant bit of the pixel color is unpredictable and
-       * forward secure. An attacker cannot predict the next bit of the
-       * randogram even if they know where the mouse will be. Nor can the
-       * attacker reproduce prior states. As such, 256 bits of entropy are
+       * This is provably secure so long as the randogram is generated with a
+       * CSPRNG. As such, the least significant bit of the pixel color is
+       * unpredictable and forward secure. An attacker cannot predict the next
+       * bit of the randogram even if they know where the mouse will be. Nor can
+       * the attacker reproduce prior states. As such, 256 bits of entropy are
        * guaranteed just from collecting the pixels alone. The rest of the mouse
        * state (timestamps, distance, angle) is additional entropy that is mixed
        * in.
        *
-       * Further, an attempt at reducing mouse correlation is made. Bits are
-       * only stored every third frame and only one bit per frame is captured.
-       * This will require more work from the user and slow down the entropy
-       * collection by at least a factor of 3, but it's still fast enough that it
-       * shouldn't be a problem.
+       * Further, an attempt at reducing mouse correlation is made. The delta of
+       * timestamp events is calculated as is the change in (x, y) coordinate
+       * events for finding relative distances and angles between events. The
+       * lag1Autocorr() function above is helpful during debugging to check how
+       * closely correlated successive events are.
        *
        * I probably don't need to hash the entropy pool with SHA-256 as the
        * pixels in the randogram are already whitened. Reading those directly
@@ -260,12 +259,13 @@
         // 8 successive least significant bits collected
         if (BITS.length === 8) {
           const now = performance.now();
-          ENTROPY[IDX++] = now - LAST_TIMESTAMP; // delta from previous sample in milliseconds
-          LAST_TIMESTAMP = now;
-
+          const dt = (LAST_TIMESTAMP !== null) ? now - LAST_TIMESTAMP : 0;
+          ENTROPY[IDX++] = dt; // delta from previous sample in milliseconds
           ENTROPY[IDX++] = parseInt(BITS.join(''), 2); // 8 pixel lsb assembled
-          ENTROPY[IDX++] = Math.sqrt((x - LAST_X) ** 2 + (y - LAST_Y) ** 2); // vector distance from (0, 0)
-          ENTROPY[IDX++] = Math.atan2((y - LAST_Y), (x - LAST_X)) * 180 / Math.PI * 3600; // vector arcseconds from (0, 0)
+          ENTROPY[IDX++] = Math.sqrt((x - LAST_X) ** 2 + (y - LAST_Y) ** 2); // vector distance from last (x, y)
+          ENTROPY[IDX++] = Math.atan2((y - LAST_Y), (x - LAST_X)) * 180 / Math.PI * 3600; // vector arcseconds from last (x, y)
+
+          LAST_TIMESTAMP = now;
           LAST_X = x;
           LAST_Y = y;
 
@@ -274,33 +274,34 @@
           DIST32.push(ENTROPY[IDX - 2]);
           ANGLE32.push(ENTROPY[IDX - 1]);
 
-          if (DEBUG) {
+          if (LOG) {
             console.log('Index: ' + (IDX - 4) + ', ' +
                         'X: ' + (x | 0) + ', ' +
                         'Y: ' + (y | 0) + ', ' +
                         'Frame: ' + FRAME_ID + ', ' +
                         'Bits: ' + BITS.join('') + ', ' +
-                        'Δt: ' + ENTROPY[IDX - 4] + ', ' +
+                        '[Δt: ' + ENTROPY[IDX - 4] + ', ' +
                         'Byte: ' + ENTROPY[IDX - 3] + ', ' +
                         'Δ-Distance: ' + ENTROPY[IDX - 2] + ', ' +
-                        'Δ-Arcseconds: ' + ENTROPY[IDX - 1] + ']');
+                        'Δ-Angle: ' + ENTROPY[IDX - 1] + ']');
           }
 
           BITS = [];
         }
 
         if (IDX === 128) {
-          if (DEBUG) {
+          if (LOG) {
             console.log('Lag-1 autocorrelations: ' + 
+                        'Δt: ' + lag1Autocorr(TIME32) + ', ' +
                         'Bytes: ' + lag1Autocorr(BYTES32) + ', ' +
-                        'Timestamps: ' + lag1Autocorr(TIME32) + ', ' +
-                        'Distances: ' + lag1Autocorr(DIST32) + ', ' +
-                        'Angles: ' + lag1Autocorr(ANGLE32));
+                        'Δ-Distances: ' + lag1Autocorr(DIST32) + ', ' +
+                        'Δ-Angles: ' + lag1Autocorr(ANGLE32));
           }
 
           // Hash the entropy pool with SHA-256 and display the result
+          PROGRESS_BAR.style.width = "100%";
           PROGRESS_BAR.style.backgroundColor = "white";
-          HEXSTRING.innerText = await sha256(ENTROPY);
+          HEXSTRING.innerText = await sha256(ENTROPY); // cross-platform deterministic byte order doesn't matter
 
           // Stop collecting entropy
           CANVAS.onpointermove = null;
@@ -316,12 +317,13 @@
       }
 
       /**
-       * Hash a byte array with SHA-256 and return a hex string.
-       * @param {Uint8Array} byteArray
+       * Hash an Int32Array with SHA-256 and return a hex string.
+       * Endianess is not important for random number generation.
+       * @param {Int32Array} intArray
        * @return {Promise<string>}
        */
-      async function sha256(byteArray) {
-        const hashBuffer = await crypto.subtle.digest('SHA-256', byteArray);
+      async function sha256(intArray) {
+        const hashBuffer = await crypto.subtle.digest('SHA-256', intArray);
         return Array.from(new Uint8Array(hashBuffer)).map(b => b.toString(16).padStart(2, '0')).join('');
       }
 
